@@ -5,6 +5,7 @@ import make_inputs
 import get_inputs
 import time
 import sys
+import re
 from datetime import datetime
 import shutil
 import subprocess
@@ -33,14 +34,31 @@ def parse_arguments(args):
 
 # Function to set global variables from defaults / system args
 def set_vars(default_args, system_args):
+    # define pattern for identifying floats in sys.args
+    float_pattern = r'^[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?$'
+    # save dict
+    save_vars = {}
     for key, value in default_args.items():
         if key in system_args:
-            if system_args[key].replace('.', '', 1).isdigit(): # check is sys arg is a float
+            float_test1 = re.match(float_pattern, system_args[key]) is not None # (captures all cases but "2.")
+            float_test2 =  system_args[key].replace('.', '', 1).isdigit()  # (misses negatives but gets others including "2.")
+            if float_test1 or float_test2:  # check is sys arg is a float
+                save_vars[key] = float(system_args[key])
                 globals()[key] = float(system_args[key])
             else:
+                save_vars[key] = system_args[key]
                 globals()[key] = system_args[key]
         else:
+            save_vars[key] = value
             globals()[key] = value
+    return save_vars
+# Function to save the combined dictionary to the run dir
+def save_dict_to_text_file(dictionary, filename, delimiter='\t'):
+    with open(filename, 'w') as file:
+        file.write(f"*** variables set by dictionary and system args\n")
+        file.write(f"    (note not all vars are used!!)\n")
+        for key, value in dictionary.items():
+            file.write(f"{key}{delimiter}{value}\n")
 # -------------------------------------------------------------
 # -------------------------------------------------------------
 # --- set default and system args
@@ -49,8 +67,8 @@ import_dict = sys_args['default_dict'] # set the dictionary to use from system a
 def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
 
 # set global variables
-set_vars(def_args, sys_args)  # default unless defined in sys_args
-
+# (TK: currently, combined_dict doesn't get saved in this version)
+combined_dict = set_vars(def_args, sys_args)  # default unless defined in sys_args
 
 water_frac = water_frac_tunespin
 
@@ -166,10 +184,8 @@ if liming: ca = 10
 outdir = outdir
 if use_local_storage:  outdir = os.environ['TMPDIR'] + '/scepter_output/'
 simid = spinname
-# runname_field   = simid+'_spintuneup_field'
-# runname_lab     = simid+'_spintuneup_lab'
-runname_field   = simid+'_field'
-runname_lab     = simid+'_lab'
+runname_field   = simid+'_spintuneup_field'
+runname_lab     = simid+'_spintuneup_lab'
 
 # compile 
 exename = 'scepter'
@@ -1206,7 +1222,7 @@ while (error > tol):
         ]
     for runname in [runname_field,runname_lab]:
         # np.savetxt(outdir + runname + where + 'iteration_tmp.res',np.array(res_list))
-        dst = outdir + runname + where + 'iteration_tmp.res'
+        dst = os.path.join(outdir, runname, 'iteration_tmp.res')
 
         with open(dst, 'w') as file:
             for item in name_list:

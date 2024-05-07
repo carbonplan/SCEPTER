@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 import numpy as np
@@ -29,10 +30,15 @@ def parse_arguments(args):
 
 # Function to set global variables from defaults / system args
 def set_vars(default_args, system_args):
+    # define pattern for identifying floats in sys.args
+    float_pattern = r'^[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?$'
+    # dict to save
     save_vars = {}
     for key, value in default_args.items():
         if key in system_args:
-            if system_args[key].replace('.', '', 1).isdigit(): # check is sys arg is a float
+            float_test1 = re.match(float_pattern, system_args[key]) is not None # (captures all cases but "2.")
+            float_test2 =  system_args[key].replace('.', '', 1).isdigit()  # (misses negatives but gets others including "2.")
+            if float_test1 or float_test2:  # check is sys arg is a float
                 save_vars[key] = float(system_args[key])
                 globals()[key] = float(system_args[key])
             else:
@@ -158,6 +164,7 @@ for tstep in mytsteps:
     else:
         spinup_field = runname_field_old
         spinup_lab = runname_lab_old
+        fdust = next_dustrate  # set fdust to some ideally smaller value for the successive iterations
     
     # set runnames
     runname_field   = f"{expid}_startyear-{str(tstep).replace('.','p')}_iter-{int(counter)}_field"
@@ -629,5 +636,6 @@ for tstep in mytsteps:
 
 
     # UPDATE THE RUNNAME FOR NEXT ITERATION
+    counter += 1
     runname_field_old = runname_field
     runname_lab_old = runname_lab

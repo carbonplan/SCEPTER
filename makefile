@@ -8,13 +8,11 @@ CPFLAGS       =
 CPFLAGS       += -Dno_intr_findloc # need to use in cluster
 # CPFLAGS       += -Dshow_PSDiter # showing iteration process during PSD calculation
 # CPFLAGS       += -Dparallel_ON # testing parallelization
+# CPFLAGS       += -Dnpar_in=8 # number of threads for parallelization 
 # CPFLAGS       += -Dnpar_in=1 # number of threads for parallelization 
-# CPFLAGS       += -Dnpar_in=1 # number of threads for parallelization 
-# CPFLAGS       += -Dparpsd_chk # checking parallelization results
+CPFLAGS       += -Dparpsd_chk # checking parallelization results
 # CPFLAGS       += -Dksld_chk # checking rate consts for sld species
 CPFLAGS       += -DolddustPSD # using old PSD for dust (not user input but prescribed one)
-# CPFLAGS       += -Ddisp_cnst=6.59754e-2 # forcing constant and common dispersion for aqueous species
-# CPFLAGS       += -Dnrec_prof_in=120 # number of profile records
 # CPFLAGS       += -Derrmtx_printout # 
 CPFLAGS       += -Dmod_basalt_cmp # using basalt composition defined in <basalt_define.h>
 # CPFLAGS       += -Ddef_flx_save_alltime # flux reported each integration (costs lots of bites)
@@ -49,7 +47,7 @@ LIBS          = -lopenblas
 
 ifneq (,$(findstring -Dmod_basalt_cmp,$(CPFLAGS)))
   # Found -Dmod_basalt_cmp
-  INC          = -I/storage/coda1/p-creinhard3/0/ykanzaki3/PyWeath/data 
+  INC          = -I/home/tykukla/SCEPTER/data 
 else
   # Not found
   INC          = 
