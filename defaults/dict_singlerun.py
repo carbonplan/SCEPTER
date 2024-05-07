@@ -7,7 +7,6 @@ default_dictionary = {
     'alphase': 'amal',   # 'gb'    # set aluminum phase
     'use_CaCl2': False,            # relevant for lab run
     'include_DIC': True,           
-    'phnorm_pw': False,            # metric for target pH (true = porewater pH; false = soil pH) -- not relevant for single run
     'use_local_storage': False,    # only relevant for georgia tech hpc
     'cec': 21.1,                   # [cmol kg-1] cation exchange capacity
     'duration': 5,                 # [yr] duration of simulation (or single targetpH iteration for multi-year)
@@ -26,10 +25,9 @@ default_dictionary = {
     'dustrate': 5000,              # [g m-2 yr-1] dust application flux ; divide by 100 to get ton / ha / yr; not used for spintuneups and an initial guess for target ph runs
     'taudust': 0.05,               # [yr] duration of dust application in year
     'dustrad': 150,                # [micron] radius of dust particles (gets converted to meters in python script that runs scepter)
-    'maxiter': 50,                 # max iterations for reaching target solution -- not relevant for single run
     'add_secondary': True,         # [True, False] whether to add secondary precipitates to list of solids to track (defined in array below)
-    'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output
-                  "gb", "ct", "gt", "cabd", "ill", "gps", "mgbd"],
+    'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
+                  "gb", "ct", "cabd", "ill", "gps", "mgbd"],
     
     # --- tunespin specific
     'activity_on': False,          # [True, False] whether to turn on thermodynamic activity coefficients (in switches.in file) 
@@ -55,9 +53,12 @@ default_dictionary = {
     'qrun': 0.351,                 # [m/yr] mean annual runoff rate (usually defined in spinup_*.sh)
     'nitrif': 1.005952,            # [gN/m2/yr] NO3 production rate via nitrification (usually defined in spinup_*.sh) (24.6 ~ 220 lbs/acre/year)
     'dep_sample': 0.15,            # [cm] depth of sample for comparing pH to target -- not relevant for single run or initial tuneup, but relevant for tuning rock application
+    'phnorm_pw': False,            # metric for target pH (true = porewater pH; false = soil pH) -- not relevant for single run
+    'maxiter': 50,                 # max iterations for reaching target solution -- not relevant for single run
 
     # --- multi-year specific
-    'max_time': 5,                # [yr] total amount of time to simulate (must be > `duration`, which refers to individual targetpH run)
+    'max_time': 5,                 # [yr] total amount of time to simulate (must be > `duration`, which refers to individual targetpH run)
+    'next_dustrate': 5,            # [g m-2 yr-1] dust rate at the start of the second iteration
     'clim_files': ["T_temp.in", "q_temp.in", "Wet_temp.in"],  # names of climate files (only used in multi-year because we have to update each)
     }
 
