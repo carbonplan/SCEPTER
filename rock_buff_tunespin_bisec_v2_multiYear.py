@@ -332,6 +332,8 @@ for tstep in mytsteps:
             # os.system('cp ' + exename_src + to + outdir + runname + where + exename)
     
     maxiter = 50
+
+    lastrun = False  # [TK added] turns to true if special condition requires ending run before error < tol
     
     res_list = []
     cnt = 0
@@ -519,7 +521,13 @@ for tstep in mytsteps:
         res_list.append([cnt, phint_field, phint, targetpH, fdust, abs( ymx/targetpH ) ])
         
         cnt += 1
-    
+
+        # --- [TK ADDED] handle special cases
+        if lastrun:
+            error = 1e-99  # end the while loop
+        # ---
+        
+        
         if np.isnan(ymx):
             print('nan detected in solution')
             error = 1e-99
@@ -528,8 +536,38 @@ for tstep in mytsteps:
             iph = 1 
             idust = 3 
             if not phnorm_pw: iph = 2
-            idust = 4 
-            if np.max(data_tmp[:,iph]) < targetpH: 
+            idust = 4
+            
+            # --- [TK added: start] 
+            data_tmp_skip1 = data_tmp[1:,:]  # skip first row since it inherits the last iter 
+            # ... check for two special cases: (1) near-zero application results in pH that's too high; (2) max application is not max pH (non-linear)
+            # get indices for min / max pH and dust app
+            phmax_idx = np.argmax(data_tmp_skip1[:,iph])      # index for max pH 
+            phmin_idx = np.argmin(data_tmp_skip1[:,iph])      # index for min pH 
+            dustmax_idx = np.argmax(data_tmp_skip1[:,idust])  # index for max dust
+            dustmin_idx = np.argmin(data_tmp_skip1[:,idust])  # index for min dust
+
+            # ... test condition 1 (pH is too high compared to target
+            low_dust_thresh = 0.1   # minimum application we allow
+            targetpH_plus_buffer = targetpH + (1.1 * tol)  # allow range w/in tolerance
+            # if minimum dust flx is below threshold AND associated pH exceeds target pH, we're maxed out
+            ph_maxedout_condition =  (np.min(data_tmp_skip1[dustmin_idx,idust]) <= low_dust_thresh) & (data_tmp_skip1[dustmin_idx,iph] > targetpH_plus_buffer)
+
+            # ... test condition 2 (non-linearity)
+            non_linear_condition = phmax_idx != dustmax_idx
+
+            # ... handle conditions
+            if ph_maxedout_condition:
+                print("pH above target despite no application")
+                fdust = 0
+                lastrun = True
+            elif non_linear_condition:
+                print("increasing rock application is not increasing pH (and pH below target)")
+                fdust = data_tmp_skip1[phmax_idx, idust]  # take the highest pH dust flux and move on...
+                lastrun = True
+            # --- [TK added: end]
+            
+            elif np.max(data_tmp[:,iph]) < targetpH:  # if we've never hit the target (and not non-linear) keep increasing fdust
                 fdust = np.max(data_tmp[:,idust])*1.5
                 print(np.max(data_tmp[:,iph]), targetpH, fdust)
             else:
@@ -596,7 +634,7 @@ for tstep in mytsteps:
         ,'porewater_pH[-]'
         ,'soil_pHw[-]'
         ,'target_pH[-]'
-        ,'basalt[g/m2/yr]'
+        ,'dust[g/m2/yr]'
         ,'error'
         ]
     
