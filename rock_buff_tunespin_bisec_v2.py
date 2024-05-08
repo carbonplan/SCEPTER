@@ -563,7 +563,15 @@ for runname in [runname_field,runname_lab]:
             
     print(res_list)
     
-    
+
+# ... [TK] add a run=completed file for easier programmatic querying
+for runname in [runname_field,runname_lab]:
+    dst = outdir + runname + where + 'completed.res'
+    # Open the file in write mode to create it
+    with open(dst, 'w') as f:
+        pass  # pass does nothing, creating an empty file
+
+
 if use_local_storage:
     for runname in [runname_field,runname_lab]:
         src = outdir + runname 

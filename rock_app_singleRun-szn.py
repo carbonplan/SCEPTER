@@ -467,5 +467,13 @@ for runname in [runname_field,runname_lab]:
                     file.write('{:.6e}\t'.format(item))
             
     print(res_list)
-    
+
+# ... [TK] add a run=completed file for easier programmatic querying
+for runname in [runname_field,runname_lab]:
+    dst = outdir + runname + where + 'completed.res'
+    # Open the file in write mode to create it
+    with open(dst, 'w') as f:
+        pass  # pass does nothing, creating an empty file
+
+
     

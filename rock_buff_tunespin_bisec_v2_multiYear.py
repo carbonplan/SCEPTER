@@ -539,7 +539,8 @@ for tstep in mytsteps:
             idust = 4
             
             # --- [TK added: start] 
-            data_tmp_skip1 = data_tmp[1:,:]  # skip first row since it inherits the last iter 
+            data_tmp_skip1 = data_tmp[1:,:]  # skip first row since it inherits the last iter
+            data_tmp_skip1 = np.round(data_tmp_skip1, 3)  # round all values to avoid tiny variability issues
             # ... check for two special cases: (1) near-zero application results in pH that's too high; (2) max application is not max pH (non-linear)
             # get indices for min / max pH and dust app
             phmax_idx = np.argmax(data_tmp_skip1[:,iph])      # index for max pH 
@@ -554,7 +555,9 @@ for tstep in mytsteps:
             ph_maxedout_condition =  (np.min(data_tmp_skip1[dustmin_idx,idust]) <= low_dust_thresh) & (data_tmp_skip1[dustmin_idx,iph] > targetpH_plus_buffer)
 
             # ... test condition 2 (non-linearity)
-            non_linear_condition = phmax_idx != dustmax_idx
+            pH_range_arr = np.max(data_tmp_skip1[:,iph]) - np.min(data_tmp_skip1[:,iph]) # first check if there's a detectable signal in ph
+            # if the signal's detectable and max pH is not max dust, we assume non-linearity
+            non_linear_condition = (pH_range_arr > 0.005) & (phmax_idx != dustmax_idx)  
 
             # ... handle conditions
             if ph_maxedout_condition:
@@ -659,7 +662,13 @@ for tstep in mytsteps:
                         file.write('{:.6e}\t'.format(item))
                 
         print(res_list)
-        
+
+    # ... [TK] add a run=completed file for easier programmatic querying
+    for runname in [runname_field,runname_lab]:
+        dst = outdir + runname + where + 'completed.res'
+        # Open the file in write mode to create it
+        with open(dst, 'w') as f:
+            pass  # pass does nothing, creating an empty file
         
     if use_local_storage:
         for runname in [runname_field,runname_lab]:
