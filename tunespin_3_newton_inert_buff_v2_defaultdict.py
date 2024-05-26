@@ -62,7 +62,10 @@ def save_dict_to_text_file(dictionary, filename, delimiter='\t'):
             file.write(f"{key}{delimiter}{value}\n")
 # -------------------------------------------------------------
 # -------------------------------------------------------------
-# --- set default and system args
+
+print(sys.argv)
+
+# --- set default and system args (TK)
 sys_args = parse_arguments(sys.argv)   # parse system args
 import_dict = sys_args['default_dict'] # set the dictionary to use from system args
 def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
@@ -72,24 +75,18 @@ def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
 combined_dict = set_vars(def_args, sys_args)  # default unless defined in sys_args
 
 water_frac = water_frac_tunespin
-
 targetpH = tph
 acidsat = tec
 targetOM = tsom
-targetlogpco2 = tsoilco2
 poro_input = poro
 moist_input = soilmoisture
 sat_input = moist_input/poro
 kh = 10**(3.5 + alpha/2.)
 
-# tau_g2 = 8. # yr, turn over time for OM
-tau_g2 = 1. # yr, turn over time for OM
-tau_g2 = 1. / ( 1./8.*3.**( (mat - 15.)/10.  ) )
-# print(tau_g2)
+runname_guess = initguess
 
 datadir = os.path.join(modeldir, 'data/')
 
-runname_guess = initguess
 
 if runname_guess=='none':
     make_initial_geuss = False
@@ -97,22 +94,22 @@ else:
     make_initial_geuss = True
 
 if make_initial_geuss:
-    outdir_guess = outdir
+    outdir_guess = '../scepter_output/'
     
     try:
-        filename = 'iteration.res'  # [tk] deleted leading "/" because it doesn't play nicely with "os.path.join()"
+        # filename = '/iteration_tmp.res'
         try:
-            filename = 'iteration.res'  # [tk] deleted leading "/" because it doesn't play nicely with "os.path.join()"
+            filename = '/iteration.res'
             if 'output' in outdir_guess:
-                data_tmp = np.loadtxt(os.path.join(outdir_guess, runname_guess, filename),skiprows=1)
+                data_tmp = np.loadtxt(outdir_guess + runname_guess + filename,skiprows=1)
             if 'archive' in outdir_guess:
-                tar_tmp = tarfile.open(os.path.join(outdir_guess, runname_guess) + '.tar.gz',"r")
+                tar_tmp = tarfile.open(outdir_guess + runname_guess + '.tar.gz',"r")
                 xfile = tar_tmp.extractfile('./'+runname_guess + filename,skiprows=1)
                 data_tmp = np.loadtxt(xfile)
         except:
-            filename = 'DA_iteration_tmp.res'
+            filename = '/DA_iteration_tmp.res'
             if 'output' in outdir_guess:
-                data_tmp = np.loadtxt(os.path.join(outdir_guess, runname_guess, filename),skiprows=1)
+                data_tmp = np.loadtxt(outdir_guess + runname_guess + filename,skiprows=1)
             if 'archive' in outdir_guess:
                 tar_tmp = tarfile.open(outdir_guess + runname_guess + '.tar.gz',"r")
                 xfile = tar_tmp.extractfile('./'+runname_guess + filename,skiprows=1)
@@ -125,34 +122,17 @@ if make_initial_geuss:
                 # tar_tmp = tarfile.open(outdir_guess + runname_guess + '.tar.gz',"r")
                 # xfile = tar_tmp.extractfile('./'+runname_guess + filename)
                 # data_tmp = np.loadtxt(xfile)
-        if len(data_tmp.shape)==2:
-            j_col = 1
-        else:
-            j_col = 0
-
-        if data_tmp.shape[j_col]==12:
-            i_error = 5
-            i_log10kh = -1
-            i_omrain_field = -2
-            i_ca = -3
-        else:
-            i_error = 6
-            i_log10kh = -2
-            i_omrain_field = -3
-            i_ca = -4
-            i_tau = -1
-
         try:
-            i_errormin = np.argmin( data_tmp[:,i_error] )
-            error_min = data_tmp[i_errormin,i_error]*100.
-            log10kh = (data_tmp[i_errormin,i_log10kh])
-            omrain_field = (data_tmp[i_errormin,i_omrain_field])
-            ca = (data_tmp[i_errormin,i_ca])
+            i_errormin = np.argmin( data_tmp[:,5] )
+            error_min = data_tmp[i_errormin,5]*100.
+            log10kh = (data_tmp[i_errormin,-1])
+            omrain_field = (data_tmp[i_errormin,-2])
+            ca = (data_tmp[i_errormin,-3])
         except:
-            error_min = data_tmp[i_error]*100.
-            log10kh = (data_tmp[i_log10kh])
-            omrain_field = (data_tmp[i_omrain_field])
-            ca = (data_tmp[i_ca])
+            error_min = data_tmp[5]*100.
+            log10kh = (data_tmp[-1])
+            omrain_field = (data_tmp[-2])
+            ca = (data_tmp[-3])
         
         filename = 'cec.in'
         sld_data_list = get_inputs.get_input_sld_properties(outdir_guess,runname_guess,filename)
@@ -162,31 +142,18 @@ if make_initial_geuss:
         
         print( 'initial guess from {:}'.format(runname_guess) )
         print( np.log10(ca), np.log10(kh), omrain_field )
-        
-        if data_tmp.shape[j_col]>12:
-            try:
-                i_errormin = np.argmin( data_tmp[:,i_error] )
-                tau_g2 = (data_tmp[i_errormin,i_tau])
-            except:
-                tau_g2 = (data_tmp[i_tau])
-
-            print( 'additional initial guess from {:}'.format(runname_guess) )
-            print( tau_g2 )
     except:
         print( 'initial guess from {:} not used as it did not converge'.format(runname_guess) )
         make_initial_geuss = False
-        if stop_unsuccessful: exit()
     
     # exit()
 
 if liming: ca = 10
 
-
 outdir = outdir
-if use_local_storage:  outdir = os.environ['TMPDIR'] + '/scepter_output/'
 simid = spinname
-runname_field   = simid+'_spintuneup4_field'
-runname_lab     = simid+'_spintuneup4_lab'
+runname_field   = simid+'_spintuneup3_field'
+runname_lab     = simid+'_spintuneup3_lab'
 
 # compile 
 exename = 'scepter'
@@ -200,24 +167,22 @@ mycwd = os.getcwd()
 # os.system('make')
 os.chdir(modeldir)  # change to model directory where makefile resides
 os.system('make')
-# os.system('make --file=makefile_test')
+
 prev_iter_exist = False
 if not os.path.exists( outdir + runname_field) : 
     os.system('mkdir -p ' + outdir + runname_field)
 else:
     if os.path.exists( outdir + runname_field + where + 'iteration_tmp.res'):
-        try:
-            iter_prev = np.loadtxt(outdir + runname_field + where + 'iteration_tmp.res',skiprows=1)
-            shutil.copy(outdir + runname_field + where + 'iteration_tmp.res'
-                ,outdir + runname_field + where + 'iteration_tmp_SAVE_'+datestr+'.res')
-        except:
-            print('something went wrong while saving previous iterations')
+        iter_prev = np.loadtxt(outdir + runname_field + where + 'iteration_tmp.res',skiprows=1)
+        shutil.copy(outdir + runname_field + where + 'iteration_tmp.res'
+            ,outdir + runname_field + where + 'iteration_tmp_SAVE_'+datestr+'.res')
         # prev_iter_exist = True
 if not os.path.exists( outdir + runname_lab) : os.system('mkdir -p ' + outdir + runname_lab)
 os.system('cp ' + exename_src + to + outdir + runname_field + where + exename)
 os.system('cp ' + exename_src + to + outdir + runname_lab + where + exename)
 # change back
 os.chdir(mycwd)
+
 
 ztot=0.5
 ztot_field=0.5
@@ -238,12 +203,9 @@ taudust_lab=0.01
 if not make_initial_geuss: 
     omrain_field=900
 omrain_lab=0
-# zom=0.5
-zom=0.25
-# poro_field=0.5
+zom=0.5
 poro_field=poro_input
 poro_lab=0.928391508
-# moistsrf_field=0.5
 moistsrf_field=sat_input
 moistsrf_lab=1.0
 zwater=100000
@@ -299,12 +261,10 @@ make_inputs.get_input_frame(
     )
 
 w_scheme_field=1
-mix_scheme_field=1 # Fickian
-mix_scheme_field=2 # homogeneous 
+mix_scheme_field=1
 poro_iter_field='false' 
 sldmin_lim ='true'
 display='true'
-# report=1
 disp_lim='true'
 restart ='false'
 rough_field      ='true'
@@ -338,7 +298,6 @@ make_inputs.get_input_switches(
     ,poro_iter=poro_iter_field
     ,sldmin_lim=sldmin_lim 
     ,display=display
-    # ,report=report
     ,disp_lim=disp_lim
     ,restart=restart 
     ,rough=rough_field
@@ -367,7 +326,7 @@ if include_Al:
     aq_list_field.append('al')
 if add_secondary:                # [tk added to track secondary precipitates]
     sld_list_field += sld_track
-
+    
 gas_list_field = ['pco2']
 exrxn_list_field = []
 # exrxn_list_field = ['g2ca']
@@ -379,7 +338,7 @@ make_inputs.get_input_tracers(
     ,gas_list = gas_list_field
     ,exrxn_list = exrxn_list_field
     )
-
+    
 # bring in parent rock file [tk added]
 if (spinup_parentrock_file != None) & ("json" in spinup_parentrock_file):
     pr_file = os.path.join(modeldir, 'data', spinup_parentrock_file)
@@ -443,20 +402,14 @@ make_inputs.get_input_sld_properties(
     
 filename = 'psdrain.in'
 srcfile = os.path.join(datadir, 'psdrain_320um.in')
+sld_varlist = [ (5e-6,0.2,1), (5e-6,0.2,1), (5e-6,0.2,1), (5e-6,0.2,1), ] 
+# sld_varlist = [ (1e-6,0.2,1), (2e-6,0.2,1), (5e-6,0.2,1), (20e-6,0.2,1), ] 
 make_inputs.get_input_sld_properties(
     outdir=outdir
     ,runname=runname_field
     ,filename = filename
+    # ,sld_varlist=sld_varlist
     ,srcfile = srcfile
-    )
-    
-filename = 'kinspc.in'
-sld_varlist = [ ('g2',tau_g2) ] 
-make_inputs.get_input_sld_properties(
-    outdir=outdir
-    ,runname=runname_field
-    ,filename = filename
-    ,sld_varlist=sld_varlist
     )
     
 if liming:
@@ -513,7 +466,6 @@ make_inputs.get_input_switches(
     ,poro_iter=poro_iter_lab
     ,sldmin_lim=sldmin_lim 
     ,display=display
-    # ,report=report
     ,disp_lim=disp_lim
     ,restart=restart 
     ,rough=rough_lab
@@ -628,6 +580,7 @@ make_inputs.get_input_sld_properties(
 error = 1e4
 tol = 1e-4
 tol = 1e-3
+# tol = 1e-2
 
 cnt = 1
 res_list = []
@@ -645,7 +598,7 @@ if prev_iter_exist:
     kh  = 10.**iter_prev[-1,-1]
     
 
-def run_a_single_set(ca,logkh,omrain_field,tau_g2):
+def run_a_single_set(ca,logkh,omrain_field):
 
     # =========== field sim =========== 
     # 4 boundary conditions 
@@ -708,7 +661,7 @@ def run_a_single_set(ca,logkh,omrain_field,tau_g2):
 
     # (4) OM_rain.in to reflect N rain 
     # N_rain = 8.406375  # gN/m2/yr
-    N_rain = nitrif  # gN/m2/yr
+    N_rain = float(sys.argv[10])  # gN/m2/yr
     N_rain = N_rain/14  # mol N/m2/yr
     N_rain = N_rain*80  # g NH4NO3/m2/yr
     N_rain = N_rain/2.  # only half is required as 1 mol NH4NO3 contains 2 moles of N
@@ -725,96 +678,42 @@ def run_a_single_set(ca,logkh,omrain_field,tau_g2):
         ,sld_varlist=sld_varlist
         )
     
-    # (5) OM decay const | added 06-16-2023
-    filename = 'kinspc.in'
-    sld_varlist = [ ('g2',tau_g2) ] 
-    make_inputs.get_input_sld_properties(
-        outdir=outdir
-        ,runname=runname_field
-        ,filename = filename
-        ,sld_varlist=sld_varlist
-        )
-    
     # >>> run 
-    # os.system(outdir+runname_field+where+exename)
-    os.system("chmod +x " + os.path.join(outdir,runname_field,'scepter'))  # grant permissions
-    proc = subprocess.Popen([outdir+runname_field+where+exename])
-
-    my_timeout = tunespin_timeout # 120*60  # kill the run if not complete in this many seconds
-    
-    flag_error_field = False
-    flag_error_lab = False
-    
-    try:
-        proc.wait(my_timeout)
-        print('run finished within {:f} min'.format(int(my_timeout/60.)))
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        flag_error_field = True
-        phint_field=np.nan;phint=np.nan;omint=np.nan;acint=np.nan;logpco2=np.nan
-        print('run UNfinished within {:f} min'.format(int(my_timeout/60.)))
-        
-        if stop_unsuccessful: exit()
-        
-        return phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab
+    os.system(outdir+runname_field+where+exename)
     
     # >>> 6 data retrieval after field run  
     
-    flag_error_field = False
-    flag_error_lab = False
+    # (1) get porewater pH 
+    phint_field = get_int_prof.get_ph_int_site(outdir,runname_field,dep_sample)
     
-    try:
-        # (1) get porewater pH 
-        # phint_field = get_int_prof.get_ph_int_site(outdir,runname_field,dep_sample,20)
-        phint_field = get_int_prof.get_ph_int_site(outdir,runname_field,dep_sample) # [tykukla] rm 20
-        
-        # (2) get acidity in %
-        # dacint = get_int_prof.get_ac_int_site(outdir,runname,dep_sample)
-        # acint = get_int_prof.get_ac_int_site_v2(outdir,runname_field,dep_sample,20)
-        acint = get_int_prof.get_ac_int_site_v2(outdir,runname_field,dep_sample) # [tykukla] rm 20
-        
-        # (3) get bulk density
-        # dense = get_int_prof.get_rhobulk_int_site(outdir,runname_field,dep_sample)
-        # dense_lab = get_int_prof.get_rhobulk_int_site(outdir,runname_field,dep_sample,20)
-        dense_lab = get_int_prof.get_rhobulk_int_site(outdir,runname_field,dep_sample) # [tykukla] rm 20
-        
-        # (4) get field solid wt%
-        sps = ['g2','inrt']
-        if include_Al:   sps.append( alphase ) 
-        if liming:   sps.append( limesp ) 
-        sldwt_list = []
-        for sp in sps:
-            # sldwt = get_int_prof.get_sldwt_int_site(outdir,runname_field,dep_sample,[sp],20)
-            sldwt = get_int_prof.get_sldwt_int_site(outdir,runname_field,dep_sample,[sp]) # [tykukla] rm 20
-            sldwt_list.append(sldwt)
-        exchanger = sum(sldwt_list)
-        
-        # (5) get SOM wt%
-        omint = sldwt_list[sps.index('g2')]
-        
-        # (6) get exchangeable solute concs. 
-        # aqsps,btmconcs,dep,time = get_int_prof.get_totsave_site(outdir,runname_field,dep_sample,20)  # returning mol/ solid m3 depth averaged value 
-        aqsps,btmconcs,dep = get_int_prof.get_totsave_site(outdir,runname_field,dep_sample) # [tykukla] rm 20 and delete time from results (not output in this version of .get_totsave_..) ;  # returning mol/ solid m3 depth averaged value 
-        
-        # (7) get DIC conc. (added 3.22.2023)
-        # dic,dep = get_int_prof.get_ave_DIC_save(outdir,runname_field,dep_sample,20)
-        dic,dep = get_int_prof.get_ave_DIC_save(outdir,runname_field,dep_sample) # [tykukla] rm 20
-        
-        # (8) get soil pCO2 (added 6.16.2023)
-        # spco2 = get_int_prof.get_gas_int_site(outdir,runname_field,dep_sample,'pco2',20)
-        spco2 = get_int_prof.get_gas_int_site(outdir,runname_field,dep_sample,'pco2') # [tykukla] rm 20
-        logpco2 = np.log10(spco2)
-        
-        print(aqsps,btmconcs,dep)
-        print('!!! SUCCESSFUL data retrieval; field run must have been SUCCESSFUL !!!')
-    except:
-        print('*** UNSUCCESSFUL data retrieval; field run must have been UNSUCCESSFUL ***')
-        flag_error_field = True
-        phint_field=np.nan;phint=np.nan;omint=np.nan;acint=np.nan;logpco2=np.nan
-        
-        if stop_unsuccessful: exit()
-        
-        return phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab
+    # (2) get acidity in %
+    # dacint = get_int_prof.get_ac_int_site(outdir,runname,dep_sample)
+    acint = get_int_prof.get_ac_int_site_v2(outdir,runname_field,dep_sample)
+    
+    # (3) get bulk density
+    # dense = get_int_prof.get_rhobulk_int_site(outdir,runname_field,dep_sample)
+    dense_lab = get_int_prof.get_rhobulk_int_site(outdir,runname_field,dep_sample)
+    
+    # (4) get field solid wt%
+    sps = ['g2','inrt']
+    if include_Al:   sps.append( alphase ) 
+    if liming:   sps.append( limesp ) 
+    sldwt_list = []
+    for sp in sps:
+        sldwt = get_int_prof.get_sldwt_int_site(outdir,runname_field,dep_sample,[sp])
+        sldwt_list.append(sldwt)
+    exchanger = sum(sldwt_list)
+    
+    # (5) get SOM wt%
+    omint = sldwt_list[sps.index('g2')]
+    
+    # (6) get exchangeable solute concs. 
+    aqsps,btmconcs,dep = get_int_prof.get_totsave_site(outdir,runname_field,dep_sample)  # returning mol/ solid m3 depth averaged value 
+    
+    # (7) get DIC conc. (added 3.22.2023)
+    dic,dep = get_int_prof.get_ave_DIC_save(outdir,runname_field,dep_sample)
+    
+    print(aqsps,btmconcs,dep)
     
     # =========== lab sim =========== 
     # 2 processes before setting boundary conditions 
@@ -935,60 +834,22 @@ def run_a_single_set(ca,logkh,omrain_field,tau_g2):
         ,sld_varlist=sld_varlist
         )
         
-    # before running previous results are deleted
-    if os.path.exists(outdir+runname_lab+where+'flx'): shutil.rmtree(outdir+runname_lab+where+'flx')
-    if os.path.exists(outdir+runname_lab+where+'prof'): shutil.rmtree(outdir+runname_lab+where+'prof')
-    
     # >>> run 
-    # os.system(outdir+runname_lab+where+exename)
-    os.system("chmod +x " + os.path.join(outdir,runname_lab,'scepter'))  # grant permissions
-    proc = subprocess.Popen([outdir+runname_lab+where+exename])
+    os.system(outdir+runname_lab+where+exename)
 
-    my_timeout = tunespin_timeout # 60*20
-    
-    flag_error_field = False
-    flag_error_lab = False
-    
-    try:
-        proc.wait(my_timeout)
-        print('run finished within {:f} min'.format(int(my_timeout/60.)))
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        flag_error_lab = True
-        phint_field=np.nan;phint=np.nan;omint=np.nan;acint=np.nan;logpco2=np.nan
-        print('run UNfinished within {:f} min'.format(int(my_timeout/60.)))
-        if stop_unsuccessful: exit()
-        return phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab
-
-    
     # 1 data retrieval 
-
-    flag_error_field = False
-    flag_error_lab = False
-    try:
-        # (1) lab pH
-        # phint = get_int_prof.get_ph_int_site(outdir,runname_lab,dep_sample,20)
-        phint = get_int_prof.get_ph_int_site(outdir,runname_lab,dep_sample)  # [tykukla] delete 20
-        print('!!! SUCCESSFUL data retrieval; lab run must have been SUCCESSFUL !!!')
+    # (1) lab pH
+    phint = get_int_prof.get_ph_int_site(outdir,runname_lab,dep_sample)
     
-    except:
-        print('*** UNSUCCESSFUL data retrieval; lab run must have been UNSUCCESSFUL ***')
-        flag_error_lab = True
-        phint_field=np.nan;phint=np.nan;omint=np.nan;acint=np.nan;logpco2=np.nan
-        if stop_unsuccessful: exit()
-        return phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab
-    
-    return phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab
+    return phint_field,phint,omint,acint
 
 while (error > tol):
 
-    nmx = 4
-
-    ymx = np.zeros(nmx)
-    emx = np.zeros(nmx)
-    amx = np.zeros((nmx,nmx),dtype=np.float64)
+    ymx = np.zeros(3)
+    emx = np.zeros(3)
+    amx = np.zeros((3,3),dtype=np.float64)
     
-    facts = [1e-4]*nmx
+    facts = [1e-4]*3
     # facts = [1e-8,1e-2,1e-4]
     # facts = [1e-2]*3
 
@@ -996,24 +857,15 @@ while (error > tol):
     
     # =========== sim 1st =========== 
     
-    phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field,tau_g2)
-    
-    if flag_error_field or flag_error_lab: # assume error is caused by too much OM rain
-        print(flag_error_field,flag_error_lab,omrain_field)
-        # omrain_field = omrain_field/1.5
-        omrain_field = omrain_field/10.
-        continue
+    phint_field,phint,omint,acint = run_a_single_set(ca,np.log10(kh),omrain_field)
 
-    print('after 1st run',phint_field,phint,acint,logpco2)
-    time.sleep(5)
+    print(phint_field,phint,acint)
 
     # =========== sim 2nd =========== 
     dca = facts[0]
     dca = ca*facts[0]
     
-    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca+dca,np.log10(kh),omrain_field,tau_g2)
-    print('after 2nd run',dphint_field,dphint,domint,dacint,dlogpco2)
-    time.sleep(5)
+    dphint_field,dphint,domint,dacint = run_a_single_set(ca+dca,np.log10(kh),omrain_field)
     
     if phnorm_pw:       dphint_dca = (dphint_field-phint_field)/dca * ca
     if not phnorm_pw:   dphint_dca = (dphint-phint)/dca * ca
@@ -1021,15 +873,15 @@ while (error > tol):
     # if not phnorm_pw:   dphint_dca = (10**-dphint-10**-phint)/dca * ca
     dacint_dca = (dacint-acint)/dca * ca
     domint_dca = (domint-omint)/dca * ca
-    dlogpco2_dca = (dlogpco2-logpco2)/dca * ca
 
+    print(dphint_dca,dacint_dca,domint_dca)
 
     # =========== sim 3rd =========== 
     
     dkh = facts[1]
     dkh = kh*facts[1]
     
-    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh+dkh),omrain_field,tau_g2)
+    dphint_field,dphint,domint,dacint = run_a_single_set(ca,np.log10(kh+dkh),omrain_field)
 
     # domint_dlogkh = (domint-omint)/dlogkh
     # dacint_dlogkh = (dacint-acint)/dlogkh
@@ -1041,17 +893,15 @@ while (error > tol):
     if not phnorm_pw:   dphint_dlogkh = (dphint-phint)/dkh*kh 
     dacint_dlogkh = (dacint-acint)/dkh * kh
     domint_dlogkh = (domint-omint)/dkh * kh
-    dlogpco2_dlogkh = (dlogpco2-logpco2)/dkh * kh
 
-    print('after 3rd run',dphint_dlogkh,dacint_dlogkh,domint_dlogkh,dlogpco2_dlogkh)
-    time.sleep(5)
+    print(dphint_dlogkh,dacint_dlogkh,domint_dlogkh)
     
 
     # =========== sim 4th =========== 
     domrain = facts[2]
     domrain = omrain_field*facts[2]
     
-    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field+domrain,tau_g2)
+    dphint_field,dphint,domint,dacint = run_a_single_set(ca,np.log10(kh),omrain_field+domrain)
 
     if phnorm_pw:       dphint_domrain = (dphint_field-phint_field)/domrain * omrain_field
     if not phnorm_pw:   dphint_domrain = (dphint-phint)/domrain * omrain_field
@@ -1059,28 +909,8 @@ while (error > tol):
     # if not phnorm_pw:   dphint_domrain = (10**-dphint-10**-phint)/domrain * omrain_field
     dacint_domrain = (dacint-acint)/domrain * omrain_field
     domint_domrain = (domint-omint)/domrain * omrain_field
-    dlogpco2_domrain = (dlogpco2-logpco2)/domrain * omrain_field
 
-    print('after 4th run',dphint_domrain,dacint_domrain,domint_domrain,dlogpco2_domrain)
-    time.sleep(5)
-    
-
-    # =========== sim 5th =========== 
-    dtaug2 = facts[3]
-    dtaug2 = tau_g2*facts[3]
-    
-    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field,tau_g2+dtaug2)
-
-    if phnorm_pw:       dphint_dtaug2 = (dphint_field-phint_field)/dtaug2 * tau_g2
-    if not phnorm_pw:   dphint_dtaug2 = (dphint-phint)/dtaug2 * tau_g2
-    # if phnorm_pw:       dphint_domrain = (10**-dphint_field-10**-phint_field)/domrain * omrain_field
-    # if not phnorm_pw:   dphint_domrain = (10**-dphint-10**-phint)/domrain * omrain_field
-    dacint_dtaug2 = (dacint-acint)/dtaug2 * tau_g2
-    domint_dtaug2 = (domint-omint)/dtaug2 * tau_g2
-    dlogpco2_dtaug2 = (dlogpco2-logpco2)/dtaug2 * tau_g2
-
-    print('after 5th run',dphint_dtaug2,dacint_dtaug2,domint_dtaug2,dlogpco2_dtaug2)
-    time.sleep(5)
+    print(dphint_domrain,dacint_domrain,domint_domrain)
     
     # ===========  Newton method ==================
     # filling Jacobian matrix 
@@ -1091,40 +921,29 @@ while (error > tol):
     # if not phnorm_pw:   ymx[0] = 10**-phint - 10**-targetpH
     ymx[1] = (acint - acidsat) 
     ymx[2] = omint - targetOM 
-    ymx[3] = logpco2 - targetlogpco2 
 
     amx[0,0] = dphint_dca
     amx[0,1] = dphint_dlogkh
     amx[0,2] = dphint_domrain
-    amx[0,3] = dphint_dtaug2
-    
     amx[1,0] = dacint_dca
     amx[1,1] = dacint_dlogkh
     amx[1,2] = dacint_domrain
-    amx[1,3] = dacint_dtaug2
-    
     amx[2,0] = domint_dca
     amx[2,1] = domint_dlogkh
     amx[2,2] = domint_domrain
-    amx[2,3] = domint_dtaug2
-    
-    amx[3,0] = dlogpco2_dca
-    amx[3,1] = dlogpco2_dlogkh
-    amx[3,2] = dlogpco2_domrain
-    amx[3,3] = dlogpco2_dtaug2
 
     ymx = -ymx
 
     dx = np.linalg.solve(amx, ymx)
 
-    print(ca,np.log10(kh),omrain_field,tau_g2)
-    print(ca*np.exp(dx[0]),np.log10(kh*np.exp(dx[1])),omrain_field*np.exp(dx[2]),tau_g2*np.exp(dx[3]) )
+    print(ca,np.log10(kh),omrain_field)
+    print(ca*np.exp(dx[0]),np.log10(kh*np.exp(dx[1])),omrain_field*np.exp(dx[2]) )
 
     if np.isnan(ymx).any():
         print('nan detected in solution')
         error = 1e-99
     else:
-        thrs = [5]*nmx
+        thrs = [5]*3
         # thrs = [3]*3
         # thrs = [7]*3
         if dx[0]>thrs[0]:
@@ -1148,13 +967,6 @@ while (error > tol):
         else:
             omrain_field = omrain_field*np.exp(dx[2])
         
-        if dx[3] > thrs[3]:
-            tau_g2 = 1.5*tau_g2
-        elif dx[3] < -1*thrs[3]:
-            tau_g2 = tau_g2/1.5
-        else:
-            tau_g2 = tau_g2*np.exp(dx[3])
-        
         if phnorm_pw:       emx[0] = ymx[0]/targetpH
         if not phnorm_pw:   emx[0] = ymx[0]/targetpH
         # if phnorm_pw:       emx[0] = ymx[0]/10**-targetpH
@@ -1177,14 +989,6 @@ while (error > tol):
                 emx[2] = ymx[2]/omrain_field
             else:
                 emx[2] = ymx[2]
-                
-        if targetlogpco2!=0:
-            emx[3] = ymx[3]/targetlogpco2 
-        else:
-            if logpco2!=0:
-                emx[3] = ymx[3]/logpco2
-            else:
-                emx[3] = ymx[3]
                 # emx[2] = ymx[2]*1e2
 
         error = np.max(np.abs(emx))
@@ -1195,8 +999,8 @@ while (error > tol):
             # kh = 10**1
             # error = 100
         
-        if omrain_field > 1e5 and tau_g2>1:
-            omrain_field = omrain_field/10.
+        # if omrain_field > 2000:
+            # omrain_field = 2000
             
     
     print(' ')
@@ -1211,54 +1015,45 @@ while (error > tol):
     
     time.sleep(5)
     
-    res_list.append([cnt,phint_field,phint,omint,acint,logpco2,error,targetpH,targetOM,acidsat,targetlogpco2,ca,omrain_field,np.log10(kh),tau_g2])
+    res_list.append([cnt,phint_field,phint,omint,acint,error,targetpH,targetOM,acidsat,ca,omrain_field,np.log10(kh)])
     cnt += 1
-
-    print(" --------------------------------------- ")
-    print(res_list)
-    print(" --------------------------------------- ")    
     
     if cnt > iter_max: break
     
     name_list = [
-        'n',
-        'p.w.pH',
-        'soil.pH',
-        'OM[wt%]',
-        'ex.acd[%]',
-        'logpCO2[atm]',
-        'error',
-        'tgt.pH',
-        'tgt.OM[wt%]',
-        'tgt.ex.acd[%]',
-        'tgt.logpCO2[atm]',
-        'Ca[M]' if not liming else 'lime[g:{}/m2/yr]'.format(limesp.upper()),
-        'OM.rain[gC/m2/yr]',
-        'log10(KH/Na)',
-        'tau.OM[yr]',
+        'iter.'
+        ,'porewater_pH[-]'
+        ,'soil_pHw[-]'
+        ,'OM[wt%]'
+        ,'exchangeable_acidity[%CEC]'
+        ,'error'
+        ,'target_pH[-]'
+        ,'target_OM[wt%]'
+        ,'target_exchangeable_acidity[%CEC]'
+        ,'Ca[M]' if not liming else 'liming[g:{}/m2/yr]'.format(limesp.upper())
+        ,'OM_rain[gC/m2/yr]'
+        ,'log10(KH/Na)'
         ]
     for runname in [runname_field,runname_lab]:
         # np.savetxt(outdir + runname + where + 'iteration_tmp.res',np.array(res_list))
-        dst = os.path.join(outdir, runname, 'iteration_tmp.res')
+        dst = outdir + runname + where + 'iteration_tmp.res'
 
         with open(dst, 'w') as file:
             for item in name_list:
-                if name_list.index(item)==0:
-                    file.write('{:5}\t'.format(item))
-                elif name_list.index(item)==len(name_list)-1:
-                    file.write('{:15}\n'.format(item))
+                if name_list.index(item)==len(name_list)-1:
+                    file.write('{}\n'.format(item))
                 else:
-                    file.write('{:15}\t'.format(item))
+                    file.write('{}\t'.format(item))
             for j in range(len(res_list)):
                 item_list = res_list[j]
                 for i in range(len(item_list)):
                     item = item_list[i]
                     if i==0:
-                        file.write('{:5d}\t'.format(item))
+                        file.write('{:d}\t'.format(item))
                     elif i==len(item_list)-1:
-                        file.write('{:.9e}\n'.format(item))
+                        file.write('{:.6e}\n'.format(item))
                     else:
-                        file.write('{:.9e}\t'.format(item))
+                        file.write('{:.6e}\t'.format(item))
                 
         print(res_list)
         
@@ -1267,31 +1062,27 @@ while (error > tol):
         shutil.copyfile(dst,dst2)
 
 
-phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field,tau_g2)
-print(phint_field,phint,omint,acint,logpco2)
+phint_field,phint,omint,acint = run_a_single_set(ca,np.log10(kh),omrain_field)
+print(phint_field,phint,omint,acint)
 # name_list = [
     # 'iter.'
     # ,'porewater_pH[-]'
     # ,'soil_pHw[-]'
     # ,'error'
     # ]
-    
 name_list = [
-    'n',
-    'p.w.pH',
-    'soil.pH',
+    'iter.',
+    'porewater_pH[-]',
+    'soil_pHw[-]',
     'OM[wt%]',
-    'ex.acd[%]',
-    'logpCO2[atm]',
+    'exchangeable_acidity[%CEC]',
     'error',
-    'tgt.pH',
-    'tgt.OM[wt%]',
-    'tgt.ex.acd[%]',
-    'tgt.logpCO2[atm]',
-    'Ca[M]' if not liming else 'lime[g:{}/m2/yr]'.format(limesp.upper()),
-    'OM.rain[gC/m2/yr]',
+    'target_pH[-]',
+    'target_OM[wt%]',
+    'target_exchangeable_acidity[%CEC]',
+    'Ca[M]' if not liming else 'liming[g{:}/m2/yr]'.format(limesp.upper()),
+    'OM_rain[gC/m2/yr]',
     'log10(KH/Na)',
-    'tau.OM[yr]',
     ]
     
 for runname in [runname_field,runname_lab]:
@@ -1299,22 +1090,20 @@ for runname in [runname_field,runname_lab]:
 
     with open(dst, 'w') as file:
         for item in name_list:
-            if name_list.index(item)==0:
-                file.write('{:5}\t'.format(item))
-            elif name_list.index(item)==len(name_list)-1:
-                file.write('{:15}\n'.format(item))
+            if name_list.index(item)==len(name_list)-1:
+                file.write('{}\n'.format(item))
             else:
-                file.write('{:15}\t'.format(item))
+                file.write('{}\t'.format(item))
         for j in range(len(res_list)):
             item_list = res_list[j]
             for i in range(len(item_list)):
                 item = item_list[i]
                 if i==0:
-                    file.write('{:5d}\t'.format(item))
+                    file.write('{:d}\t'.format(item))
                 elif i==len(item_list)-1:
-                    file.write('{:.9e}\n'.format(item))
+                    file.write('{:.6e}\n'.format(item))
                 else:
-                    file.write('{:.9e}\t'.format(item))
+                    file.write('{:.6e}\t'.format(item))
             
     print(res_list)
     
@@ -1322,7 +1111,7 @@ for runname in [runname_field,runname_lab]:
 if use_local_storage:
     for runname in [runname_field,runname_lab]:
         src = outdir + runname 
-        dst = '/storage/coda1/p-creinhard3/0/ykanzaki3/scepter_output/' + runname 
+        dst = '../scepter_output/' + runname 
         
         if not os.path.exists(dst): 
             shutil.copytree(src, dst)

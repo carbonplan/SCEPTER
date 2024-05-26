@@ -28,6 +28,7 @@ default_dictionary = {
     'add_secondary': True,         # [True, False] whether to add secondary precipitates to list of solids to track (defined in array below)
     'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
                   "gb", "ct", "cabd", "ill", "gps", "mgbd"],
+    'singlerun_seasonality': True, # [True, False] whether to impose seasonality in the singlerun script
     
     # --- tunespin specific
     'activity_on': False,          # [True, False] whether to turn on thermodynamic activity coefficients (in switches.in file) 
@@ -55,10 +56,13 @@ default_dictionary = {
     'dep_sample': 0.15,            # [cm] depth of sample for comparing pH to target -- not relevant for single run or initial tuneup, but relevant for tuning rock application
     'phnorm_pw': False,            # metric for target pH (true = porewater pH; false = soil pH) -- not relevant for single run
     'maxiter': 50,                 # max iterations for reaching target solution -- not relevant for single run
-
+    'spinup_parentrock_file': 'parentlist1.json',  # [None or *.json] looks for a parent rock composition in SCEPTER/data/*.json. None assumes fully inert
+    'tunespin_timeout': 7200,      # [s] time before we give up on a tunespin run (7200 is 120*60 = 2 hours)
+    
     # --- multi-year specific
     'max_time': 5,                 # [yr] total amount of time to simulate (must be > `duration`, which refers to individual targetpH run)
     'next_dustrate': 5,            # [g m-2 yr-1] dust rate at the start of the second iteration
     'clim_files': ["T_temp.in", "q_temp.in", "Wet_temp.in"],  # names of climate files (only used in multi-year because we have to update each)
+    
     }
 

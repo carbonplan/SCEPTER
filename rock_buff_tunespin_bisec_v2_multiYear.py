@@ -121,7 +121,30 @@ def update_clim(inputfile, outputfile, timezero):
                 # write the adjusted year and temperature to the output file
                 # print(f"{formatted_yr}\t{formatted_clim}\n")
                 f_out.write(f"{formatted_yr}\t{formatted_clim}\n")  # Adjust the delimiter as needed
-                
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# function to remove duplicate mineral names in the solid list
+# (assumes output file is the same as the input file)
+def remove_duplicates(input_file):
+    with open(input_file, 'r') as f:
+        lines = f.readlines()
+        header = lines[0]  # Save the header
+        lines_without_tabs = [line.replace('\t', '') for line in lines]  # remove tabs before comparing
+        unique_lines = set(lines_without_tabs[1:])  # remove duplicates from mineral names
+
+    # check if the last entry ends with "\n" and remove it if needed
+    last_entry = list(unique_lines)[-1]
+
+    # write lines to output file, keeping the header at the top
+    with open(input_file, 'w') as f:
+        f.write(header)  # write the header first
+        # write unique mineral names
+        for line in unique_lines:
+            if line != last_entry:
+                f.write(line)
+            else:
+                f.write(line.rstrip('\n'))  # don't add newline for the last entry
 # -------------------------------------------------------------
 # -------------------------------------------------------------
 # --- set default and system args
@@ -230,6 +253,8 @@ for tstep in mytsteps:
     
     if added_sp == 'gbas': dustsrc = os.path.join(modeldir, 'data', 'dust_gbasalt.in')
     if added_sp == 'cc': dustsrc = os.path.join(modeldir, 'data', 'dust_lime.in')
+    if added_sp == 'cao': dustsrc = os.path.join(modeldir, 'data', 'dust_cao.in')
+    if added_sp == 'dlm': dustsrc = os.path.join(modeldir, 'data', 'dust_dlm.in')
     dustdst = 'dust.in'
     
     os.system('cp ' + dustsrc + to + outdir + runname_field + where + dustdst) 
@@ -244,6 +269,9 @@ for tstep in mytsteps:
     data.insert(1, added_sp+'\t\n')
     with open(dst, 'w') as file:
         file.writelines(data)
+    # remove duplicate minerals
+    remove_duplicates(dst)
+
         
     # ============ adding Fe(II) as tracer and its oxidation =================
     # filename = '/solutes.in'
@@ -287,6 +315,9 @@ for tstep in mytsteps:
     data.insert(1, added_sp+'\t\n')
     with open(dst, 'w') as file:
         file.writelines(data)
+    # remove duplicate minerals
+    remove_duplicates(dst)
+
         
     # filename = '/solutes.in'
     # src = outdir + spinup_lab + filename

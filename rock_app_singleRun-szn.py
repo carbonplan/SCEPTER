@@ -74,7 +74,30 @@ def copy_files(src_dir, dst_dir):
         if os.path.isfile(src_file):
             shutil.copy2(src_file, dst_file)
             # print(f"Copied {src_file} to {dst_file}")
-    
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# function to remove duplicate mineral names in the solid list
+# (assumes output file is the same as the input file)
+def remove_duplicates(input_file):
+    with open(input_file, 'r') as f:
+        lines = f.readlines()
+        header = lines[0]  # Save the header
+        lines_without_tabs = [line.replace('\t', '') for line in lines]  # remove tabs before comparing
+        unique_lines = set(lines_without_tabs[1:])  # remove duplicates from mineral names
+
+    # check if the last entry ends with "\n" and remove it if needed
+    last_entry = list(unique_lines)[-1]
+
+    # write lines to output file, keeping the header at the top
+    with open(input_file, 'w') as f:
+        f.write(header)  # write the header first
+        # write unique mineral names
+        for line in unique_lines:
+            if line != last_entry:
+                f.write(line)
+            else:
+                f.write(line.rstrip('\n'))  # don't add newline for the last entry
 # -------------------------------------------------------------
 # -------------------------------------------------------------
 # --- set default and system args
@@ -89,8 +112,8 @@ combined_dict = set_vars(def_args, sys_args)  # default unless defined in sys_ar
 tau = duration
 added_sp = dustsp
 spinid = spinrun
-spinup_field = spinid+'_spintuneup_field'
-spinup_lab   = spinid+'_spintuneup_lab'
+spinup_field = spinid+'_field'
+spinup_lab   = spinid+'_lab'
 expid = newrun_id
 runname_field = expid+'_'+added_sp+'_field_tau'+str(tau).replace('.','p')
 runname_lab   = expid+'_'+added_sp+'_lab_tau'+str(tau).replace('.','p')
@@ -115,12 +138,13 @@ for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
     save_dict_to_text_file(combined_dict, fn_dict_save, delimiter='\t')
 
 # duplicate the climate files
-for runname in [runname_field,runname_lab]:
-    # set source and destination
-    src_clim = os.path.join(climatedir, climatefiles)
-    dst_clim = os.path.join(outdir, runname)
-    # copy over
-    copy_files(src_clim, dst_clim)
+if singlerun_seasonality==True:
+    for runname in [runname_field,runname_lab]:
+        # set source and destination
+        src_clim = os.path.join(climatedir, climatefiles)
+        dst_clim = os.path.join(outdir, runname)
+        # copy over
+        copy_files(src_clim, dst_clim)
 
 exename = 'scepter'
 # exename_src = 'scepter_test'
@@ -138,13 +162,25 @@ data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homoge
 data[7] = 'true\trestart from a previous run\n'
 data[-3] = 'true\tenabling PSD tracking\n'
 data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
-data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
+if singlerun_seasonality==True:
+    data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
+else:
+    data[-1] = 'false\tenabling seasonality\n'
 with open(dst, 'w') as file:
     file.writelines(data)
 
 
+# --- TROUBLESHOOT ------------ # 
+print(src + "--------" + dst)
+print(data)
+time.sleep(5)
+
+
+
 if added_sp == 'gbas': dustsrc = os.path.join(modeldir, 'data', 'dust_gbasalt.in')
 if added_sp == 'cc': dustsrc = os.path.join(modeldir, 'data', 'dust_lime.in')
+if added_sp == 'cao': dustsrc = os.path.join(modeldir, 'data', 'dust_cao.in')
+if added_sp == 'dlm': dustsrc = os.path.join(modeldir, 'data', 'dust_dlm.in')
 dustdst = 'dust.in'
 
 os.system('cp ' + dustsrc + to + outdir + runname_field + where + dustdst) 
@@ -174,7 +210,9 @@ with open(src, 'r') as file:
 data.insert(1, added_sp+'\t\n')
 with open(dst, 'w') as file:
     file.writelines(data)
-    
+# remove duplicate minerals
+remove_duplicates(dst)
+
 # ============ adding Fe(II) as tracer and its oxidation =================
 # filename = '/solutes.in'
 # src = outdir + spinup + filename
@@ -217,7 +255,9 @@ with open(src, 'r') as file:
 data.insert(1, added_sp+'\t\n')
 with open(dst, 'w') as file:
     file.writelines(data)
-    
+# remove duplicate minerals
+remove_duplicates(dst)
+
 # filename = '/solutes.in'
 # src = outdir + spinup_lab + filename
 # dst = outdir + runname_lab  + filename
@@ -296,7 +336,8 @@ with open(dst, 'w') as file:
 ## --- run field run --- ##
 
 print(outdir+runname_field+'/scepter')
-os.system(outdir+runname_field+'/scepter')
+os.system("chmod +x " + os.path.join(outdir,runname_field,'scepter'))  # grant permissions
+os.system(os.path.join(outdir,runname_field,'scepter'))
 
 ## --- getting data from field run --- ##
 
@@ -408,7 +449,8 @@ make_inputs.get_input_tracer_bounds(
 ## --- run lab run --- ##
 
 print(outdir+runname_lab+'/scepter')
-os.system(outdir+runname_lab+'/scepter')
+os.system("chmod +x " + os.path.join(outdir,runname_lab,'scepter'))  # grant permissions
+os.system(os.path.join(outdir,runname_lab,'scepter'))
 
 ## --- getting data from lab run --- ##
 
