@@ -307,12 +307,17 @@ display='true'
 # report=1
 disp_lim='true'
 restart ='false'
-rough_field      ='true'
+if include_roughness_sa == True:
+    rough_field      ='true'
+else:
+    rough_field      ='false'
 act_ON ='false'
 if activity_on : act_ON ='true'
 dt_fix='false'
-cec_on='false'
-cec_on='true'
+if cec_adsorption_on == True:
+    cec_on="true"
+else:
+    cec_on="false"
 dz_fix='true'
 close_aq_field='false'
 poro_evol='true'
@@ -1191,9 +1196,9 @@ while (error > tol):
         
         
         # when log10 kh is below 1, calculation can become difficult
-        # if kh < 10**1:
-            # kh = 10**1
-            # error = 100
+        if kh < 10**1:
+            kh = 10**1
+            error = 100
         
         if omrain_field > 1e5 and tau_g2>1:
             omrain_field = omrain_field/10.

@@ -267,12 +267,17 @@ sldmin_lim ='true'
 display='true'
 disp_lim='true'
 restart ='false'
-rough_field      ='true'
+if include_roughness_sa == True:
+    rough_field      ='true'
+else:
+    rough_field      ='false'
 act_ON ='false'
 if activity_on : act_ON ='true'
 dt_fix='false'
-cec_on='false'
-cec_on='true'
+if cec_adsorption_on == True:
+    cec_on="true"
+else:
+    cec_on="false"
 dz_fix='true'
 close_aq_field='false'
 poro_evol='true'

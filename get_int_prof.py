@@ -52,6 +52,46 @@ def get_ph_int_site(outdir,runname,dep_sample):
     
     return phintval
 
+# --- added by Tyler to check whether pH is on the rise or fall
+def get_ph_int_site_trend(outdir,runname,dep_sample):
+    # ... initialize empty lists
+    pH_timestep = []  
+    timestep = []
+    # ... loop through each timestep
+    for i in range(20,0,-1):
+        infile  = outdir+runname+'/prof/prof_aq(tot)-{:03d}.txt'.format(i)
+        if not os.path.exists(infile): 
+            continue
+        else: 
+            # get depth integrated pH and time
+            data = np.loadtxt(infile,skiprows=1)
+            pH_dep = data[:,-2]
+            dep = data[:,0]
+            itime = data[0,-1]
+            this_ph = phint(dep,pH_dep, dep_sample)
+            pH_timestep.append(this_ph)
+            timestep.append(itime)
+    
+    # ... check if pH is increasing or decreasing 
+    midpoint = len(pH_timestep) // 2
+    start_ph = round(np.mean(pH_timestep[0:midpoint]), 2)
+    end_ph = round(np.mean(pH_timestep[midpoint:-1]), 2)
+    # assign pH trend
+    if start_ph > end_ph:
+        ph_trend = "decreasing"
+    elif start_ph < end_ph:
+        ph_trend = "increasing"
+    elif start_ph == end_ph:
+        ph_trend = "constant"
+
+    # ... get the most recent pH value
+    phintval = pH_timestep[-1]
+    print(phintval)
+    
+    return phintval, ph_trend
+
+
+
 def get_intph_int_site(outdir,runname,dep_sample):
 
     infile = outdir+runname+'/flx/int_ph.txt'

@@ -94,6 +94,8 @@ def remove_duplicates(input_file):
         # write unique mineral names
         for line in unique_lines:
             if line != last_entry:
+                if not line.endswith('\n'):  # if the last item got moved around, it won't have a newline indicator so we must add it..
+                    line += '\n'
                 f.write(line)
             else:
                 f.write(line.rstrip('\n'))  # don't add newline for the last entry
@@ -187,7 +189,19 @@ data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homoge
 data[7] = 'true\trestart from a previous run\n'
 data[-3] = 'true\tenabling PSD tracking\n'
 data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
-data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
+if include_roughness_sa == True:
+    data[8] = 'true\tinclude roughness in mineral surface area\n'
+else:
+    data[8] = 'false\tinclude roughness in mineral surface area\n'
+if singlerun_seasonality==True:
+    data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
+else:
+    data[-1] = 'false\tenabling seasonality\n'
+if cec_adsorption_on == True:
+    data[11] = "true\tenabling adsorption for cation exchange\n"
+else:
+    data[11] = "false\tenabling adsorption for cation exchange\n"
+
 with open(dst, 'w') as file:
     file.writelines(data)
 

@@ -95,6 +95,8 @@ def remove_duplicates(input_file):
         # write unique mineral names
         for line in unique_lines:
             if line != last_entry:
+                if not line.endswith('\n'):  # if the last item got moved around, it won't have a newline indicator so we must add it..
+                    line += '\n'
                 f.write(line)
             else:
                 f.write(line.rstrip('\n'))  # don't add newline for the last entry
@@ -111,6 +113,7 @@ combined_dict = set_vars(def_args, sys_args)  # default unless defined in sys_ar
 # rename vars
 tau = duration
 added_sp = dustsp
+added_sp2 = dustsp_2nd
 spinid = spinrun
 spinup_field = spinid+'_field'
 spinup_lab   = spinid+'_lab'
@@ -118,6 +121,7 @@ expid = newrun_id
 runname_field = expid+'_'+added_sp+'_field_tau'+str(tau).replace('.','p')
 runname_lab   = expid+'_'+added_sp+'_lab_tau'+str(tau).replace('.','p')
 fdust = dustrate
+fdust2 = dustrate_2nd
 dustrad = float(dustrad)/1e6  #  /1e6 converts micron to meters
 
 datadir = os.path.join(modeldir, 'data/')
@@ -158,14 +162,23 @@ src = outdir + spinup_field + filename
 dst = outdir + runname_field  + filename
 with open(src, 'r') as file:
     data = file.readlines()
-data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(imix)
+data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
 data[7] = 'true\trestart from a previous run\n'
 data[-3] = 'true\tenabling PSD tracking\n'
 data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
+if include_roughness_sa == True:
+    data[8] = 'true\tinclude roughness in mineral surface area\n'
+else:
+    data[8] = 'false\tinclude roughness in mineral surface area\n'
 if singlerun_seasonality==True:
     data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
 else:
     data[-1] = 'false\tenabling seasonality\n'
+if cec_adsorption_on == True:
+    data[11] = "true\tenabling adsorption for cation exchange\n"
+else:
+    data[11] = "false\tenabling adsorption for cation exchange\n"
+    
 with open(dst, 'w') as file:
     file.writelines(data)
 
@@ -176,7 +189,7 @@ print(data)
 time.sleep(5)
 
 
-
+# --- PRIMARY DUST FILE
 if added_sp == 'gbas': dustsrc = os.path.join(modeldir, 'data', 'dust_gbasalt.in')
 if added_sp == 'cc': dustsrc = os.path.join(modeldir, 'data', 'dust_lime.in')
 if added_sp == 'cao': dustsrc = os.path.join(modeldir, 'data', 'dust_cao.in')
@@ -184,6 +197,17 @@ if added_sp == 'dlm': dustsrc = os.path.join(modeldir, 'data', 'dust_dlm.in')
 dustdst = 'dust.in'
 
 os.system('cp ' + dustsrc + to + outdir + runname_field + where + dustdst) 
+
+
+# --- SECONDARY DUST FILE
+if added_sp2 == "amnt": dustsrc2 = os.path.join(modeldir, 'data', 'dust_fert.in')
+if added_sp2 == 'gbas': dustsrc2 = os.path.join(modeldir, 'data', 'dust_gbasalt.in')
+if added_sp2 == 'cc': dustsrc2 = os.path.join(modeldir, 'data', 'dust_lime.in')
+if added_sp2 == 'cao': dustsrc2 = os.path.join(modeldir, 'data', 'dust_cao.in')
+if added_sp2 == 'dlm': dustsrc2 = os.path.join(modeldir, 'data', 'dust_dlm.in')  
+dustdst2 = 'dust_2nd.in'
+
+os.system('cp ' + dustsrc2 + to + outdir + runname_field + where + dustdst2) 
 
 
 # ------------------------------------------------------------------------------ # 
@@ -208,21 +232,27 @@ with open(src, 'r') as file:
     data = file.readlines()
 
 data.insert(1, added_sp+'\t\n')
+if include_N:
+    data.append('amnt'+'\t\n')
+if include_Al: 
+    data.append(alphase+'\t\n')
 with open(dst, 'w') as file:
     file.writelines(data)
 # remove duplicate minerals
 remove_duplicates(dst)
 
 # ============ adding Fe(II) as tracer and its oxidation =================
-# filename = '/solutes.in'
-# src = outdir + spinup + filename
-# dst = outdir + runname  + filename
-# with open(src, 'r') as file:
-    # data = file.readlines()
+filename = '/solutes.in'
+src = outdir + spinup + filename
+dst = outdir + runname_field  + filename
+with open(src, 'r') as file:
+    data = file.readlines()
+if include_N:
+    data.append('no3'+'\t\n')
 
 # data.insert(1, 'fe2\t\n')
-# with open(dst, 'w') as file:
-    # file.writelines(data)
+with open(dst, 'w') as file:
+    file.writelines(data)
     
 # filename = '/gases.in'
 # src = outdir + spinup + filename
@@ -253,20 +283,25 @@ with open(src, 'r') as file:
     data = file.readlines()
 
 data.insert(1, added_sp+'\t\n')
+if include_N:
+    data.append('amnt'+'\t\n')
+if include_Al: 
+    data.append(alphase+'\t\n')
 with open(dst, 'w') as file:
     file.writelines(data)
 # remove duplicate minerals
 remove_duplicates(dst)
 
-# filename = '/solutes.in'
-# src = outdir + spinup_lab + filename
-# dst = outdir + runname_lab  + filename
-# with open(src, 'r') as file:
-    # data = file.readlines()
-
+filename = '/solutes.in'
+src = outdir + spinup_lab + filename
+dst = outdir + runname_lab  + filename
+with open(src, 'r') as file:
+    data = file.readlines()
+if include_N:
+    data.append('no3'+'\t\n')
 # data.insert(1, 'k\t\nna\t\nmg\t\n')
-# with open(dst, 'w') as file:
-    # file.writelines(data)
+with open(dst, 'w') as file:
+    file.writelines(data)
 
 filename = '/kinspc.in'
 src = outdir + spinup_lab + filename
@@ -325,6 +360,7 @@ with open(src, 'r') as file:
     data = file.readlines()
 data[3]     = '{:.8f}\ttotal duration of simulation [yr]\n'.format(tau)
 data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust) 
+data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(fdust2)
 data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(taudust)
 data[16]    = '{:.8f}\tradius of particles [m]\n'.format(dustrad)   # [tykukla added]
 data[18]    = '{}\n'.format(spinup_field)
@@ -343,7 +379,7 @@ os.system(os.path.join(outdir,runname_field,'scepter'))
 
 phint_field = get_int_prof.get_ph_int_site(outdir,runname_field,dep_sample)
 dense_lab = get_int_prof.get_rhobulk_int_site(outdir,runname_field,dep_sample)
-sps = ['g2','inrt',added_sp]
+sps = ['g2',added_sp] # ['g2','inrt',added_sp]    # TK -- come back to these so all solid species are considered? is it necessary?
 if include_Al:  sps.append( alphase )
 sldwt_list = []
 for sp in sps:
@@ -382,6 +418,8 @@ fdust_list = []
 fdust_nm_list = []
 
 for sp in aqsps:
+    if sp not in oxide_ctnm_list:
+            continue
     isp = aqsps.index(sp)
     iox = oxide_ctnm_list.index(sp)
     conc = btmconcs[isp]
@@ -510,12 +548,43 @@ for runname in [runname_field,runname_lab]:
             
     print(res_list)
 
+
 # ... [TK] add a run=completed file for easier programmatic querying
 for runname in [runname_field,runname_lab]:
     dst = outdir + runname + where + 'completed.res'
     # Open the file in write mode to create it
     with open(dst, 'w') as f:
         pass  # pass does nothing, creating an empty file
+
+
+# ... move directory to AWS
+if aws_save == "move":
+    for runname in [runname_field,runname_lab]:
+        src = os.path.join(outdir, runname)
+        dst_aws = os.path.join(aws_bucket)
+        # check if the destination directory exists and remove it if it does
+        # if os.path.exists(dst_aws):
+        #     shutil.rmtree(dst_aws)
+        # move the dir
+        # shutil.move(src, dst_aws)
+        cmd_activate = 'conda run -n cdr-scepter1p0_env'
+        cmd_run = 's5cmd mv ' + src + ' ' + dst_aws
+        result1 = subprocess.run(cmd_activate, shell=True, check=True)
+        result2 = subprocess.run(cmd_run, shell=True, check=True)
+
+elif aws_save == "copy":
+    for runname in [runname_field,runname_lab]:
+        src = os.path.join(outdir, runname)
+        dst_aws = os.path.join(aws_bucket)
+        # check if the destination directory exists and remove it if it does
+        # if os.path.exists(dst_aws):
+        #     shutil.rmtree(dst_aws)
+        # copy the dir
+        # shutil.copytree(src, dst_aws)
+        cmd_activate = 'conda run -n cdr-scepter1p0_env'
+        cmd_run = 's5cmd cp ' + src + ' ' + dst_aws
+        result1 = subprocess.run(cmd_activate, shell=True, check=True)
+        result2 = subprocess.run(cmd_run, shell=True, check=True)
 
 
     

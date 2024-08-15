@@ -2560,7 +2560,7 @@ if (do_psd) then
             enddo 
         
             if (.not.incld_rough) then 
-                rough_ps(isps,:) = rough_f( 'smooth', nps, 10d0**ps(:) )
+                rough_ps(isps,:) = rough_f( 'smooth    ', nps, 10d0**ps(:) )
             else 
                 rough_ps(isps,:) = rough_f( roughref(isps), nps, 10d0**ps(:) )
             endif 
@@ -20363,7 +20363,7 @@ enddo
 dVd = 0d0
 rough_tmp = 1d0
 if (.not.incld_rough) then 
-    rough_tmp(:) = rough_f( 'smooth', nps, (10d0**ps(:)) )
+    rough_tmp(:) = rough_f( 'smooth    ', nps, (10d0**ps(:)) )
 else
     rough_tmp(:) = rough_f( roughref, nps, (10d0**ps(:)) )
 endif 
@@ -22541,7 +22541,7 @@ kpsd = 0d0
 ! dV = 0d0
 do iz = 1, nz
     if (.not. incld_rough) then 
-        rough_tmp(:) = rough_f( 'smooth', nps, (10d0**ps(:)) )
+        rough_tmp(:) = rough_f( 'smooth    ', nps, (10d0**ps(:)) )
     else
         rough_tmp(:) = rough_f( roughref, nps, (10d0**ps(:)) )
     endif 
@@ -23834,7 +23834,7 @@ selectcase(trim(adjustl(ref_dummy)))
         ! rough_f = 10d0**(   113.41d0 * exp( 1.0219d0 * log10( r_dummy ) ) ) ! (assuming cube)
         ! rough_f = 10d0**(   max( 2.02d0*log10( r_dummy ) + 10.734d0, 1d0 ) )  ! (assuming sphere)
         rough_f = 10d0**(   max( 2.02d0*log10( r_dummy ) + 10.126d0, 1d0 ) )  ! (assuming cube)
-    case('smooth')
+    case('smooth    ')
         rough_f = 1d0
     case default 
         print*, '*** error in rough_f --> stop'
