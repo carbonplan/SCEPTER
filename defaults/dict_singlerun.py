@@ -32,6 +32,8 @@ default_dictionary = {
                   "gb", "ct", "cabd", "ill", "gps", "mgbd"],
     'singlerun_seasonality': True, # [True, False] whether to impose seasonality in the singlerun script
     'include_roughness_sa': True,  # [True, False] whether to include roughness in the mineral surface area calculation (for switches.in)
+    'include_psd_bulk': True,      # [True, False] whether to compute bulk particle size diameters (for switches.in)
+    'include_psd_full': True,      # [True, False] whether to compute full particle size diameters (for switches.in)
     
     # --- tunespin specific
     'activity_on': False,          # [True, False] whether to turn on thermodynamic activity coefficients (in switches.in file) 

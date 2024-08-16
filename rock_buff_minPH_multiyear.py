@@ -39,9 +39,17 @@ def set_vars(default_args, system_args):
         if key in system_args:
             float_test1 = re.match(float_pattern, system_args[key]) is not None # (captures all cases but "2.")
             float_test2 =  system_args[key].replace('.', '', 1).isdigit()  # (misses negatives but gets others including "2.")
+            bool_test_true = system_args[key] == "True"     # check if we should turn string True into boolean
+            bool_test_false = system_args[key] == "False"   # check if we should turn string False into boolean
             if float_test1 or float_test2:  # check is sys arg is a float
                 save_vars[key] = float(system_args[key])
                 globals()[key] = float(system_args[key])
+            if bool_test_true:
+                save_vars[key] = True
+                globals()[key] = True
+            if bool_test_false:
+                save_vars[key] = False
+                globals()[key] = False
             else:
                 save_vars[key] = system_args[key]
                 globals()[key] = system_args[key]
@@ -49,6 +57,7 @@ def set_vars(default_args, system_args):
             save_vars[key] = value
             globals()[key] = value
     return save_vars
+    
 # Function to save the combined dictionary to the run dir
 def save_dict_to_text_file(dictionary, filename, delimiter='\t'):
     with open(filename, 'w') as file:
@@ -248,8 +257,14 @@ for tstep in mytsteps:
         data = file.readlines()
     data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(imix)
     data[7] = 'true\trestart from a previous run\n'
-    data[-3] = 'true\tenabling PSD tracking\n'
-    data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
+    if include_psd_bulk:
+        data[-3] = 'true\tenabling PSD tracking\n'
+    else:
+        data[-3] = 'false\tenabling PSD tracking\n'
+    if include_psd_full:
+        data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
+    else:
+        data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
     if include_roughness_sa == True:
         data[8] = 'true\tinclude roughness in mineral surface area\n'
     else:

@@ -32,15 +32,23 @@ def parse_arguments(args):
 def set_vars(default_args, system_args):
     # define pattern for identifying floats in sys.args
     float_pattern = r'^[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?$'
-    # save dict
+    # dict to save
     save_vars = {}
     for key, value in default_args.items():
         if key in system_args:
             float_test1 = re.match(float_pattern, system_args[key]) is not None # (captures all cases but "2.")
             float_test2 =  system_args[key].replace('.', '', 1).isdigit()  # (misses negatives but gets others including "2.")
+            bool_test_true = system_args[key] == "True"     # check if we should turn string True into boolean
+            bool_test_false = system_args[key] == "False"   # check if we should turn string False into boolean
             if float_test1 or float_test2:  # check is sys arg is a float
                 save_vars[key] = float(system_args[key])
                 globals()[key] = float(system_args[key])
+            if bool_test_true:
+                save_vars[key] = True
+                globals()[key] = True
+            if bool_test_false:
+                save_vars[key] = False
+                globals()[key] = False
             else:
                 save_vars[key] = system_args[key]
                 globals()[key] = system_args[key]
@@ -48,6 +56,7 @@ def set_vars(default_args, system_args):
             save_vars[key] = value
             globals()[key] = value
     return save_vars
+    
 # Function to save the combined dictionary to the run dir
 def save_dict_to_text_file(dictionary, filename, delimiter='\t'):
     with open(filename, 'w') as file:
