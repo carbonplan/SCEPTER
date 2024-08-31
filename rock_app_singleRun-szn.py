@@ -8,116 +8,28 @@ import get_int_prof
 import make_inputs
 import random
 import defaults.dict_singlerun
+import subprocess
+
+# --- read in helper functions from aglime-swap-cdr
+# add aglime-swap-cdr dir to path # [UPDATE FOR YOUR MACHINE]
+sys.path.append(os.path.abspath('/home/tykukla/aglime-swap-cdr/scepter/setup'))
+# import module
+import scepter_helperFxns as shf
+# ---
 
 
-# -------------------------------------------------------------
-# Function to parse arguments
-def parse_arguments(args):
-    parsed_args = {}
-    i = 1  # Start from index 1 to skip the script name (sys.argv[0])
-    while i < len(args):
-        if args[i].startswith('--'):
-            key = args[i][2:]  # Remove '--' prefix
-            if i + 1 < len(args) and not args[i + 1].startswith('--'):
-                value = args[i + 1]
-                parsed_args[key] = value
-                i += 1  # Skip the next item as it's the value for the current key
-            else:
-                parsed_args[key] = None  # If no value provided, set to None
-        i += 1
-    return parsed_args
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Function to set global variables from defaults / system args
-def set_vars(default_args, system_args):
-    # define pattern for identifying floats in sys.args
-    float_pattern = r'^[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?$'
-    # dict to save
-    save_vars = {}
-    for key, value in default_args.items():
-        if key in system_args:
-            float_test1 = re.match(float_pattern, system_args[key]) is not None # (captures all cases but "2.")
-            float_test2 =  system_args[key].replace('.', '', 1).isdigit()  # (misses negatives but gets others including "2.")
-            bool_test_true = system_args[key] == "True"     # check if we should turn string True into boolean
-            bool_test_false = system_args[key] == "False"   # check if we should turn string False into boolean
-            if float_test1 or float_test2:  # check is sys arg is a float
-                save_vars[key] = float(system_args[key])
-                globals()[key] = float(system_args[key])
-            if bool_test_true:
-                save_vars[key] = True
-                globals()[key] = True
-            if bool_test_false:
-                save_vars[key] = False
-                globals()[key] = False
-            else:
-                save_vars[key] = system_args[key]
-                globals()[key] = system_args[key]
-        else:
-            save_vars[key] = value
-            globals()[key] = value
-    return save_vars
-    
-# Function to save the combined dictionary to the run dir
-def save_dict_to_text_file(dictionary, filename, delimiter='\t'):
-    with open(filename, 'w') as file:
-        file.write(f"*** variables set by dictionary and system args\n")
-        file.write(f"    (note not all vars are used!!)\n")
-        for key, value in dictionary.items():
-            file.write(f"{key}{delimiter}{value}\n")
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Function to copy climate variables
-def copy_files(src_dir, dst_dir):
-    # directory must exist
-    if not os.path.exists(dst_dir):
-        print("Cannot find " + dst_dir)
-    
-    # iterate over source files
-    for filename in os.listdir(src_dir):
-        src_file = os.path.join(src_dir, filename)
-        dst_file = os.path.join(dst_dir, filename)
-        
-        # copy them over (skipping any directories)
-        if os.path.isfile(src_file):
-            shutil.copy2(src_file, dst_file)
-            # print(f"Copied {src_file} to {dst_file}")
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# function to remove duplicate mineral names in the solid list
-# (assumes output file is the same as the input file)
-def remove_duplicates(input_file):
-    with open(input_file, 'r') as f:
-        lines = f.readlines()
-        header = lines[0]  # Save the header
-        lines_without_tabs = [line.replace('\t', '') for line in lines]  # remove tabs before comparing
-        unique_lines = set(lines_without_tabs[1:])  # remove duplicates from mineral names
-
-    # check if the last entry ends with "\n" and remove it if needed
-    last_entry = list(unique_lines)[-1]
-
-    # write lines to output file, keeping the header at the top
-    with open(input_file, 'w') as f:
-        f.write(header)  # write the header first
-        # write unique mineral names
-        for line in unique_lines:
-            if line != last_entry:
-                if not line.endswith('\n'):  # if the last item got moved around, it won't have a newline indicator so we must add it..
-                    line += '\n'
-                f.write(line)
-            else:
-                f.write(line.rstrip('\n'))  # don't add newline for the last entry
 # -------------------------------------------------------------
 # -------------------------------------------------------------
 # --- set default and system args
-sys_args = parse_arguments(sys.argv)   # parse system args
+sys_args = shf.parse_arguments(sys.argv)   # parse system args
 import_dict = sys_args['default_dict'] # set the dictionary to use from system args
 def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
 
 # set global variables
-combined_dict = set_vars(def_args, sys_args)  # default unless defined in sys_args
+combined_dict = shf.set_vars(def_args, sys_args)  # default unless defined in sys_args
+for key, value in combined_dict.items():
+    globals()[key] = value
+
 
 # rename vars
 tau = duration
@@ -148,7 +60,7 @@ for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
         shutil.copytree(src, dst)
     # save file denoting the variables used
     fn_dict_save = os.path.join(dst, "vars.res")
-    save_dict_to_text_file(combined_dict, fn_dict_save, delimiter='\t')
+    shf.save_dict_to_text_file(combined_dict, fn_dict_save, delimiter='\t')
 
 # duplicate the climate files
 if singlerun_seasonality==True:
@@ -157,7 +69,7 @@ if singlerun_seasonality==True:
         src_clim = os.path.join(climatedir, climatefiles)
         dst_clim = os.path.join(outdir, runname)
         # copy over
-        copy_files(src_clim, dst_clim)
+        shf.copy_files(src_clim, dst_clim)
 
 exename = 'scepter'
 # exename_src = 'scepter_test'
@@ -255,7 +167,7 @@ if include_Al:
 with open(dst, 'w') as file:
     file.writelines(data)
 # remove duplicate minerals
-remove_duplicates(dst)
+shf.remove_duplicates(dst)
 
 # ============ adding Fe(II) as tracer and its oxidation =================
 filename = '/solutes.in'
@@ -306,7 +218,7 @@ if include_Al:
 with open(dst, 'w') as file:
     file.writelines(data)
 # remove duplicate minerals
-remove_duplicates(dst)
+shf.remove_duplicates(dst)
 
 filename = '/solutes.in'
 src = outdir + spinup_lab + filename
@@ -565,42 +477,23 @@ for runname in [runname_field,runname_lab]:
     print(res_list)
 
 
-# ... [TK] add a run=completed file for easier programmatic querying
-for runname in [runname_field,runname_lab]:
-    dst = outdir + runname + where + 'completed.res'
-    # Open the file in write mode to create it
-    with open(dst, 'w') as f:
-        pass  # pass does nothing, creating an empty file
+# ... run postprocessing checks
+shf.run_complete_check(runname_field, 
+                      runname_lab, 
+                      outdir, 
+                      target_duration=tau, 
+                      include_duration_check=True, 
+                      omit_saveSuff=True, 
+                      omit_ipynb=True,
+                     )
 
 
-# ... move directory to AWS
-if aws_save == "move":
-    for runname in [runname_field,runname_lab]:
-        src = os.path.join(outdir, runname)
-        dst_aws = os.path.join(aws_bucket)
-        # check if the destination directory exists and remove it if it does
-        # if os.path.exists(dst_aws):
-        #     shutil.rmtree(dst_aws)
-        # move the dir
-        # shutil.move(src, dst_aws)
-        cmd_activate = 'conda run -n cdr-scepter1p0_env'
-        cmd_run = 's5cmd mv ' + src + ' ' + dst_aws
-        result1 = subprocess.run(cmd_activate, shell=True, check=True)
-        result2 = subprocess.run(cmd_run, shell=True, check=True)
-
-elif aws_save == "copy":
-    for runname in [runname_field,runname_lab]:
-        src = os.path.join(outdir, runname)
-        dst_aws = os.path.join(aws_bucket)
-        # check if the destination directory exists and remove it if it does
-        # if os.path.exists(dst_aws):
-        #     shutil.rmtree(dst_aws)
-        # copy the dir
-        # shutil.copytree(src, dst_aws)
-        cmd_activate = 'conda run -n cdr-scepter1p0_env'
-        cmd_run = 's5cmd cp ' + src + ' ' + dst_aws
-        result1 = subprocess.run(cmd_activate, shell=True, check=True)
-        result2 = subprocess.run(cmd_run, shell=True, check=True)
+# ... move to aws if this option is turned on
+# [nothing happens if aws_save != 'move' or 'copy']
+shf.to_aws(aws_save, 
+           aws_bucket, 
+           outdir, 
+           runname_lab, 
+           runname_field)
 
 
-    
