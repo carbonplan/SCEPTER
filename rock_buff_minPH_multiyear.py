@@ -7,168 +7,34 @@ import shutil
 import get_int_prof
 import make_inputs
 import random
+import subprocess
 import defaults.dict_singlerun
+# import build_composite_multiyear as cfxns
+
+
+# --- read in helper functions from aglime-swap-cdr
+# add aglime-swap-cdr dir to path # [UPDATE FOR YOUR MACHINE]
+sys.path.append(os.path.abspath('/home/tykukla/aglime-swap-cdr/scepter/setup'))
+# import module
+import scepter_helperFxns as shf
 import build_composite_multiyear as cfxns
+# ---
 
-# -------------------------------------------------------------
-# Function to parse arguments
-def parse_arguments(args):
-    parsed_args = {}
-    i = 1  # Start from index 1 to skip the script name (sys.argv[0])
-    while i < len(args):
-        if args[i].startswith('--'):
-            key = args[i][2:]  # Remove '--' prefix
-            if i + 1 < len(args) and not args[i + 1].startswith('--'):
-                value = args[i + 1]
-                parsed_args[key] = value
-                i += 1  # Skip the next item as it's the value for the current key
-            else:
-                parsed_args[key] = None  # If no value provided, set to None
-        i += 1
-    return parsed_args
 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Function to set global variables from defaults / system args
-def set_vars(default_args, system_args):
-    # define pattern for identifying floats in sys.args
-    float_pattern = r'^[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?$'
-    # dict to save
-    save_vars = {}
-    for key, value in default_args.items():
-        if key in system_args:
-            float_test1 = re.match(float_pattern, system_args[key]) is not None # (captures all cases but "2.")
-            float_test2 =  system_args[key].replace('.', '', 1).isdigit()  # (misses negatives but gets others including "2.")
-            bool_test_true = system_args[key] == "True"     # check if we should turn string True into boolean
-            bool_test_false = system_args[key] == "False"   # check if we should turn string False into boolean
-            if float_test1 or float_test2:  # check is sys arg is a float
-                save_vars[key] = float(system_args[key])
-                globals()[key] = float(system_args[key])
-            if bool_test_true:
-                save_vars[key] = True
-                globals()[key] = True
-            if bool_test_false:
-                save_vars[key] = False
-                globals()[key] = False
-            else:
-                save_vars[key] = system_args[key]
-                globals()[key] = system_args[key]
-        else:
-            save_vars[key] = value
-            globals()[key] = value
-    return save_vars
-    
-# Function to save the combined dictionary to the run dir
-def save_dict_to_text_file(dictionary, filename, delimiter='\t'):
-    with open(filename, 'w') as file:
-        file.write(f"*** variables set by dictionary and system args\n")
-        file.write(f"    (note not all vars are used!!)\n")
-        for key, value in dictionary.items():
-            file.write(f"{key}{delimiter}{value}\n")
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Function to copy climate variables
-def copy_files(src_dir, dst_dir):
-    # directory must exist
-    if not os.path.exists(dst_dir):
-        print("Cannot find " + dst_dir)
-    
-    # iterate over source files
-    for filename in os.listdir(src_dir):
-        src_file = os.path.join(src_dir, filename)
-        dst_file = os.path.join(dst_dir, filename)
-        
-        # copy them over (skipping any directories)
-        if os.path.isfile(src_file):
-            shutil.copy2(src_file, dst_file)
-            # print(f"Copied {src_file} to {dst_file}")
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Function to generate timesteps for multi-year
-def generate_timesteps(total_duration, timestep):
-    timesteparr = []
-    current_time = 0
-    while current_time <= (total_duration - timestep):
-        timesteparr.append(current_time)
-        current_time += timestep
-    return timesteparr
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Function to write file marking the current iteration
-def write_iter_file_with_marker(values, current_index, filename):
-    with open(filename, 'w') as file:
-        file.write(f"year \n")
-        for i, value in enumerate(values):
-            if i == current_index:
-                file.write(f"{value} <--- \n")
-            else:
-                file.write(f"{value}\n")
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# function to update climate vars to current iteration
-def update_clim(inputfile, outputfile, timezero):
-    # open the input and output files
-    with open(inputfile, 'r') as f_in, open(outputfile, 'w') as f_out:
-        # skip the header line and copy it to new file
-        header = next(f_in)
-        f_out.write(header)  # write to output
-        # read the file line by line
-        for line in f_in:
-            # split each line into year and climate value
-            year, clim = line.strip().split('\t')  # Adjust the delimiter as needed
-    
-            # convert year to an integer and subtract 5
-            year = float(year) - timezero
-            
-            # check if the adjusted year is greater than or equal to tstep
-            if year >= 0:
-                formatted_yr = "{:.7f}".format(float(year))
-                formatted_clim = "{:.7f}".format(float(clim))
-                # write the adjusted year and temperature to the output file
-                # print(f"{formatted_yr}\t{formatted_clim}\n")
-                f_out.write(f"{formatted_yr}\t{formatted_clim}\n")  # Adjust the delimiter as needed
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# function to remove duplicate mineral names in the solid list
-# (assumes output file is the same as the input file)
-def remove_duplicates(input_file):
-    with open(input_file, 'r') as f:
-        lines = f.readlines()
-        header = lines[0]  # Save the header
-        lines_without_tabs = [line.replace('\t', '') for line in lines]  # remove tabs before comparing
-        unique_lines = set(lines_without_tabs[1:])  # remove duplicates from mineral names
-
-    # check if the last entry ends with "\n" and remove it if needed
-    last_entry = list(unique_lines)[-1]
-
-    # write lines to output file, keeping the header at the top
-    with open(input_file, 'w') as f:
-        f.write(header)  # write the header first
-        # write unique mineral names
-        for line in unique_lines:
-            if line != last_entry:
-                if not line.endswith('\n'):  # if the last item got moved around, it won't have a newline indicator so we must add it..
-                    line += '\n'
-                f.write(line)
-            else:
-                f.write(line.rstrip('\n'))  # don't add newline for the last entry
-# -------------------------------------------------------------
 # -------------------------------------------------------------
 # --- set default and system args
-sys_args = parse_arguments(sys.argv)   # parse system args
+sys_args = shf.parse_arguments(sys.argv)   # parse system args
 import_dict = "reApp_dictionary" # set the dictionary to use from system args
 # import_dict = "default_dictionary" # set the dictionary to use from system args
 # import_dict = sys_args['default_dict'] # set the dictionary to use from system args
 def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
 
 # set global variables
-combined_dict = set_vars(def_args, sys_args)  # default unless defined in sys_args
-
+combined_dict = shf.set_vars(def_args, sys_args)  # default unless defined in sys_args
+for key, value in combined_dict.items():
+    globals()[key] = value
+    
 # rename vars
 targetpH = tph
 tau = duration
@@ -191,7 +57,7 @@ datadir = os.path.join(modeldir, 'data/')
 
 # ... get time step array
 timestep_dur = duration  # just for clarity... duration is a timestep here
-mytsteps = generate_timesteps(max_time, timestep_dur)
+mytsteps = shf.generate_timesteps(max_time, timestep_dur)
 counter = 0  # for tracking and file naming (MUST START AT ZERO)
 runname_field_old, runname_lab_old = "placeholder1", "placeholder2"   # placeholders for update later
 
@@ -224,20 +90,20 @@ for tstep in mytsteps:
 
         # save file denoting the iteration
         fn_itermarker = os.path.join(dst, "multiyear-iter.res")
-        write_iter_file_with_marker(mytsteps, counter, fn_itermarker)
+        shf.write_iter_file_with_marker(mytsteps, counter, fn_itermarker)
         # save file denoting the variables used
         combined_dict['dustrate'] = fdust # update dust rate
         fn_dict_save = os.path.join(dst, "vars.res")
-        save_dict_to_text_file(combined_dict, fn_dict_save, delimiter='\t')
+        shf.save_dict_to_text_file(combined_dict, fn_dict_save, delimiter='\t')
 
     
-    # duplicate the climate files
-    for runname in [runname_field,runname_lab]:
-        for thisfile in clim_files:  # loop through all three climate inputs
-            src_clim = os.path.join(climatedir, climatefiles, thisfile)
-            dst_clim = os.path.join(outdir, runname, thisfile)
-            # read from source, update, save to dst
-            update_clim(src_clim, dst_clim, tstep)
+    if singlerun_seasonality:   # duplicate the climate files
+        for runname in [runname_field,runname_lab]:
+            for thisfile in clim_files:  # loop through all three climate inputs
+                src_clim = os.path.join(climatedir, climatefiles, thisfile)
+                dst_clim = os.path.join(outdir, runname, thisfile)
+                # read from source, update, save to dst
+                shf.update_clim(src_clim, dst_clim, tstep)
 
 
     
@@ -283,6 +149,7 @@ for tstep in mytsteps:
     
 
     # --- PRIMARY DUST FILE
+    if added_sp == "amnt": dustsrc = os.path.join(modeldir, 'data', 'dust_fert.in')
     if added_sp == 'gbas': dustsrc = os.path.join(modeldir, 'data', 'dust_gbasalt.in')
     if added_sp == 'cc': dustsrc = os.path.join(modeldir, 'data', 'dust_lime.in')
     if added_sp == 'cao': dustsrc = os.path.join(modeldir, 'data', 'dust_cao.in')
@@ -317,7 +184,7 @@ for tstep in mytsteps:
     with open(dst, 'w') as file:
         file.writelines(data)
     # remove duplicate minerals
-    remove_duplicates(dst)
+    shf.remove_duplicates(dst)
 
         
     # ============ adding Fe(II) as tracer and its oxidation =================
@@ -370,7 +237,7 @@ for tstep in mytsteps:
     with open(dst, 'w') as file:
         file.writelines(data)
     # remove duplicate minerals
-    remove_duplicates(dst)
+    shf.remove_duplicates(dst)
 
         
     filename = '/solutes.in'
@@ -696,12 +563,34 @@ for tstep in mytsteps:
             result1 = subprocess.run(cmd_activate, shell=True, check=True)
             result2 = subprocess.run(cmd_run, shell=True, check=True)
         
+    
+    # ... run postprocessing checks
+    shf.run_complete_check(runname_field, 
+                          runname_lab, 
+                          outdir, 
+                          target_duration=tau, 
+                          include_duration_check=True, 
+                          omit_saveSuff=True, 
+                          omit_ipynb=True,
+                         )
+    
+    
+    # ... move to aws if this option is turned on
+    # [nothing happens if aws_save != 'move' or 'copy']
+    shf.to_aws(aws_save, 
+               aws_bucket, 
+               outdir, 
+               runname_lab, 
+               runname_field)
 
+    
+    
     # UPDATE THE RUNNAME FOR NEXT ITERATION
     counter += 1
     runname_field_old = runname_field
     runname_lab_old = runname_lab
 
+    
 
 # ---------------------------------------
 # --- BUILD THE COMPOSITE DIRECTORY

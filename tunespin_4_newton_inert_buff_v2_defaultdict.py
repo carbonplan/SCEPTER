@@ -14,63 +14,27 @@ import defaults.dict_singlerun
 
 datestr = datetime.today().strftime('%Y-%m-%d')
 
-# -------------------------------------------------------------
-# Function to parse arguments
-def parse_arguments(args):
-    parsed_args = {}
-    i = 1  # Start from index 1 to skip the script name (sys.argv[0])
-    while i < len(args):
-        if args[i].startswith('--'):
-            key = args[i][2:]  # Remove '--' prefix
-            if i + 1 < len(args) and not args[i + 1].startswith('--'):
-                value = args[i + 1]
-                parsed_args[key] = value
-                i += 1  # Skip the next item as it's the value for the current key
-            else:
-                parsed_args[key] = None  # If no value provided, set to None
-        i += 1
-    return parsed_args
+# --- read in helper functions from aglime-swap-cdr
+# add aglime-swap-cdr dir to path # [UPDATE FOR YOUR MACHINE]
+sys.path.append(os.path.abspath('/home/tykukla/aglime-swap-cdr/scepter/setup'))
+# import module
+import scepter_helperFxns as shf
+# ---
 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# Function to set global variables from defaults / system args
-def set_vars(default_args, system_args):
-    # define pattern for identifying floats in sys.args
-    float_pattern = r'^[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?$'
-    # save dict
-    save_vars = {}
-    for key, value in default_args.items():
-        if key in system_args:
-            float_test1 = re.match(float_pattern, system_args[key]) is not None # (captures all cases but "2.")
-            float_test2 =  system_args[key].replace('.', '', 1).isdigit()  # (misses negatives but gets others including "2.")
-            if float_test1 or float_test2:  # check is sys arg is a float
-                save_vars[key] = float(system_args[key])
-                globals()[key] = float(system_args[key])
-            else:
-                save_vars[key] = system_args[key]
-                globals()[key] = system_args[key]
-        else:
-            save_vars[key] = value
-            globals()[key] = value
-    return save_vars
-# Function to save the combined dictionary to the run dir
-def save_dict_to_text_file(dictionary, filename, delimiter='\t'):
-    with open(filename, 'w') as file:
-        file.write(f"*** variables set by dictionary and system args\n")
-        file.write(f"    (note not all vars are used!!)\n")
-        for key, value in dictionary.items():
-            file.write(f"{key}{delimiter}{value}\n")
 # -------------------------------------------------------------
 # -------------------------------------------------------------
 # --- set default and system args
-sys_args = parse_arguments(sys.argv)   # parse system args
+sys_args = shf.parse_arguments(sys.argv)   # parse system args
 import_dict = sys_args['default_dict'] # set the dictionary to use from system args
 def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
 
 # set global variables
 # (TK: currently, combined_dict doesn't get saved in this version)
-combined_dict = set_vars(def_args, sys_args)  # default unless defined in sys_args
-
+combined_dict = shf.set_vars(def_args, sys_args)  # default unless defined in sys_args
+for key, value in combined_dict.items():
+    globals()[key] = value
+    
 water_frac = water_frac_tunespin
 
 targetpH = tph
@@ -110,7 +74,7 @@ if make_initial_geuss:
                 xfile = tar_tmp.extractfile('./'+runname_guess + filename,skiprows=1)
                 data_tmp = np.loadtxt(xfile)
         except:
-            filename = 'DA_iteration_tmp.res'
+            filename = 'iteration_tmp.res' # 'DA_iteration_tmp.res'
             if 'output' in outdir_guess:
                 data_tmp = np.loadtxt(os.path.join(outdir_guess, runname_guess, filename),skiprows=1)
             if 'archive' in outdir_guess:
@@ -298,11 +262,6 @@ make_inputs.get_input_frame(
     ,runid=runname_field
     )
 
-w_scheme_field=1
-mix_scheme_field=1 # Fickian
-mix_scheme_field=2 # homogeneous 
-poro_iter_field='false' 
-sldmin_lim ='true'
 display='true'
 # report=1
 disp_lim='true'
@@ -320,11 +279,9 @@ else:
     cec_on="false"
 dz_fix='true'
 close_aq_field='false'
-poro_evol='true'
+poro_evol=poro_iter_field
 sa_evol_1 ='true'
 sa_evol_2='false'
-psd_bulk_field='true'
-psd_full_field='true'
 season='false'
 
 w_scheme_lab=0
@@ -1324,14 +1281,34 @@ for runname in [runname_field,runname_lab]:
     print(res_list)
     
 
-if use_local_storage:
-    for runname in [runname_field,runname_lab]:
-        src = outdir + runname 
-        dst = '/storage/coda1/p-creinhard3/0/ykanzaki3/scepter_output/' + runname 
+# if use_local_storage:
+#     for runname in [runname_field,runname_lab]:
+#         src = outdir + runname 
+#         dst = '/storage/coda1/p-creinhard3/0/ykanzaki3/scepter_output/' + runname 
         
-        if not os.path.exists(dst): 
-            shutil.copytree(src, dst)
-        else:
-            shutil.rmtree(dst)
-            shutil.copytree(src, dst)
+#         if not os.path.exists(dst): 
+#             shutil.copytree(src, dst)
+#         else:
+#             shutil.rmtree(dst)
+#             shutil.copytree(src, dst)
+
+
+# ... run postprocessing checks
+shf.run_complete_check(runname_field, 
+                      runname_lab, 
+                      outdir, 
+                      target_duration=ttot_field, 
+                      include_duration_check=True, 
+                      omit_saveSuff=True, 
+                      omit_ipynb=True,
+                     )
+
+
+# ... move to aws if this option is turned on
+# [nothing happens if aws_save != 'move' or 'copy']
+shf.to_aws(aws_save, 
+           aws_bucket, 
+           outdir, 
+           runname_lab, 
+           runname_field)
             
