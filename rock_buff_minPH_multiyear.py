@@ -1,4 +1,5 @@
-import os
+# %%
+# import os
 import re
 import sys
 import time
@@ -21,7 +22,7 @@ import build_composite_multiyear as cfxns
 # ---
 
 
-
+# %%
 # -------------------------------------------------------------
 # --- set default and system args
 sys_args = shf.parse_arguments(sys.argv)   # parse system args
@@ -51,7 +52,7 @@ expid = newrun_id
 outdir = outdir
 datadir = os.path.join(modeldir, 'data/')
 
-
+# %%
 # -------------------------------------------------------------------------------
 # LOOP THROUGH TIME STEPS 
 
@@ -61,6 +62,7 @@ mytsteps = shf.generate_timesteps(max_time, timestep_dur)
 counter = 0  # for tracking and file naming (MUST START AT ZERO)
 runname_field_old, runname_lab_old = "placeholder1", "placeholder2"   # placeholders for update later
 
+# %% 
 for tstep in mytsteps:
     
     # set the spinup 
@@ -534,35 +536,6 @@ for tstep in mytsteps:
                 shutil.rmtree(dst)
                 shutil.copytree(src, dst)
 
-    # ... move directory to AWS
-    if aws_save == "move":
-        for runname in [runname_field,runname_lab]:
-            src = os.path.join(outdir, runname)
-            dst_aws = os.path.join(aws_bucket)
-            # check if the destination directory exists and remove it if it does
-            # if os.path.exists(dst_aws):
-            #     shutil.rmtree(dst_aws)
-            # move the dir
-            # shutil.move(src, dst_aws)
-            cmd_activate = 'conda run -n cdr-scepter1p0_env'
-            cmd_run = 's5cmd mv ' + src + ' ' + dst_aws
-            result1 = subprocess.run(cmd_activate, shell=True, check=True)
-            result2 = subprocess.run(cmd_run, shell=True, check=True)
-    
-    elif aws_save == "copy":
-        for runname in [runname_field,runname_lab]:
-            src = os.path.join(outdir, runname)
-            dst_aws = os.path.join(aws_bucket)
-            # check if the destination directory exists and remove it if it does
-            # if os.path.exists(dst_aws):
-            #     shutil.rmtree(dst_aws)
-            # copy the dir
-            # shutil.copytree(src, dst_aws)
-            cmd_activate = 'conda run -n cdr-scepter1p0_env'
-            cmd_run = 's5cmd cp ' + src + ' ' + dst_aws
-            result1 = subprocess.run(cmd_activate, shell=True, check=True)
-            result2 = subprocess.run(cmd_run, shell=True, check=True)
-        
     
     # ... run postprocessing checks
     shf.run_complete_check(runname_field, 
@@ -592,6 +565,7 @@ for tstep in mytsteps:
 
     
 
+# %%
 # ---------------------------------------
 # --- BUILD THE COMPOSITE DIRECTORY
 cfxns.build_composite(expid, outdir)

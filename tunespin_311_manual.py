@@ -48,15 +48,15 @@ def set_vars(default_args, system_args):
             float_test2 =  system_args[key].replace('.', '', 1).isdigit()  # (misses negatives but gets others including "2.")
             bool_test_true = system_args[key] == "True"     # check if we should turn string True into boolean
             bool_test_false = system_args[key] == "False"   # check if we should turn string False into boolean
-            if float_test1 or float_test2:  # check is sys arg is a float
-                save_vars[key] = float(system_args[key])
-                globals()[key] = float(system_args[key])
             if bool_test_true:
                 save_vars[key] = True
                 globals()[key] = True
-            if bool_test_false:
+            elif bool_test_false:
                 save_vars[key] = False
                 globals()[key] = False
+            elif float_test1 or float_test2:  # check is sys arg is a float
+                save_vars[key] = float(system_args[key])
+                globals()[key] = float(system_args[key])
             else:
                 save_vars[key] = system_args[key]
                 globals()[key] = system_args[key]
