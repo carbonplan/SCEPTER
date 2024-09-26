@@ -118,6 +118,7 @@ time.sleep(5)
 
 
 # --- PRIMARY DUST FILE
+if added_sp == "amnt": dustsrc = os.path.join(modeldir, 'data', 'dust_fert.in')
 if added_sp == 'gbas': dustsrc = os.path.join(modeldir, 'data', 'dust_gbasalt.in')
 if added_sp == 'cc': dustsrc = os.path.join(modeldir, 'data', 'dust_lime.in')
 if added_sp == 'cao': dustsrc = os.path.join(modeldir, 'data', 'dust_cao.in')
@@ -159,11 +160,15 @@ dst = outdir + runname_field  + filename
 with open(src, 'r') as file:
     data = file.readlines()
 
-data.insert(1, added_sp+'\t\n')
-if include_N:
-    data.append('amnt'+'\t\n')
+# add dust species
+data.insert(1, added_sp+'\n')
+if added_sp2 in ['gbas','cc','cao','dlm','amnt']: # then add this as well
+        data.insert(1, added_sp2+'\n')
+if include_N and added_sp2 != "amnt":
+    data.append('amnt'+'\n')
 if include_Al: 
-    data.append(alphase+'\t\n')
+    data.append(alphase+'\n')
+
 with open(dst, 'w') as file:
     file.writelines(data)
 # remove duplicate minerals
@@ -175,12 +180,14 @@ src = outdir + spinup + filename
 dst = outdir + runname_field  + filename
 with open(src, 'r') as file:
     data = file.readlines()
-if include_N:
+if include_N or added_sp2 == "amnt":
     data.append('no3'+'\t\n')
 
 # data.insert(1, 'fe2\t\n')
 with open(dst, 'w') as file:
     file.writelines(data)
+# remove duplicate minerals
+shf.remove_duplicates(dst)
     
 # filename = '/gases.in'
 # src = outdir + spinup + filename
@@ -210,11 +217,15 @@ dst = outdir + runname_lab  + filename
 with open(src, 'r') as file:
     data = file.readlines()
 
-data.insert(1, added_sp+'\t\n')
-if include_N:
-    data.append('amnt'+'\t\n')
+# add dust species
+data.insert(1, added_sp+'\n')
+if added_sp2 in ['gbas','cc','cao','dlm','amnt']: # then add this as well
+        data.insert(1, added_sp2+'\n')
+if include_N and added_sp2 != "amnt":
+    data.append('amnt'+'\n')
 if include_Al: 
-    data.append(alphase+'\t\n')
+    data.append(alphase+'\n')
+
 with open(dst, 'w') as file:
     file.writelines(data)
 # remove duplicate minerals
@@ -225,11 +236,13 @@ src = outdir + spinup_lab + filename
 dst = outdir + runname_lab  + filename
 with open(src, 'r') as file:
     data = file.readlines()
-if include_N:
+if include_N or added_sp2 == "amnt":
     data.append('no3'+'\t\n')
 # data.insert(1, 'k\t\nna\t\nmg\t\n')
 with open(dst, 'w') as file:
     file.writelines(data)
+# remove duplicate minerals
+shf.remove_duplicates(dst)
 
 filename = '/kinspc.in'
 src = outdir + spinup_lab + filename

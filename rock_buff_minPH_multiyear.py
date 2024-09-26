@@ -1,5 +1,5 @@
 # %%
-# import os
+import os
 import re
 import sys
 import time
@@ -176,12 +176,14 @@ for tstep in mytsteps:
     dst = outdir + runname_field  + filename
     with open(src, 'r') as file:
         data = file.readlines()
-    
-    data.insert(1, added_sp+'\t\n')
-    if include_N:
-        data.append('amnt'+'\t\n')
+    # add dust sp
+    data.insert(1, added_sp+'\n')
+    if added_sp2 in ['gbas','cc','cao','dlm','amnt']: # then add this as well
+        data.insert(1, added_sp2+'\n')
+    if include_N and added_sp2 != "amnt":
+        data.append('amnt'+'\n')
     if include_Al: 
-        data.append(alphase+'\t\n')
+        data.append(alphase+'\n')
 
     with open(dst, 'w') as file:
         file.writelines(data)
@@ -195,12 +197,14 @@ for tstep in mytsteps:
     dst = outdir + runname_field  + filename
     with open(src, 'r') as file:
         data = file.readlines()
-    if include_N:
+    if include_N or added_sp2 == "amnt":
         data.append('no3'+'\t\n')
 
     # data.insert(1, 'fe2\t\n')
     with open(dst, 'w') as file:
         file.writelines(data)
+    # remove duplicate minerals
+    shf.remove_duplicates(dst)
         
     # filename = '/gases.in'
     # src = outdir + spinup + filename
@@ -230,11 +234,14 @@ for tstep in mytsteps:
     with open(src, 'r') as file:
         data = file.readlines()
     
-    data.insert(1, added_sp+'\t\n')
-    if include_N:
-        data.append('amnt'+'\t\n')
+    # add dust sp
+    data.insert(1, added_sp+'\n')
+    if added_sp2 in ['gbas','cc','cao','dlm','amnt']: # then add this as well
+        data.insert(1, added_sp2+'\n')
+    if include_N and added_sp2 != "amnt":
+        data.append('amnt'+'\n')
     if include_Al: 
-        data.append(alphase+'\t\n')
+        data.append(alphase+'\n')
 
     with open(dst, 'w') as file:
         file.writelines(data)
@@ -248,12 +255,14 @@ for tstep in mytsteps:
     with open(src, 'r') as file:
         data = file.readlines()
 
-    if include_N:
+    if include_N or added_sp2 == "amnt":
         data.append('no3'+'\t\n')
 
     # data.insert(1, 'k\t\nna\t\nmg\t\n')
     with open(dst, 'w') as file:
         file.writelines(data)
+    # remove duplicate minerals
+    shf.remove_duplicates(dst)
         
     filename = '/kinspc.in'
     src = outdir + spinup_lab + filename
@@ -568,5 +577,6 @@ for tstep in mytsteps:
 # %%
 # ---------------------------------------
 # --- BUILD THE COMPOSITE DIRECTORY
+print(expid) # (troubleshoot)
 cfxns.build_composite(expid, outdir)
 # ---------------------------------------
