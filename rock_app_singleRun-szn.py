@@ -159,7 +159,8 @@ src = outdir + spinup_field + filename
 dst = outdir + runname_field  + filename
 with open(src, 'r') as file:
     data = file.readlines()
-
+if not data[-1].endswith("\n"):
+    data[-1] += "\n"   # add to avoid a messy append
 # add dust species
 data.insert(1, added_sp+'\n')
 if added_sp2 in ['gbas','cc','cao','dlm','amnt']: # then add this as well
@@ -180,6 +181,8 @@ src = outdir + spinup + filename
 dst = outdir + runname_field  + filename
 with open(src, 'r') as file:
     data = file.readlines()
+if not data[-1].endswith("\n"):
+    data[-1] += "\n"   # add to avoid a messy append
 if include_N or added_sp2 == "amnt":
     data.append('no3'+'\t\n')
 
@@ -216,7 +219,8 @@ src = outdir + spinup_lab + filename
 dst = outdir + runname_lab  + filename
 with open(src, 'r') as file:
     data = file.readlines()
-
+if not data[-1].endswith("\n"):
+    data[-1] += "\n"   # add to avoid a messy append
 # add dust species
 data.insert(1, added_sp+'\n')
 if added_sp2 in ['gbas','cc','cao','dlm','amnt']: # then add this as well
@@ -236,6 +240,8 @@ src = outdir + spinup_lab + filename
 dst = outdir + runname_lab  + filename
 with open(src, 'r') as file:
     data = file.readlines()
+if not data[-1].endswith("\n"):
+    data[-1] += "\n"   # add to avoid a messy append
 if include_N or added_sp2 == "amnt":
     data.append('no3'+'\t\n')
 # data.insert(1, 'k\t\nna\t\nmg\t\n')
@@ -249,7 +255,8 @@ src = outdir + spinup_lab + filename
 dst = outdir + runname_lab  + filename
 with open(src, 'r') as file:
     data = file.readlines()
-    
+if not data[-1].endswith("\n"):
+    data[-1] += "\n"   # add to avoid a messy append
 data.insert(1, added_sp+'\t0\n')
 with open(dst, 'w') as file:
     file.writelines(data)

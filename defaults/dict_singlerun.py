@@ -169,7 +169,7 @@ reApp_dictionary = {
     'use_local_storage': False,    # only relevant for georgia tech hpc
     'cec': 21.1,                   # [cmol kg-1] cation exchange capacity
     'duration': 1,                 # [yr] duration of simulation (or single targetpH or minPH iteration for multi-year)
-    'dustsp': 'cc',              # added dust species 
+    'dustsp': 'gbas',              # added dust species 
     'dustsp_2nd': 'amnt',            # added dust species for secondary dust
     'imix': 3,                     # mixing style (1=fickian; 2=homogeneous; 3=tilling)
     'ztot_lab': 0.05,
@@ -182,8 +182,8 @@ reApp_dictionary = {
     'outdir': '/home/tykukla/SCEPTER/scepter_output/', # directory of output files
     'climatedir': '/home/tykukla/aglime-swap-cdr/scepter/clim-inputs/',   # climate input main directory
     'climatefiles': 'default',     # climate input subdirectory (contains the climate `.in` files)
-    'dustrate': 100,               # [g m-2 yr-1] dust application flux ; divide by 100 to get ton / ha / yr; not used for spintuneups and an initial guess for target ph runs
-    'dustrate_2nd': 25,            # [g m-2 yr-1] dust application flux ; multiply by ~11 to get lbs / acre / yr; divide by 100 to get ton / ha / yr (only used for reApp scripts)
+    'dustrate': 1000,               # [g m-2 yr-1] dust application flux ; divide by 100 to get ton / ha / yr; not used for spintuneups and an initial guess for target ph runs
+    'dustrate_2nd': 80,            # [g m-2 yr-1] dust application flux ; multiply by ~11 to get lbs / acre / yr; divide by 100 to get ton / ha / yr (only used for reApp scripts)
     'taudust': 0.05,               # [yr] duration of dust application in year
     'dustrad': 150,                # [micron] radius of dust particles (gets converted to meters in python script that runs scepter)
     'add_secondary': False,         # [True, False] whether to add secondary precipitates to list of solids to track (defined in array below)
@@ -204,7 +204,7 @@ reApp_dictionary = {
     'limewt': 100.089,             # [] lime wt% of total dust
     'water_frac_tunespin': 2.5,    # [] water frac for the tunespin (set separately because default files had 2.5 for tuneup, 1 for basalt)
     'iter_max': 3000,              # [] max iterations to find converged solution
-    'tph': 6.8,                   # [] target pH for tunespin (usually defined in spinup_*.sh or, for rock app, the input .csv file)
+    'tph': 6.4,                   # [] target pH for tunespin (usually defined in spinup_*.sh or, for rock app, the input .csv file)
     'tec': 20.9,                   # [%CEC] target exchangeable acidity (acidsat) (usually defined in spinup_*.sh)
     'tsom': 2.05,                  # [wt%] target soil organic matter (usually defined in spinup_*.sh)
     'tsoilco2': -1.804,            # [log10 atm] target soil pco2 (usually defined in spinup_*.sh)

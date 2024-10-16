@@ -176,6 +176,8 @@ for tstep in mytsteps:
     dst = outdir + runname_field  + filename
     with open(src, 'r') as file:
         data = file.readlines()
+    if not data[-1].endswith("\n"):
+        data[-1] += "\n"   # add to avoid a messy append
     # add dust sp
     data.insert(1, added_sp+'\n')
     if added_sp2 in ['gbas','cc','cao','dlm','amnt']: # then add this as well
@@ -197,8 +199,10 @@ for tstep in mytsteps:
     dst = outdir + runname_field  + filename
     with open(src, 'r') as file:
         data = file.readlines()
+    if not data[-1].endswith("\n"):
+        data[-1] += "\n"   # add to avoid a messy append
     if include_N or added_sp2 == "amnt":
-        data.append('no3'+'\t\n')
+        data.append('no3'+'\n')
 
     # data.insert(1, 'fe2\t\n')
     with open(dst, 'w') as file:
@@ -233,7 +237,8 @@ for tstep in mytsteps:
     dst = outdir + runname_lab  + filename
     with open(src, 'r') as file:
         data = file.readlines()
-    
+    if not data[-1].endswith("\n"):
+        data[-1] += "\n"   # add to avoid a messy append
     # add dust sp
     data.insert(1, added_sp+'\n')
     if added_sp2 in ['gbas','cc','cao','dlm','amnt']: # then add this as well
@@ -254,7 +259,8 @@ for tstep in mytsteps:
     dst = outdir + runname_lab  + filename
     with open(src, 'r') as file:
         data = file.readlines()
-
+    if not data[-1].endswith("\n"):
+        data[-1] += "\n"   # add to avoid a messy append
     if include_N or added_sp2 == "amnt":
         data.append('no3'+'\t\n')
 
@@ -269,7 +275,8 @@ for tstep in mytsteps:
     dst = outdir + runname_lab  + filename
     with open(src, 'r') as file:
         data = file.readlines()
-        
+    if not data[-1].endswith("\n"):
+        data[-1] += "\n"   # add to avoid a messy append
     data.insert(1, added_sp+'\t0\n')
     with open(dst, 'w') as file:
         file.writelines(data)
@@ -580,3 +587,5 @@ for tstep in mytsteps:
 print(expid) # (troubleshoot)
 cfxns.build_composite(expid, outdir)
 # ---------------------------------------
+
+# %%
