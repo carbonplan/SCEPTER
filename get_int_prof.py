@@ -25,6 +25,8 @@ def linave(dep,var,ztrgt):
     
     return a
 
+# --- updated by T Kukla (Jan 29, 2025) so paths are made with 
+#     os.path.join()
 def get_ph_int_site(outdir,runname,dep_sample):
     # outdir = '../pyweath_output/'
     # runname = ''
@@ -32,11 +34,15 @@ def get_ph_int_site(outdir,runname,dep_sample):
 
     # dep_sample = float(sys.argv[1])
 
+    mydir = os.path.join(outdir, runname)
+    
     for i in range(20,0,-1):
-        infile  = outdir+runname+'/prof/prof_aq(tot)-{:03d}.txt'.format(i)
+        indir = os.path.join(mydir, 'prof')
+        infile  = os.path.join(indir, 'prof_aq(tot)-{:03d}.txt'.format(i))
         if not os.path.exists(infile): continue
         else: break 
-    infile = outdir+runname+'/prof/prof_aq(tot)-{:03d}.txt'.format(i)
+    indir = os.path.join(mydir, 'prof')
+    infile = os.path.join(indir, 'prof_aq(tot)-{:03d}.txt'.format(i))
     data = np.loadtxt(infile,skiprows=1)
     print('using aq(tot)-{:03d}'.format(i))
         
@@ -51,6 +57,7 @@ def get_ph_int_site(outdir,runname,dep_sample):
     print(phintval)
     
     return phintval
+
 
 # --- added by Tyler to check whether pH is on the rise or fall
 def get_ph_int_site_trend(outdir,runname,dep_sample):

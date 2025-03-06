@@ -1,4 +1,11 @@
 # %%
+# ---------------------------------------------------------
+# 
+# multiyear run with specified dust flux timeseries (e.g.,
+# if you want to apply rock once then run a bunch of years 
+# with no application)
+# 
+# ---------------------------------------------------------
 import os
 import re
 import sys
@@ -10,6 +17,7 @@ import make_inputs
 import random
 import subprocess
 import defaults.dict_singlerun
+import pandas as pd
 # import build_composite_multiyear as cfxns
 
 
@@ -19,56 +27,111 @@ sys.path.append(os.path.abspath('/home/tykukla/aglime-swap-cdr/scepter/setup'))
 # import module
 import scepter_helperFxns as shf
 import build_composite_multiyear as cfxns
+import cflx_proc as cflx
 # ---
+
 
 
 # %%
 # -------------------------------------------------------------
 # --- set default and system args
 sys_args = shf.parse_arguments(sys.argv)   # parse system args
-import_dict = "reApp_dictionary" # set the dictionary to use from system args
-# import_dict = "default_dictionary" # set the dictionary to use from system args
-# import_dict = sys_args['default_dict'] # set the dictionary to use from system args
+import_dict = sys_args['default_dict'] # set the dictionary to use from system args
 def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
 
 # set global variables
 combined_dict = shf.set_vars(def_args, sys_args)  # default unless defined in sys_args
+# (set as kwargs CHANGE WHEN THIS BECOMES A FUNCTION)
+kwargs = combined_dict.copy()
+# add to globals (CHANGE/REMOVE WHEN THIS BECOMES A FUNCTION)
 for key, value in combined_dict.items():
     globals()[key] = value
     
 # rename vars
-targetpH = tph
-tau = duration
-added_sp = dustsp
-added_sp2 = dustsp_2nd
 spinid = spinrun
-fdust = dustrate  # only fdust updates with time for now
-fdust2 = dustrate_2nd
-taudust=taudust
-dustrad = float(dustrad)/1e6  #  /1e6 converts micron to meters
-
 expid = newrun_id
-
-outdir = outdir
+dustrad_init = dustrad  # make a static version since dustrad is overwritten later
 datadir = os.path.join(modeldir, 'data/')
+
+# %% 
+# --- Read in the dust flux file
+# [2] read in file
+src_dust = os.path.join(dust_ts_dir, dust_ts_fn)
+df_dust = pd.read_csv(src_dust)
+# except:
+#     ValueError("For now, `rock_buff_dust-ts_multiyear.py` requires a dust file to be defined. We didn't find one.")
+
+
 
 # %%
 # -------------------------------------------------------------------------------
 # LOOP THROUGH TIME STEPS 
 
+# ... get time step array
+counter = 0  # for tracking and file naming (MUST START AT ZERO)
+runname_field_old, runname_lab_old = "placeholder1", "placeholder2"   # placeholders for update later
+# empty lists for moving output to aws
+runname_lab_list, runname_field_list = [], []
+
 # --- files to delete if they are copied over
 # (diagnostic files from the spinup run)
 files_to_delete = ["check_logs.res", "check_results.res", "completed.res"]
 
-
-# ... get time step array
-timestep_dur = duration  # just for clarity... duration is a timestep here
-mytsteps = shf.generate_timesteps(max_time, timestep_dur)
-counter = 0  # for tracking and file naming (MUST START AT ZERO)
-runname_field_old, runname_lab_old = "placeholder1", "placeholder2"   # placeholders for update later
-
 # %% 
-for tstep in mytsteps:
+# Loop through each row in the df
+for index, row in df_dust.iterrows():
+    # set up the dust values 
+    # ********
+    # NOTE update this later to work for any arbitrary column header and value 
+    # in the .csv file !! 
+    # ********
+    # [tau] timestep (years)
+    if "duration" in row:
+        try:
+            tau = float(row['duration'])
+        except:
+            tau = duration
+    else:
+        tau = duration
+    # [dustsp] primary dust
+    if "dustsp" in row:
+        added_sp = str(row['dustsp'])
+    else:
+        added_sp = dustsp
+    # [dustsp_2nd] secondary dust
+    if "dustsp_2nd" in row:
+        added_sp2 = str(row['dustsp_2nd'])
+    else:
+        added_sp2 = dustsp_2nd
+    # [dustrate] how much dust to apply 
+    if "dustrate" in row:
+        try:
+            fdust = float(row['dustrate'])
+        except:
+            fdust = dustrate
+    else: 
+        fdust = dustrate
+    # [dustrate_2nd] how much dust to apply 
+    if "dustrate_2nd" in row:
+        try:
+            fdust2 = float(row['dustrate_2nd'])
+        except:
+            fdust2 = dustrate_2nd
+    else: 
+        fdust2 = dustrate_2nd
+    # [dustrad] how much dust to apply 
+    if "dustrad" in row:
+        try:
+            dustrad = float(row['dustrad'])/1e6
+        except:
+            dustrad = float(dustrad_init)/1e6
+    else: 
+        dustrad = float(dustrad_init)/1e6
+    if "yr_start" in row:
+        tstep = row["yr_start"]
+    else:
+        tstep = "NA"
+    # ************************************************************************
     
     # set the spinup 
     if counter == 0:  # first step uses a set spinup run
@@ -77,7 +140,7 @@ for tstep in mytsteps:
     else:
         spinup_field = runname_field_old
         spinup_lab = runname_lab_old
-        fdust = next_dustrate  # set fdust to some ideally smaller value for the successive iterations
+        # fdust = next_dustrate  # set fdust to some ideally smaller value for the successive iterations
     
     # set runnames
     runname_field   = f"{expid}_startyear-{str(tstep).replace('.','p')}_iter-{int(counter)}_field"
@@ -97,7 +160,7 @@ for tstep in mytsteps:
 
         # save file denoting the iteration
         fn_itermarker = os.path.join(dst, "multiyear-iter.res")
-        shf.write_iter_file_with_marker(mytsteps, counter, fn_itermarker)
+        shf.write_iter_file_with_marker(df_dust['yr_start'].values, counter, fn_itermarker)
         # save file denoting the variables used
         combined_dict['dustrate'] = fdust # update dust rate
         fn_dict_save = os.path.join(dst, "vars.res")
@@ -114,6 +177,13 @@ for tstep in mytsteps:
                 dst_clim = os.path.join(outdir, runname, thisfile)
                 # read from source, update, save to dst
                 shf.update_clim(src_clim, dst_clim, tstep)
+    
+    # save the dust file
+    for runname in [runname_field,runname_lab]:
+        src_dust = os.path.join(dust_ts_dir, dust_ts_fn)
+        dst_dust = os.path.join(outdir, runname, dust_ts_fn)
+        if os.path.isfile(src_dust):
+            shutil.copy2(src_dust, dst_dust)
 
 
     
@@ -131,7 +201,7 @@ for tstep in mytsteps:
     dst = outdir + runname_field  + filename
     with open(src, 'r') as file:
         data = file.readlines()
-    data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(imix)
+    data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
     data[7] = 'true\trestart from a previous run\n'
     if include_psd_bulk:
         data[-3] = 'true\tenabling PSD tracking\n'
@@ -315,14 +385,6 @@ for tstep in mytsteps:
             # os.system('cp ' + exename_src + to + outdir + runname + where + exename)
     
     
-    res_list = []
-    
-    # get ph of spin-up
-    phint = get_int_prof.get_ph_int_site(outdir,spinup_lab,dep_sample)
-    phint_field = get_int_prof.get_ph_int_site(outdir,spinup_field,dep_sample)
-    ymx = phint - targetpH
-    if phnorm_pw: ymx = phint_field - targetpH
-    res_list.append([0, phint_field,phint, targetpH, 0, abs( ymx/targetpH ) ])
         
     
     ## /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -336,9 +398,13 @@ for tstep in mytsteps:
     with open(src, 'r') as file:
         data = file.readlines()
     data[3]     = '{:.8f}\ttotal duration of simulation [yr]\n'.format(tau)
-    data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust)
+    if kwargs.get('mat') is not None:
+        data[4] = '{:.8f}\ttemperature [oC]\n'.format(mat) 
+    data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust) 
     data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(fdust2)
     data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(taudust)
+    if kwargs.get('qrun') is not None:
+        data[15] = '{:.8f}\tnet water flux [m/yr]\n'.format(mat)
     data[16]    = '{:.8f}\tradius of particles [m]\n'.format(dustrad)   # [tykukla added]
     data[18]    = '{}\n'.format(spinup_field)
     data[20]    = '{}\n'.format(runname_field)
@@ -349,12 +415,12 @@ for tstep in mytsteps:
     ## --- run field run --- ##
     
     print(outdir+runname_field+'/scepter')
-    os.system(outdir+runname_field+'/scepter')
+    os.system("chmod +x " + os.path.join(outdir,runname_field,'scepter'))  # grant permissions
+    os.system(os.path.join(outdir,runname_field,'scepter'))
+
 
     ## --- getting data from field run --- ##
     
-    phint_field, ph_trend_field = get_int_prof.get_ph_int_site_trend(outdir,runname_field,dep_sample)
-    dense_lab = get_int_prof.get_rhobulk_int_site(outdir,runname_field,dep_sample)
     # sps = ['g2','inrt',added_sp]
     sps = ['g2', added_sp]
     if include_Al:  sps.append( alphase )
@@ -364,14 +430,14 @@ for tstep in mytsteps:
         sldwt_list.append(sldwt)
     
     aqsps,btmconcs,dep = get_int_prof.get_totsave_site(outdir,runname_field,dep_sample)  # returning mol/ solid m3 depth averaged value 
-    print(aqsps,btmconcs,dep)
+    # print(aqsps,btmconcs,dep)
     
     dic,dep = get_int_prof.get_ave_DIC_save(outdir,runname_field,dep_sample) # returning DIC in mol/ solid m3
     
     ## /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     ## --- setup for lab run --- ##
-    
+    dense_lab = get_int_prof.get_rhobulk_int_site(outdir,runname_field,dep_sample)
     poro_lab = water_frac/(1./dense_lab+water_frac)
     
     oxide_ctnm_list = ['ca','mg','na','k'] 
@@ -463,87 +529,17 @@ for tstep in mytsteps:
     ## --- run lab run --- ##
     
     print(outdir+runname_lab+'/scepter')
-    os.system(outdir+runname_lab+'/scepter')
-    
+    os.system("chmod +x " + os.path.join(outdir,runname_lab,'scepter'))  # grant permissions
+    os.system(os.path.join(outdir,runname_lab,'scepter'))
+
     ## --- getting data from lab run --- ##
     
-    phint, ph_trend_lab = get_int_prof.get_ph_int_site_trend(outdir,runname_lab,dep_sample)
-    print(phint_field,phint)
+    # phint, ph_trend_lab = get_int_prof.get_ph_int_site_trend(outdir,runname_lab,dep_sample)
+    # print(phint_field,phint)
     
     ## /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-    # time.sleep(5)
     
-    # set the timestep pH
-    if phnorm_pw:  # base pH tracking off porewater
-        timestep_ph = phint_field
-        ph_trend = ph_trend_field
-    else:   # base pH tracking off lab results
-        timestep_ph = phint
-        ph_trend = ph_trend_lab
-    
-    # ... set dust flux for the next timestep
-    # --- TROUBLESHOOT
-    print(str(timestep_ph) + " -- " + str(targetpH) + " -- " + ph_trend)
-    time.sleep(5)
-    # time.sleep(30)
-    # ---
-    # [1] it's too acidic and it's getting more acidic ==> add rock! 
-    if (timestep_ph < targetpH) & (ph_trend == "decreasing"):
-        next_dustrate = dustrate 
-    # [2] it's too acidic and pH is constant ==> add rock! 
-    if (timestep_ph < targetpH) & (ph_trend == "constant"):
-        next_dustrate = dustrate
-    # [3] it's too acidic but pH is increasing ==> add rock anyway!  
-    if (timestep_ph < targetpH) & (ph_trend == "increasing"):
-        next_dustrate = dustrate
-    # [4] it's too basic
-    if (timestep_ph > targetpH):
-        next_dustrate = 0.1  # negligible
-    
-    
-    
-    
-    res_list.append([0, phint_field, phint, targetpH, fdust, abs( ymx/targetpH ) ])
-    
-
-    
-    for runname in [runname_field,runname_lab]:
-        np.savetxt(outdir + runname + where + 'iteration_tmp.res',np.array(res_list))
-    
-    
-    
-    name_list = [
-        'iter.'
-        ,'porewater_pH[-]'
-        ,'soil_pHw[-]'
-        ,'target_pH[-]'
-        ,'dust[g/m2/yr]'
-        ,'error'
-        ]
-    
-    for runname in [runname_field,runname_lab]:
-        dst = outdir + runname + where + 'iteration.res'
-    
-        with open(dst, 'w') as file:
-            for item in name_list:
-                if name_list.index(item)==len(name_list)-1:
-                    file.write('{}\n'.format(item))
-                else:
-                    file.write('{}\t'.format(item))
-            for j in range(len(res_list)):
-                item_list = res_list[j]
-                for i in range(len(item_list)):
-                    item = item_list[i]
-                    if i==0:
-                        file.write('{:d}\t'.format(item))
-                    elif i==len(item_list)-1:
-                        file.write('{:.6e}\n'.format(item))
-                    else:
-                        file.write('{:.6e}\t'.format(item))
-                
-        print(res_list)
-
     # ... [TK] add a run=completed file for easier programmatic querying
     for runname in [runname_field,runname_lab]:
         dst = outdir + runname + where + 'completed.res'
@@ -576,20 +572,13 @@ for tstep in mytsteps:
     # ... update the dust flux file so it's usable without needing input from frame.in
     shf.dustflx_calc(outdir, runname_field, fdust, fdust2, dustsp, dustsp_2nd)
     
-    # ... move to aws if this option is turned on
-    # [nothing happens if aws_save != 'move' or 'copy']
-    shf.to_aws(aws_save, 
-               aws_bucket, 
-               outdir, 
-               runname_lab, 
-               runname_field)
-
-    
-    
     # UPDATE THE RUNNAME FOR NEXT ITERATION
     counter += 1
     runname_field_old = runname_field
     runname_lab_old = runname_lab
+    # add to lists that are used for aws moving
+    runname_field_list.append(runname_field)
+    runname_lab_list.append(runname_lab)
 
     
 
@@ -597,7 +586,22 @@ for tstep in mytsteps:
 # ---------------------------------------
 # --- BUILD THE COMPOSITE DIRECTORY
 print(expid) # (troubleshoot)
-cfxns.build_composite(expid, outdir)
+compDir_field, compDir_lab = cfxns.build_composite(expid, outdir)
+runname_field_list.append(compDir_field)
+runname_lab_list.append(compDir_lab)
 # ---------------------------------------
+# ... compute cdr-relevant fluxes
+cflx.cflx_calc(outdir, compDir_field, [dustsp, dustsp_2nd])
+
+# ... compute profile data
+cflx.prof_postproc_save(outdir, runname_field, runname_lab, postproc_prof_list)
+
+# ... move to aws if this option is turned on
+# [nothing happens if aws_save != 'move' or 'copy']
+outdir_postproc = shf.to_aws(aws_save, 
+                            aws_bucket, 
+                            outdir, 
+                            runname_lab_list, 
+                            runname_field_list)
 
 # %%

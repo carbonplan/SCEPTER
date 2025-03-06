@@ -1,3 +1,4 @@
+# %% 
 import os
 import re
 import sys
@@ -15,8 +16,9 @@ import subprocess
 sys.path.append(os.path.abspath('/home/tykukla/aglime-swap-cdr/scepter/setup'))
 # import module
 import scepter_helperFxns as shf
+import cflx_proc as cflx
 # ---
-
+# %% 
 
 # -------------------------------------------------------------
 # -------------------------------------------------------------
@@ -27,6 +29,9 @@ def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
 
 # set global variables
 combined_dict = shf.set_vars(def_args, sys_args)  # default unless defined in sys_args
+# (set as kwargs CHANGE WHEN THIS BECOMES A FUNCTION)
+kwargs = combined_dict.copy()
+# add to globals (CHANGE/REMOVE WHEN THIS BECOMES A FUNCTION)
 for key, value in combined_dict.items():
     globals()[key] = value
 
@@ -41,11 +46,21 @@ spinup_lab   = spinid+'_lab'
 expid = newrun_id
 runname_field = expid+'_'+added_sp+'_field_tau'+str(tau).replace('.','p')
 runname_lab   = expid+'_'+added_sp+'_lab_tau'+str(tau).replace('.','p')
+
+if spinup_on: # then make sure the runnames end with "_field" or "_lab"
+    print("spinup is on")
+    runname_field = expid+'_'+added_sp+'_tau'+str(tau).replace('.','p')+'_field'
+    runname_lab   = expid+'_'+added_sp+'_tau'+str(tau).replace('.','p')+'_lab'
+
 fdust = dustrate
 fdust2 = dustrate_2nd
 dustrad = float(dustrad)/1e6  #  /1e6 converts micron to meters
 
 datadir = os.path.join(modeldir, 'data/')
+
+# --- files to delete if they are copied over
+# (diagnostic files from the spinup run)
+files_to_delete = ["check_logs.res", "check_results.res", "completed.res"]
 
 # duplicate directories from spinups
 for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
@@ -61,6 +76,10 @@ for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
     # save file denoting the variables used
     fn_dict_save = os.path.join(dst, "vars.res")
     shf.save_dict_to_text_file(combined_dict, fn_dict_save, delimiter='\t')
+    # delete the diagnistic files from the spinup
+    for file in files_to_delete:
+        if os.path.exists(os.path.join(dst, file)):
+            os.remove(os.path.join(dst, file))
 
 # duplicate the climate files
 if singlerun_seasonality==True:
@@ -78,6 +97,30 @@ to = ' '
 where = '/'
 
 # ============ common input file modification wrt spinup: for field run
+# --- UPDATE CEC IF ASKED ---------
+if cec_update_from_spinup:
+    for runname in [runname_field, runname_lab]:
+        with open(os.path.join(outdir, runname_field, "cec.in"), "r") as f:
+            lines = f.readlines()
+
+        # Process each line
+        modified_lines = []
+        for line in lines:
+            if re.match(r"^\S+\s+[-+]?\d*\.\d+", line):  # Check if line starts with a name followed by a number
+                parts = line.split()
+                parts[1] = str(cec)  # Modify first number
+                parts[-1] = str(alpha)  # Modify last number
+                modified_lines.append("\t".join(parts) + "\n")
+            else:
+                modified_lines.append(line)  # Keep header unchanged
+
+        # print(modified_lines)
+
+        # write back to the same file
+        with open(os.path.join(outdir, runname, "cec.in"), "w") as f:
+            f.writelines(modified_lines)
+# -----------------------------------
+
 filename = '/switches.in'
 src = outdir + spinup_field + filename
 dst = outdir + runname_field  + filename
@@ -85,31 +128,58 @@ with open(src, 'r') as file:
     data = file.readlines()
 data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
 data[7] = 'true\trestart from a previous run\n'
-if include_psd_bulk:
+if include_psd_bulk == True:
     data[-3] = 'true\tenabling PSD tracking\n'
-else:
+elif include_psd_bulk == False:
     data[-3] = 'false\tenabling PSD tracking\n'
-if include_psd_full:
+if include_psd_full == True:
     data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
-else:
+elif include_psd_full == False:
     data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
-    
+
+if poro_iter_field == True:
+    data[3] = 'true\tporosity  iteration\n'
+elif poro_iter_field == False:
+    data[3] = 'false\tporosity  iteration\n'
+if poro_evol == True:
+    data[-6] = 'true\tenabling porosity evolution\n'
+elif poro_evol == False:
+    data[-6] = 'false\tenabling porosity evolution\n'
+
 if include_roughness_sa == True:
     data[8] = 'true\tinclude roughness in mineral surface area\n'
-else:
+elif include_roughness_sa == False:
     data[8] = 'false\tinclude roughness in mineral surface area\n'
+if sa_rule2 == True:
+    data[-4] = 'true\tenabling SA evolution 2 (SA increases with porosity)\n'
+elif sa_rule2 == False:
+    data[-4] = 'false\tenabling SA evolution 2 (SA increases with porosity)\n'
+if sa_rule1 == True:
+    data[-5] = 'true\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
+elif sa_rule1 == False:
+    data[-5] = 'false\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
+
 if singlerun_seasonality==True:
     data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
-else:
-    data[-1] = 'false\tenabling seasonality\n'
+elif singlerun_seasonality == False:
+    data[-1] = 'false\tenabling full seasonality\n'
 if cec_adsorption_on == True:
     data[11] = "true\tenabling adsorption for cation exchange\n"
-else:
+elif cec_adsorption_on == False:
     data[11] = "false\tenabling adsorption for cation exchange\n"
     
 with open(dst, 'w') as file:
     file.writelines(data)
 
+# %% 
+
+tx = "test"
+if tx:
+    print("yay")
+elif not tx:
+    print("nay")
+
+# %% 
 
 # --- TROUBLESHOOT ------------ # 
 print(src + "--------" + dst)
@@ -123,6 +193,7 @@ if added_sp == 'gbas': dustsrc = os.path.join(modeldir, 'data', 'dust_gbasalt.in
 if added_sp == 'cc': dustsrc = os.path.join(modeldir, 'data', 'dust_lime.in')
 if added_sp == 'cao': dustsrc = os.path.join(modeldir, 'data', 'dust_cao.in')
 if added_sp == 'dlm': dustsrc = os.path.join(modeldir, 'data', 'dust_dlm.in')
+if added_sp == 'wls': dustsrc = os.path.join(modeldir, 'data', 'dust_wls.in')
 dustdst = 'dust.in'
 
 os.system('cp ' + dustsrc + to + outdir + runname_field + where + dustdst) 
@@ -134,6 +205,7 @@ if added_sp2 == 'gbas': dustsrc2 = os.path.join(modeldir, 'data', 'dust_gbasalt.
 if added_sp2 == 'cc': dustsrc2 = os.path.join(modeldir, 'data', 'dust_lime.in')
 if added_sp2 == 'cao': dustsrc2 = os.path.join(modeldir, 'data', 'dust_cao.in')
 if added_sp2 == 'dlm': dustsrc2 = os.path.join(modeldir, 'data', 'dust_dlm.in')  
+if added_sp == 'wls': dustsrc = os.path.join(modeldir, 'data', 'dust_wls.in')
 dustdst2 = 'dust_2nd.in'
 
 os.system('cp ' + dustsrc2 + to + outdir + runname_field + where + dustdst2) 
@@ -163,7 +235,7 @@ if not data[-1].endswith("\n"):
     data[-1] += "\n"   # add to avoid a messy append
 # add dust species
 data.insert(1, added_sp+'\n')
-if added_sp2 in ['gbas','cc','cao','dlm','amnt']: # then add this as well
+if added_sp2 in ['gbas','cc','cao','dlm','amnt', 'wls']: # then add this as well
         data.insert(1, added_sp2+'\n')
 if include_N and added_sp2 != "amnt":
     data.append('amnt'+'\n')
@@ -213,7 +285,6 @@ shf.remove_duplicates(dst)
     # file.writelines(data)
     
 # ============ common input file modification wrt spinup: for lab run ============
-
 filename = '/slds.in'
 src = outdir + spinup_lab + filename
 dst = outdir + runname_lab  + filename
@@ -223,7 +294,7 @@ if not data[-1].endswith("\n"):
     data[-1] += "\n"   # add to avoid a messy append
 # add dust species
 data.insert(1, added_sp+'\n')
-if added_sp2 in ['gbas','cc','cao','dlm','amnt']: # then add this as well
+if added_sp2 in ['gbas','cc','cao','dlm','amnt', 'wls']: # then add this as well
         data.insert(1, added_sp2+'\n')
 if include_N and added_sp2 != "amnt":
     data.append('amnt'+'\n')
@@ -307,9 +378,13 @@ dst = outdir + runname_field  + filename
 with open(src, 'r') as file:
     data = file.readlines()
 data[3]     = '{:.8f}\ttotal duration of simulation [yr]\n'.format(tau)
+if kwargs.get('mat') is not None:
+    data[4] = '{:.8f}\ttemperature [oC]\n'.format(mat) 
 data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust) 
 data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(fdust2)
 data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(taudust)
+if kwargs.get('qrun') is not None:
+    data[15] = '{:.8f}\tnet water flux [m/yr]\n'.format(mat)
 data[16]    = '{:.8f}\tradius of particles [m]\n'.format(dustrad)   # [tykukla added]
 data[18]    = '{}\n'.format(spinup_field)
 data[20]    = '{}\n'.format(runname_field)
@@ -507,6 +582,14 @@ shf.run_complete_check(runname_field,
                       omit_ipynb=True,
                      )
 
+# ... update the dust flux file so it's usable without needing input from frame.in
+shf.dustflx_calc(outdir, runname_field, fdust, fdust2, dustsp, dustsp_2nd)
+
+# ... compute cdr-relevant fluxes
+cflx.cflx_calc(outdir, runname_field, [dustsp, dustsp_2nd])
+
+# ... compute profile data
+cflx.prof_postproc_save(outdir, runname_field, runname_lab, postproc_prof_list)
 
 # ... move to aws if this option is turned on
 # [nothing happens if aws_save != 'move' or 'copy']
@@ -517,3 +600,5 @@ shf.to_aws(aws_save,
            runname_field)
 
 
+
+# %%

@@ -14,65 +14,49 @@ import defaults.dict_singlerun
 
 datestr = datetime.today().strftime('%Y-%m-%d')
 
-# -------------------------------------------------------------
-# Function to parse arguments
-def parse_arguments(args):
-    parsed_args = {}
-    i = 1  # Start from index 1 to skip the script name (sys.argv[0])
-    while i < len(args):
-        if args[i].startswith('--'):
-            key = args[i][2:]  # Remove '--' prefix
-            if i + 1 < len(args) and not args[i + 1].startswith('--'):
-                value = args[i + 1]
-                parsed_args[key] = value
-                i += 1  # Skip the next item as it's the value for the current key
-            else:
-                parsed_args[key] = None  # If no value provided, set to None
-        i += 1
-    return parsed_args
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-# Function to set global variables from defaults / system args
-def set_vars(default_args, system_args):
-    # define pattern for identifying floats in sys.args
-    float_pattern = r'^[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?$'
-    # save dict
-    save_vars = {}
-    for key, value in default_args.items():
-        if key in system_args:
-            float_test1 = re.match(float_pattern, system_args[key]) is not None # (captures all cases but "2.")
-            float_test2 =  system_args[key].replace('.', '', 1).isdigit()  # (misses negatives but gets others including "2.")
-            if float_test1 or float_test2:  # check is sys arg is a float
-                save_vars[key] = float(system_args[key])
-                globals()[key] = float(system_args[key])
-            else:
-                save_vars[key] = system_args[key]
-                globals()[key] = system_args[key]
-        else:
-            save_vars[key] = value
-            globals()[key] = value
-    return save_vars
-# Function to save the combined dictionary to the run dir
-def save_dict_to_text_file(dictionary, filename, delimiter='\t'):
-    with open(filename, 'w') as file:
-        file.write(f"*** variables set by dictionary and system args\n")
-        file.write(f"    (note not all vars are used!!)\n")
-        for key, value in dictionary.items():
-            file.write(f"{key}{delimiter}{value}\n")
-# -------------------------------------------------------------
-# -------------------------------------------------------------
-
-print(sys.argv)
-
-# --- set default and system args (TK)
-sys_args = parse_arguments(sys.argv)   # parse system args
+# --- read in helper functions from aglime-swap-cdr
+# add aglime-swap-cdr dir to path # [UPDATE FOR YOUR MACHINE]
+sys.path.append(os.path.abspath('/home/tykukla/aglime-swap-cdr/scepter/setup'))
+# import module
+import scepter_helperFxns as shf
+# ---
 import_dict = sys_args['default_dict'] # set the dictionary to use from system args
 def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
 
 # set global variables
-# (TK: currently, combined_dict doesn't get saved in this version)
-combined_dict = set_vars(def_args, sys_args)  # default unless defined in sys_args
+combined_dict = shf.set_vars(def_args, sys_args)  # default unless defined in sys_args
+# (set as kwargs CHANGE WHEN THIS BECOMES A FUNCTION)
+kwargs = combined_dict.copy()
+# add to globals (CHANGE/REMOVE WHEN THIS BECOMES A FUNCTION)
+for key, value in combined_dict.items():
+    globals()[key] = value
+shf.save_dict_to_text_file(combined_dict, fn_dict_save, delimiter='\t')
+# -------------------------------------------------------------
+
+print(sys.argv)
+
+
+# --- update optional inputs
+ttot_field = 10000 if kwargs.get('ttot_field') is None else kwargs.get('ttot_field')
+ztot_field = 0.5 if kwargs.get('ztot_field') is None else kwargs.get('ztot_field')
+zom = 0.25 if kwargs.get('zom') is None else kwargs.get('zom')
+if not make_initial_geuss:
+    omrain_field = 900 if kwargs.get('omrain_field') is None else kwargs.get('omrain_field')
+zwater = 10000 if kwargs.get('zwater') is None else kwargs.get('zwater')
+w_scheme_field = 1 if kwargs.get('w_scheme_field') is None else kwargs.get('w_scheme_field')
+mix_scheme_field = 1 if kwargs.get('mix_scheme_field') is None else kwargs.get('mix_scheme_field')
+poro_iter_field = 'false' if kwargs.get('poro_iter_field') is None else kwargs.get('poro_iter_field')
+poro_evol = 'false' if kwargs.get('poro_evol') is None else kwargs.get('poro_evol')
+sldmin_lim = 'false' if kwargs.get('sldmin_lim') is None else kwargs.get('sldmin_lim')
+psd_bulk_field = 'false' if kwargs.get('psd_bulk_field') is None else kwargs.get('psd_bulk_field')
+psd_full_field = 'false' if kwargs.get('psd_full_field') is None else kwargs.get('psd_full_field')
+sa_evol_1 = 'true' if kwargs.get('sa_evol_1') is None else kwargs.get('sa_evol_1')
+sa_evol_2 = 'false' if kwargs.get('sa_evol_2') is None else kwargs.get('sa_evol_2')
+display = 'true' if kwargs.get('display') is None else kwargs.get('display')
+disp_lim = 'true' if kwargs.get('disp_lim') is None else kwargs.get('disp_lim')
+close_aq_field = 'false' if kwargs.get('close_aq_field') is None else kwargs.get('close_aq_field')
+season = 'false' if kwargs.get('season') is None else kwargs.get('season') 
+
 
 water_frac = water_frac_tunespin
 targetpH = tph
@@ -185,13 +169,8 @@ os.chdir(mycwd)
 
 
 ztot=0.5
-ztot_field=0.5
-# ztot_field=0.3
-ztot_lab=0.5
 ztot_lab=0.05
 nz=30
-ttot_field=10000
-ttot_lab=1000
 ttot_lab=100
 temp_field=mat
 temp_lab=25
@@ -200,22 +179,17 @@ fdust_lab=0
 fdust2=0
 taudust_field=0
 taudust_lab=0.01
-if not make_initial_geuss: 
-    omrain_field=900
 omrain_lab=0
-zom=0.5
 poro_field=poro_input
 poro_lab=0.928391508
 moistsrf_field=sat_input
 moistsrf_lab=1.0
-zwater=100000
 # zdust_field=0.18
 zdust_field=0.25
 zdust_lab=0.15
 w_field=100e-5
 w_field=erosion
 w_lab=0
-q_field=1200e-3
 q_field=qrun
 q_lab=0
 p=10e-6
@@ -260,12 +234,6 @@ make_inputs.get_input_frame(
     ,runid=runname_field
     )
 
-w_scheme_field=1
-mix_scheme_field=1
-poro_iter_field='false' 
-sldmin_lim ='true'
-display='true'
-disp_lim='true'
 restart ='false'
 if include_roughness_sa == True:
     rough_field      ='true'
@@ -279,13 +247,6 @@ if cec_adsorption_on == True:
 else:
     cec_on="false"
 dz_fix='true'
-close_aq_field='false'
-poro_evol='true'
-sa_evol_1 ='true'
-sa_evol_2='false'
-psd_bulk_field='true'
-psd_full_field='true'
-season='false'
 
 w_scheme_lab=0
 mix_scheme_lab=0 
@@ -1123,4 +1084,22 @@ if use_local_storage:
         else:
             shutil.rmtree(dst)
             shutil.copytree(src, dst)
-            
+
+# ... run postprocessing checks
+shf.run_complete_check(runname_field, 
+                      runname_lab, 
+                      outdir, 
+                      target_duration=ttot_field, 
+                      include_duration_check=True, 
+                      omit_saveSuff=True, 
+                      omit_ipynb=True,
+                     )
+
+
+# ... move to aws if this option is turned on
+# [nothing happens if aws_save != 'move' or 'copy']
+shf.to_aws(aws_save, 
+           aws_bucket, 
+           outdir, 
+           runname_lab, 
+           runname_field)

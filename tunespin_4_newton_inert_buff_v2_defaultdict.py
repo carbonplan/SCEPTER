@@ -32,9 +32,35 @@ def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
 # set global variables
 # (TK: currently, combined_dict doesn't get saved in this version)
 combined_dict = shf.set_vars(def_args, sys_args)  # default unless defined in sys_args
+# (set as kwargs CHANGE WHEN THIS BECOMES A FUNCTION)
+kwargs = combined_dict.copy()
+# add to globals (CHANGE/REMOVE WHEN THIS BECOMES A FUNCTION
 for key, value in combined_dict.items():
     globals()[key] = value
-    
+# (vars are saved lower after we make the directory)
+
+# --- update optional inputs
+ttot_field = 10000 if kwargs.get('ttot_field') is None else kwargs.get('ttot_field')
+ztot_field = 0.5 if kwargs.get('ztot_field') is None else kwargs.get('ztot_field')
+zom = 0.25 if kwargs.get('zom') is None else kwargs.get('zom')
+if not make_initial_guess:
+    omrain_field = 900 if kwargs.get('omrain_field') is None else kwargs.get('omrain_field')
+zwater = 10000 if kwargs.get('zwater') is None else kwargs.get('zwater')
+w_scheme_field = 1 if kwargs.get('w_scheme_field') is None else kwargs.get('w_scheme_field')
+mix_scheme_field = 1 if kwargs.get('mix_scheme_field') is None else kwargs.get('mix_scheme_field')
+poro_iter_field = 'false' if kwargs.get('poro_iter_field') is None else kwargs.get('poro_iter_field')
+poro_evol = 'false' if kwargs.get('poro_evol') is None else kwargs.get('poro_evol')
+sldmin_lim = 'false' if kwargs.get('sldmin_lim') is None else kwargs.get('sldmin_lim')
+psd_bulk_field = 'false' if kwargs.get('psd_bulk_field') is None else kwargs.get('psd_bulk_field')
+psd_full_field = 'false' if kwargs.get('psd_full_field') is None else kwargs.get('psd_full_field')
+sa_evol_1 = 'true' if kwargs.get('sa_evol_1') is None else kwargs.get('sa_evol_1')
+sa_evol_2 = 'false' if kwargs.get('sa_evol_2') is None else kwargs.get('sa_evol_2')
+display = 'true' if kwargs.get('display') is None else kwargs.get('display')
+disp_lim = 'true' if kwargs.get('disp_lim') is None else kwargs.get('disp_lim')
+close_aq_field = 'false' if kwargs.get('close_aq_field') is None else kwargs.get('close_aq_field')
+season = 'false' if kwargs.get('season') is None else kwargs.get('season') 
+
+
 water_frac = water_frac_tunespin
 
 targetpH = tph
@@ -56,11 +82,11 @@ datadir = os.path.join(modeldir, 'data/')
 runname_guess = initguess
 
 if runname_guess=='none':
-    make_initial_geuss = False
+    make_initial_guess = False
 else:
-    make_initial_geuss = True
+    make_initial_guess = True
 
-if make_initial_geuss:
+if make_initial_guess:
     outdir_guess = outdir
     
     try:
@@ -138,7 +164,7 @@ if make_initial_geuss:
             print( tau_g2 )
     except:
         print( 'initial guess from {:} not used as it did not converge'.format(runname_guess) )
-        make_initial_geuss = False
+        make_initial_guess = False
         if stop_unsuccessful: exit()
     
     # exit()
@@ -146,11 +172,14 @@ if make_initial_geuss:
 if liming: ca = 10
 
 
+# save file denoting the variables used
 outdir = outdir
 if use_local_storage:  outdir = os.environ['TMPDIR'] + '/scepter_output/'
 simid = spinname
 runname_field   = simid+'_spintuneup4_field'
 runname_lab     = simid+'_spintuneup4_lab'
+
+
 
 # compile 
 exename = 'scepter'
@@ -178,19 +207,20 @@ else:
             print('something went wrong while saving previous iterations')
         # prev_iter_exist = True
 if not os.path.exists( outdir + runname_lab) : os.system('mkdir -p ' + outdir + runname_lab)
+
+# save the vars used ---
+fn_dict_save = os.path.join(outdir, runname_field, "vars.res")
+shf.save_dict_to_text_file(combined_dict, fn_dict_save, delimiter='\t')
+# ----------------------
+
 os.system('cp ' + exename_src + to + outdir + runname_field + where + exename)
 os.system('cp ' + exename_src + to + outdir + runname_lab + where + exename)
 # change back
 os.chdir(mycwd)
 
 ztot=0.5
-ztot_field=0.5
-# ztot_field=0.3
-ztot_lab=0.5
 ztot_lab=0.05
 nz=30
-ttot_field=10000
-ttot_lab=1000
 ttot_lab=100
 temp_field=mat
 temp_lab=25
@@ -199,18 +229,13 @@ fdust_lab=0
 fdust2=0
 taudust_field=0
 taudust_lab=0.01
-if not make_initial_geuss: 
-    omrain_field=900
 omrain_lab=0
-# zom=0.5
-zom=0.25
 # poro_field=0.5
 poro_field=poro_input
 poro_lab=0.928391508
 # moistsrf_field=0.5
 moistsrf_field=sat_input
 moistsrf_lab=1.0
-zwater=100000
 # zdust_field=0.18
 zdust_field=0.25
 zdust_lab=0.15
@@ -262,9 +287,7 @@ make_inputs.get_input_frame(
     ,runid=runname_field
     )
 
-display='true'
-# report=1
-disp_lim='true'
+
 restart ='false'
 if include_roughness_sa == True:
     rough_field      ='true'
@@ -278,11 +301,6 @@ if cec_adsorption_on == True:
 else:
     cec_on="false"
 dz_fix='true'
-close_aq_field='false'
-poro_evol=poro_iter_field
-sa_evol_1 ='true'
-sa_evol_2='false'
-season='false'
 
 w_scheme_lab=0
 mix_scheme_lab=0 
@@ -1303,6 +1321,8 @@ shf.run_complete_check(runname_field,
                       omit_ipynb=True,
                      )
 
+# ... compute profile data
+cflx.prof_postproc_save(outdir, runname_field, runname_lab, postproc_prof_list)
 
 # ... move to aws if this option is turned on
 # [nothing happens if aws_save != 'move' or 'copy']
