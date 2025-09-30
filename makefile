@@ -65,6 +65,59 @@ SRC           = scepter.f90
                             
 PROGRAM       = scepter
 
+# - TK added to handle alternative scepter.f90 files -----------------------
+OBJS_A      = scepter_rateA.o
+SRC_A       = scepter_rateA.f90
+PROGRAM_A   = scepter_rateA
+
+rateA:           $(PROGRAM_A)
+
+$(PROGRAM_A): $(OBJS_A)
+	$(FC) $(OBJS_A) -o $(PROGRAM_A) -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
+
+$(OBJS_A):   $(SRC_A)
+	$(FC) $(SRC_A) -c -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
+
+# ---
+OBJS_B      = scepter_rateB.o
+SRC_B       = scepter_rateB.f90
+PROGRAM_B   = scepter_rateB
+
+rateB:           $(PROGRAM_B)
+
+$(PROGRAM_B): $(OBJS_B)
+	$(FC) $(OBJS_B) -o $(PROGRAM_B) -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
+
+$(OBJS_B):   $(SRC_B)
+	$(FC) $(SRC_B) -c -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
+
+# ---
+OBJS_C      = scepter_rateC.o
+SRC_C       = scepter_rateC.f90
+PROGRAM_C   = scepter_rateC
+
+rateC:           $(PROGRAM_C)
+
+$(PROGRAM_C): $(OBJS_C)
+	$(FC) $(OBJS_C) -o $(PROGRAM_C) -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
+
+$(OBJS_C):   $(SRC_C)
+	$(FC) $(SRC_C) -c -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
+
+# ---
+OBJS_D      = scepter_rateD.o
+SRC_D       = scepter_rateD.f90
+PROGRAM_D   = scepter_rateD
+
+rateD:           $(PROGRAM_D)
+
+$(PROGRAM_D): $(OBJS_D)
+	$(FC) $(OBJS_D) -o $(PROGRAM_D) -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
+
+$(OBJS_D):   $(SRC_D)
+	$(FC) $(SRC_D) -c -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
+# --------------------------------------------------------------------------
+
 all:            $(PROGRAM)
 
 $(PROGRAM):     $(OBJS)
@@ -73,7 +126,6 @@ $(PROGRAM):     $(OBJS)
 $(OBJS):        $(SRC) 
 	$(FC) $(SRC) -c -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
 
-clean:;         rm -f *.o  *~ $(PROGRAM)
+clean:;         rm -f *.o  *~ $(PROGRAM) $(PROGRAM_A) $(PROGRAM_B) $(PROGRAM_C) $(PROGRAM_D)
 blank:;         truncate -s 0 *.out
-cleanall:;         rm -f *.o *.out *~ $(PROGRAM)
-
+cleanall:;         rm -f *.o *.out *~ $(PROGRAM) $(PROGRAM_A) $(PROGRAM_B) $(PROGRAM_C) $(PROGRAM_D)

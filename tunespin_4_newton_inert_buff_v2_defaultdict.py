@@ -16,7 +16,7 @@ datestr = datetime.today().strftime('%Y-%m-%d')
 
 # --- read in helper functions from aglime-swap-cdr
 # add aglime-swap-cdr dir to path # [UPDATE FOR YOUR MACHINE]
-sys.path.append(os.path.abspath('/home/tykukla/aglime-swap-cdr/scepter/setup'))
+sys.path.append(os.path.abspath('/home/tykukla/ew-workflows/run_scepter'))
 # import module
 import scepter_helperFxns as shf
 # ---
@@ -59,7 +59,7 @@ display = 'true' if kwargs.get('display') is None else kwargs.get('display')
 disp_lim = 'true' if kwargs.get('disp_lim') is None else kwargs.get('disp_lim')
 close_aq_field = 'false' if kwargs.get('close_aq_field') is None else kwargs.get('close_aq_field')
 season = 'false' if kwargs.get('season') is None else kwargs.get('season') 
-
+nz = 30 if kwargs.get('nz') is None else kwargs.get('nz')
 
 water_frac = water_frac_tunespin
 
@@ -220,7 +220,6 @@ os.chdir(mycwd)
 
 ztot=0.5
 ztot_lab=0.05
-nz=30
 ttot_lab=100
 temp_field=mat
 temp_lab=25

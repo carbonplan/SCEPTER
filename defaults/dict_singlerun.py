@@ -40,7 +40,13 @@ singlerun_default = {
     'poro_evol': False,            # [True, False "spinvalue"] porosity evolves with solid phase dissolution
     'cec_adsorption_on': False,    # [True, False "spinvalue"] whether to enable cec adsorption
     'dep_sample': 0.15,            # [cm] depth of sample for comparing pH to target -- not relevant for single run or initial tuneup, but relevant for tuning rock application
-
+    # --- particle size distribution
+    'psdrain_datfile': "psdrain_100um.in",  # [] name of psdrain.in file in SCEPTER/data/ to use for the given run
+    'use_psdrain_datfile': False,  # [True, False] If true, the psdrain_datfile is copied over and used, otherwise a single peak distribution is constructed from the gaussian parameters below
+    'psdrain_meanRad': 5e-6,       # [m] mean radius of the particle size distribution (only used if `include_psd_*` is True)
+    'psdrain_log10_sd': 0.2,       # [m] standard deviation of the particle size distribution in log10 (only used if `include_psd_*` is True)
+    'psdrain_wt': 1.,              # [ ] weight for the PSD distribution
+    
     # --- optional, update CEC from spinup
     'cec_update_from_spinup': False,   # [True, False] whether to update CEC and alpha vars relative to the spinup value (False means no change to cec.in is made)
     'cec': 21.1,                   # [cmol kg-1] [only used if cec_update_from_spinup == True] cation exchange capacity
@@ -54,6 +60,8 @@ singlerun_default = {
     # --- OPTIONAL (accepts spinup value if None)
     "qrun": None,                  # [m yr-1] water infiltration flux, use this to override spinup only
     "mat": None,                   # [degC] mean annual temperature, use this to override spinup only
+    "dust_mixdep": None,           # [m] depth of dust mixing into soil column
+    "soilmoisture_surf": None,     # [] soil moisture saturation at the surface of the profile
 
     # --- spinup check
     'spinup_on': False,            # [bool] if it's a "spinup" initiated from another spinup, then our file naming convention will be different
@@ -61,6 +69,9 @@ singlerun_default = {
     # --- compute specific
     'aws_save': "None",              # ["move", "copy", None] whether to "move" file to aws, just copy it, or nothing at all
     'aws_bucket': "s3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/",  # where to save at AWS (only used if 'aws_save'=True)
+
+    # --- which scepter executable to use
+    'scepter_exec_name': 'scepter'  # ['scepter', 'scepter_rateA', ...]
 }
 
 
@@ -141,6 +152,9 @@ spinup_default = {
     # --- compute specific
     'aws_save': "copy",              # ["move", "copy", None] whether to "move" file to aws, just copy it, or nothing at all
     'aws_bucket': "s3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/",  # where to save at AWS (only used if 'aws_save'=True)
+
+    # --- which scepter executable to use
+    'scepter_exec_name': 'scepter'  # ['scepter', 'scepter_rateA', ...]
 }
 
 
@@ -178,14 +192,20 @@ specifydust_default = {
     # 'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
     #               "gb", "ct", "cabd", "ill", "gps", "mgbd"],
     'singlerun_seasonality': False, # [True, False] whether to impose seasonality in the singlerun script
-    'include_roughness_sa': True,  # [True, False] whether to include roughness in the mineral surface area calculation (for switches.in)
+    'include_roughness_sa': False,  # [True, False] whether to include roughness in the mineral surface area calculation (for switches.in)
     'include_psd_bulk': False,      # [True, False] whether to compute bulk particle size diameters (for switches.in)
     'include_psd_full': False,      # [True, False] whether to compute full particle size diameters (for switches.in)
     'cec_adsorption_on': False,    # [True, False] whether to enable cec adsorption
     'dep_sample': 0.15,            # [cm] depth of sample for comparing pH to target -- not relevant for single run or initial tuneup, but relevant for tuning rock application
+    # --- particle size distribution
+    'psdrain_datfile': "psdrain_100um.in",  # [] name of psdrain.in file in SCEPTER/data/ to use for the given run
+    'use_psdrain_datfile': False,  # [True, False] If true, the psdrain_datfile is copied over and used, otherwise a single peak distribution is constructed from the gaussian parameters below
+    'psdrain_meanRad': 5e-6,       # [m] mean radius of the particle size distribution (only used if `include_psd_*` is True)
+    'psdrain_log10_sd': 0.2,       # [m] standard deviation of the particle size distribution in log10 (only used if `include_psd_*` is True)
+    'psdrain_wt': 1.,              # [ ] weight for the PSD distribution
 
     # --- multi-year specific
-    "dust_ts_dir": "/home/tykukla/aglime-swap-cdr/scepter/dust-inputs",
+    "dust_ts_dir": "/home/tykukla/ew-workflows/inputs/scepter/dust",
     "dust_ts_fn": "gbas_15yr_1app_no2nd_001.csv",
     'max_time': 6,                 # [yr] total amount of time to simulate (must be > `duration`, which refers to individual targetpH run)
     'clim_files': ["T_temp.in", "q_temp.in", "Wet_temp.in"],  # names of climate files (only used in multi-year because we have to update each)
@@ -207,5 +227,8 @@ specifydust_default = {
     # --- compute specific
     'aws_save': None,              # ["move", "copy", None] whether to "move" file to aws, just copy it, or nothing at all
     'aws_bucket': "s3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/",  # where to save at AWS (only used if 'aws_save'=True)
+
+    # --- which scepter executable to use
+    'scepter_exec_name': 'scepter'  # ['scepter', 'scepter_rateA', ...]
 }
 

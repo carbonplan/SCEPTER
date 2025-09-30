@@ -1,3 +1,12 @@
+! *_rateC is the same as scepter.f90 but with LOWER gbas acid and base mechanisms.
+! each is decreased by one order of magnitude 
+!
+! NOTE: don't forget to change this line `path2 = path(:len(trim(path))-len('scepter')-1)`
+! to the proper scepter version
+! 
+! MINERAL       logk_h_ORIG          logk_h_NEW         log_oh_ORIG         log_oh_NEW          NOTES
+! gbas          -4.27d0              -5.27d0            -11.00d0            -12.00d0            same applies to cbas
+!
 program weathering
 
 implicit none 
@@ -19,7 +28,7 @@ WRITE(*,*) TRIM(path)
 ! call get_command_argument(0, cmd)
 ! WRITE(*,*) TRIM(cmd)
 ! path2 = path(:index(path,'weathering')-2)
-path2 = path(:len(trim(path))-len('scepter')-1)
+path2 = path(:len(trim(path))-len('scepter_rateC')-1)
 WRITE(*,*) TRIM(path2)
 
 CALL chdir(TRIM(path2))
@@ -2604,7 +2613,7 @@ if (do_psd) then
         
         open(ipsdv,file = trim(adjustl(profdir))//'/'//'intpsd_pr.txt',status = 'replace')
         write(ipsdv,*) ' sldsp\diameter(um) ', (10d0**ps(ips)*1d6*2d0,ips=1,nps), 'p80(um)'
-        write(ipsdv,*) 'blk  ',(intpsd(ips),ips=1,nps), p80_tmp
+        write(ipsdv,*) chrsld(isps),(intpsd(ips),ips=1,nps), p80_tmp
         close(ipsdv)
 
         ! initially particle is distributed as in parent rock 
@@ -3991,7 +4000,7 @@ do while (it<nt)
                         & nps,ps,intpsd &! input 
                         & ,p80_tmp &! output
                         & )
-                    write(ipsdv,*) 'blk  ',(intpsd(ips),ips=1,nps), p80_tmp
+                    write(ipsdv,*) chrsld(isps),(intpsd(ips),ips=1,nps), p80_tmp
                 endif 
             enddo 
             
@@ -8941,8 +8950,8 @@ select case(trim(adjustl(mineral)))
         mh = 1.013d0
         moh = -0.258d0
         kinn_ref = 0d0
-        kinh_ref = 10d0**(-4.27d0)*sec2yr
-        kinoh_ref = 10d0**(-11.00d0)*sec2yr
+        kinh_ref = 10d0**(-5.27d0)*sec2yr
+        kinoh_ref = 10d0**(-12.00d0)*sec2yr
         ean = 0d0
         eah = 39.7d0
         eaoh = 38.4d0

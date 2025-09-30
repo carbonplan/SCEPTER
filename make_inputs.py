@@ -341,7 +341,7 @@ def get_input_sld_properties(**kwargs):
     if not os.path.exists(outdir + runname): os.makedirs(outdir + runname)
     
     if srcfile != None:
-        copyfile(srcfile, outdir + runname + '/' + filename)
+        copyfile(srcfile, os.path.join(outdir, runname, filename))
     else:
         
         n = len(sld_varlist)

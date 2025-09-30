@@ -13,7 +13,7 @@ import subprocess
 
 # --- read in helper functions from aglime-swap-cdr
 # add aglime-swap-cdr dir to path # [UPDATE FOR YOUR MACHINE]
-sys.path.append(os.path.abspath('/home/tykukla/aglime-swap-cdr/scepter/setup'))
+sys.path.append(os.path.abspath('/home/tykukla/ew-workflows/run_scepter'))
 # import module
 import scepter_helperFxns as shf
 import cflx_proc as cflx
@@ -80,6 +80,8 @@ for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
     for file in files_to_delete:
         if os.path.exists(os.path.join(dst, file)):
             os.remove(os.path.join(dst, file))
+    # make sure we have the right scepter run script
+    shf.check_scepter_exec(scepter_exec_name, dst, modeldir)
 
 # duplicate the climate files
 if singlerun_seasonality==True:
@@ -90,9 +92,7 @@ if singlerun_seasonality==True:
         # copy over
         shf.copy_files(src_clim, dst_clim)
 
-exename = 'scepter'
-# exename_src = 'scepter_test'
-exename_src = 'scepter'
+exename = scepter_exec_name
 to = ' '
 where = '/'
 
@@ -173,11 +173,11 @@ with open(dst, 'w') as file:
 
 # %% 
 
-tx = "test"
-if tx:
-    print("yay")
-elif not tx:
-    print("nay")
+# tx = "test"
+# if tx:
+#     print("yay")
+# elif not tx:
+#     print("nay")
 
 # %% 
 
@@ -188,24 +188,47 @@ time.sleep(5)
 
 
 # --- PRIMARY DUST FILE
+multi_sp_feedstock = False
 if added_sp == "amnt": dustsrc = os.path.join(modeldir, 'data', 'dust_fert.in')
 if added_sp == 'gbas': dustsrc = os.path.join(modeldir, 'data', 'dust_gbasalt.in')
 if added_sp == 'cc': dustsrc = os.path.join(modeldir, 'data', 'dust_lime.in')
 if added_sp == 'cao': dustsrc = os.path.join(modeldir, 'data', 'dust_cao.in')
 if added_sp == 'dlm': dustsrc = os.path.join(modeldir, 'data', 'dust_dlm.in')
 if added_sp == 'wls': dustsrc = os.path.join(modeldir, 'data', 'dust_wls.in')
+if added_sp == 'fo': dustsrc = os.path.join(modeldir, 'data', 'dust_fo.in')
+if added_sp == 'baek23': 
+    dustsrc = os.path.join(modeldir, 'data', 'dust_def.in')
+    multi_sp_feedstock = True
+if added_sp == 'baek23nodp': 
+    dustsrc = os.path.join(modeldir, 'data', 'dust_def_noDP.in')
+    multi_sp_feedstock = True
+if added_sp == 'bridge': # blue ridge basalt
+    dustsrc = os.path.join(modeldir, 'data', 'dust_BlueRidge.in')
+    multi_sp_feedstock = True
 dustdst = 'dust.in'
 
 os.system('cp ' + dustsrc + to + outdir + runname_field + where + dustdst) 
 
 
 # --- SECONDARY DUST FILE
+multi_sp_feedstock_2nd = False
 if added_sp2 == "amnt": dustsrc2 = os.path.join(modeldir, 'data', 'dust_fert.in')
 if added_sp2 == 'gbas': dustsrc2 = os.path.join(modeldir, 'data', 'dust_gbasalt.in')
 if added_sp2 == 'cc': dustsrc2 = os.path.join(modeldir, 'data', 'dust_lime.in')
 if added_sp2 == 'cao': dustsrc2 = os.path.join(modeldir, 'data', 'dust_cao.in')
 if added_sp2 == 'dlm': dustsrc2 = os.path.join(modeldir, 'data', 'dust_dlm.in')  
-if added_sp == 'wls': dustsrc = os.path.join(modeldir, 'data', 'dust_wls.in')
+if added_sp2 == 'wls': dustsrc2 = os.path.join(modeldir, 'data', 'dust_wls.in')
+if added_sp2 == 'fo': dustsrc2 = os.path.join(modeldir, 'data', 'dust_fo.in')
+if added_sp2 == 'baek23': 
+    dustsrc2 = os.path.join(modeldir, 'data', 'dust_def.in')
+    multi_sp_feedstock_2nd = True
+if added_sp2 == 'baek23nodp': 
+    dustsrc2 = os.path.join(modeldir, 'data', 'dust_def_noDP.in')
+    multi_sp_feedstock_2nd = True
+if added_sp2 == 'bridge': # blue ridge basalt
+    dustsrc2 = os.path.join(modeldir, 'data', 'dust_BlueRidge.in')
+    multi_sp_feedstock_2nd = True
+
 dustdst2 = 'dust_2nd.in'
 
 os.system('cp ' + dustsrc2 + to + outdir + runname_field + where + dustdst2) 
@@ -233,10 +256,18 @@ with open(src, 'r') as file:
     data = file.readlines()
 if not data[-1].endswith("\n"):
     data[-1] += "\n"   # add to avoid a messy append
-# add dust species
-data.insert(1, added_sp+'\n')
-if added_sp2 in ['gbas','cc','cao','dlm','amnt', 'wls']: # then add this as well
+# add dust species if name is mineral
+if not multi_sp_feedstock:
+    data.insert(1, added_sp+'\n')
+else: # otherwise get dustsp from the dust.in file
+    data = shf.add_dustsp_to_sld(data, dustdst, outdir, runname_field)
+
+# add second species if needed
+if not multi_sp_feedstock_2nd: # then add this as well
         data.insert(1, added_sp2+'\n')
+else: # otherwise get dustsp from the dust.in file
+    data = shf.add_dustsp_to_sld(data, dustdst2, outdir, runname_field)
+    
 if include_N and added_sp2 != "amnt":
     data.append('amnt'+'\n')
 if include_Al: 
@@ -292,10 +323,18 @@ with open(src, 'r') as file:
     data = file.readlines()
 if not data[-1].endswith("\n"):
     data[-1] += "\n"   # add to avoid a messy append
-# add dust species
-data.insert(1, added_sp+'\n')
-if added_sp2 in ['gbas','cc','cao','dlm','amnt', 'wls']: # then add this as well
+# add dust species if name is mineral
+if not multi_sp_feedstock:
+    data.insert(1, added_sp+'\n')
+else: # otherwise get dustsp from the dust.in file
+    data = shf.add_dustsp_to_sld(data, dustdst, outdir, runname_lab)
+    
+# add second species if needed
+if not multi_sp_feedstock_2nd: # then add this as well
         data.insert(1, added_sp2+'\n')
+else: # otherwise get dustsp from the dust.in file
+    data = shf.add_dustsp_to_sld(data, dustdst2, outdir, runname_lab)
+    
 if include_N and added_sp2 != "amnt":
     data.append('amnt'+'\n')
 if include_Al: 
@@ -347,7 +386,28 @@ make_inputs.get_input_sld_properties(
     ,filename = filename
     ,srcfile = srcfile
     )
+
+# --- particle size distribution setup
+if include_psd_bulk or include_psd_full:
+    # define the source file 
+    if use_psdrain_datfile:
+        srcfile = os.path.join(modeldir, 'data', psdrain_datfile)
+    else: 
+        srcfile = None  # this means we make one from scratch using sld_varlist
     
+    filename = 'psdrain.in'
+    sld_varlist = [[psdrain_meanRad, psdrain_log10_sd, psdrain_wt]]
+    # make (or copy) psdrain.in
+    make_inputs.get_input_sld_properties(
+        outdir = outdir
+        ,runname = runname_field
+        ,filename = filename 
+        ,srcfile = srcfile
+        ,sld_varlist = sld_varlist,
+    )
+# -------------------------------------
+    
+
 # compile 
 # os.system('make')
 # os.system('make --file=makefile_test')
@@ -378,13 +438,18 @@ dst = outdir + runname_field  + filename
 with open(src, 'r') as file:
     data = file.readlines()
 data[3]     = '{:.8f}\ttotal duration of simulation [yr]\n'.format(tau)
-if kwargs.get('mat') is not None:
+if kwargs.get('mat') is not None and not np.isnan(kwargs.get('mat')):
+    print(f"MAT: -------------------- {kwargs.get('mat')}")
     data[4] = '{:.8f}\ttemperature [oC]\n'.format(mat) 
 data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust) 
 data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(fdust2)
 data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(taudust)
+if kwargs.get('soilmoisture_surf') is not None:
+    data[11] = '{:.8f}\twater saturation at the surface of profile\n'.format(soilmoisture_surf)
+if kwargs.get('dust_mixdep') is not None:
+    data[13] = '{:.8f}\tdepth of mixed layer for dust [m]\n'.format(dust_mixdep)
 if kwargs.get('qrun') is not None:
-    data[15] = '{:.8f}\tnet water flux [m/yr]\n'.format(mat)
+    data[15] = '{:.8f}\tnet water flux [m/yr]\n'.format(qrun)
 data[16]    = '{:.8f}\tradius of particles [m]\n'.format(dustrad)   # [tykukla added]
 data[18]    = '{}\n'.format(spinup_field)
 data[20]    = '{}\n'.format(runname_field)
@@ -394,15 +459,24 @@ with open(dst, 'w') as file:
     
 ## --- run field run --- ##
 
-print(outdir+runname_field+'/scepter')
-os.system("chmod +x " + os.path.join(outdir,runname_field,'scepter'))  # grant permissions
-os.system(os.path.join(outdir,runname_field,'scepter'))
+print(outdir+runname_field+'/' + exename)
+os.system("chmod +x " + os.path.join(outdir,runname_field,exename))  # grant permissions
+os.system(os.path.join(outdir,runname_field,exename))
 
 ## --- getting data from field run --- ##
 
 phint_field = get_int_prof.get_ph_int_site(outdir,runname_field,dep_sample)
 dense_lab = get_int_prof.get_rhobulk_int_site(outdir,runname_field,dep_sample)
-sps = ['g2',added_sp] # ['g2','inrt',added_sp]    # TK -- come back to these so all solid species are considered? is it necessary?
+
+if not multi_sp_feedstock:
+    sps = ['g2',added_sp] # ['g2','inrt',added_sp]    # TK -- come back to these so all solid species are considered? is it necessary?
+else: # otherwise get dustsp from the dust.in file
+    slds_path = os.path.join(outdir, runname_field, 'slds.in')
+    with open(slds_path, "r") as f:
+        sld_lines = f.readlines()
+    # undo formatting
+    sps = [line.strip() for line in sld_lines[1:]]
+
 if include_Al:  sps.append( alphase )
 sldwt_list = []
 for sp in sps:
@@ -509,9 +583,9 @@ make_inputs.get_input_tracer_bounds(
 
 ## --- run lab run --- ##
 
-print(outdir+runname_lab+'/scepter')
-os.system("chmod +x " + os.path.join(outdir,runname_lab,'scepter'))  # grant permissions
-os.system(os.path.join(outdir,runname_lab,'scepter'))
+print(outdir+runname_lab+'/' +exename)
+os.system("chmod +x " + os.path.join(outdir,runname_lab,exename))  # grant permissions
+os.system(os.path.join(outdir,runname_lab,exename))
 
 ## --- getting data from lab run --- ##
 
@@ -586,7 +660,8 @@ shf.run_complete_check(runname_field,
 shf.dustflx_calc(outdir, runname_field, fdust, fdust2, dustsp, dustsp_2nd)
 
 # ... compute cdr-relevant fluxes
-cflx.cflx_calc(outdir, runname_field, [dustsp, dustsp_2nd])
+multi_sp_dict = {dustsp: multi_sp_feedstock, dustsp_2nd: multi_sp_feedstock_2nd}
+cflx.cflx_calc(outdir, runname_field, [dustsp, dustsp_2nd], multi_sp_dict)
 
 # ... compute profile data
 cflx.prof_postproc_save(outdir, runname_field, runname_lab, postproc_prof_list)

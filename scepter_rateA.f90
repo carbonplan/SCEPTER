@@ -1,3 +1,23 @@
+! *_rateA is the same as scepter.f90 but with HIGHER secondary mineral 
+! neutral mechanism rate constants in clays. we also lower the primary mineral 
+! neutral mechanism rates in basalt minerals, but it doesn't matter for `gbas` 
+! simulations 
+!
+! NOTE: don't forget to change this line `path2 = path(:len(trim(path))-len('scepter')-1)`
+! to the proper scepter version
+! 
+! MINERAL       logk_ntrl_ORIG          logk_ntrl_NEW          NOTES
+! smectites     -12.78d0                -10.78d0               all smectites + illites treated the same     
+! ka            -13.18d0                -11.18d0               ka and al2o3 treated the same. values follow Palandri and Kharaka; Hermanska has -14.1
+! -- changed but have no effect for gbas 
+! an            -9.12d0                 -11.12d0               roughly consistent w/ Hermanska et al. 2022 table 2; -11.34
+! fa            -12.80d0                -14.80d0               a neutral rate is used here, but none is given in Palandri and Kharaka or Hermanska et al
+! fo            -10.64d0                -12.64d0               default uses Palandri and Kharaka values, Hermanska et al. has no neutral rate constant
+! kfs           -12.41d0                -14.41d0               default uses Palandri and Kharaka values, Hermanska et al. is similar. This change automatically updates the sanidine constant too, assumed equal to kfs
+! ab            -12.04d0                -14.04d0               default uses Palandri and Kharaka data with linear regression, Hermanska et al. is closer to -11.
+! dp            -11.11d0                -13.11d0               default uses Palandri and Kharaka values, Hermanska has a similar neutral rate but smaller acidic
+! hb            -11.97d0                -13.97d0               default uses augite data from Palandri and Kharaka, Hermanska is slightly different, this updates agt and cpx minerals too
+!
 program weathering
 
 implicit none 
@@ -10,6 +30,8 @@ real(kind=8) ztot,ttot,rainpowder,zsupp,poroi,satup,zsat,w,qin,p80,plant_rain,zm
     & ,step_tau
 integer count_dtunchanged_Max
 
+print *, "Running modified rateA version"
+
 
 CALL getcwd(cwd)
 WRITE(*,*) TRIM(cwd)
@@ -19,7 +41,7 @@ WRITE(*,*) TRIM(path)
 ! call get_command_argument(0, cmd)
 ! WRITE(*,*) TRIM(cmd)
 ! path2 = path(:index(path,'weathering')-2)
-path2 = path(:len(trim(path))-len('scepter')-1)
+path2 = path(:len(trim(path))-len('scepter_rateA')-1)
 WRITE(*,*) TRIM(path2)
 
 CALL chdir(TRIM(path2))
@@ -2604,7 +2626,7 @@ if (do_psd) then
         
         open(ipsdv,file = trim(adjustl(profdir))//'/'//'intpsd_pr.txt',status = 'replace')
         write(ipsdv,*) ' sldsp\diameter(um) ', (10d0**ps(ips)*1d6*2d0,ips=1,nps), 'p80(um)'
-        write(ipsdv,*) 'blk  ',(intpsd(ips),ips=1,nps), p80_tmp
+        write(ipsdv,*) chrsld(isps),(intpsd(ips),ips=1,nps), p80_tmp
         close(ipsdv)
 
         ! initially particle is distributed as in parent rock 
@@ -3991,7 +4013,7 @@ do while (it<nt)
                         & nps,ps,intpsd &! input 
                         & ,p80_tmp &! output
                         & )
-                    write(ipsdv,*) 'blk  ',(intpsd(ips),ips=1,nps), p80_tmp
+                    write(ipsdv,*) chrsld(isps),(intpsd(ips),ips=1,nps), p80_tmp
                 endif 
             enddo 
             
@@ -7943,7 +7965,7 @@ select case(trim(adjustl(mineral)))
     case('ka') ! corundum dissolution rate is assumed to be the same as kaolinite (cf., Carroll-Webb and Walther, 1988)
         mh = 0.777d0
         moh = -0.472d0
-        kinn_ref = 10d0**(-13.18d0)*sec2yr
+        kinn_ref = 10d0**(-11.18d0)*sec2yr
         kinh_ref = 10d0**(-11.31d0)*sec2yr
         kinoh_ref = 10d0**(-17.05d0)*sec2yr
         ean = 22.2d0
@@ -7979,7 +8001,7 @@ select case(trim(adjustl(mineral)))
         ! following is linear regression result of Table 1
         mh = 0.457d0
         moh = -0.572d0
-        kinn_ref = 10d0**(-12.04d0)*sec2yr
+        kinn_ref = 10d0**(-14.04d0)*sec2yr
         kinh_ref = 10d0**(-9.87d0)*sec2yr
         kinoh_ref = 10d0**(-16.98d0)*sec2yr
         ean = 69.8d0
@@ -8015,7 +8037,7 @@ select case(trim(adjustl(mineral)))
     case('kfs','sdn') ! sanidine assumed to follow rate law of K-feldspar
         mh = 0.5d0
         moh = -0.823d0
-        kinn_ref = 10d0**(-12.41d0)*sec2yr
+        kinn_ref = 10d0**(-14.41d0)*sec2yr
         kinh_ref = 10d0**(-10.06d0)*sec2yr
         ! kinoh_ref = 10d0**(-9.68d0)*sec2yr*kw**(-moh)
         kinoh_ref = 10d0**(-21.2d0)*sec2yr
@@ -8071,7 +8093,7 @@ select case(trim(adjustl(mineral)))
     case('fo')
         mh = 0.47d0
         moh = 0d0
-        kinn_ref = 10d0**(-10.64d0)*sec2yr
+        kinn_ref = 10d0**(-12.64d0)*sec2yr
         kinh_ref = 10d0**(-6.85d0)*sec2yr
         kinoh_ref = 0d0
         ean = 79d0
@@ -8097,7 +8119,7 @@ select case(trim(adjustl(mineral)))
     case('fa')
         mh = 1d0
         moh = 0d0
-        kinn_ref = 10d0**(-12.80d0)*sec2yr
+        kinn_ref = 10d0**(-14.80d0)*sec2yr
         kinh_ref = 10d0**(-4.80d0)*sec2yr
         kinoh_ref = 0d0
         ean = 94.4d0
@@ -8123,7 +8145,7 @@ select case(trim(adjustl(mineral)))
     case('an')
         mh = 1.411d0
         moh = 0d0
-        kinn_ref = 10d0**(-9.12d0)*sec2yr
+        kinn_ref = 10d0**(-11.12d0)*sec2yr
         kinh_ref = 10d0**(-3.5d0)*sec2yr
         kinoh_ref = 0d0
         ean = 17.8d0
@@ -8569,7 +8591,7 @@ select case(trim(adjustl(mineral)))
     case('cabd','ill','kbd','nabd','mgbd','casp','ksp','nasp','mgsp') ! illite kinetics is assumed to be the same as smectite (Bibi et al., 2011)
         mh = 0.34d0
         moh = -0.4d0
-        kinn_ref = 10d0**(-12.78d0)*sec2yr
+        kinn_ref = 10d0**(-10.78d0)*sec2yr
         kinh_ref = 10d0**(-10.98d0)*sec2yr
         kinoh_ref = 10d0**(-16.52d0)*sec2yr
         ean = 35d0
@@ -8621,7 +8643,7 @@ select case(trim(adjustl(mineral)))
     case('dp')
         mh = 0.71d0
         moh = 0d0
-        kinn_ref = 10d0**(-11.11d0)*sec2yr
+        kinn_ref = 10d0**(-13.11d0)*sec2yr
         kinh_ref = 10d0**(-6.36d0)*sec2yr
         kinoh_ref = 0d0
         ean = 50.6d0
@@ -8647,7 +8669,7 @@ select case(trim(adjustl(mineral)))
     case('hb','cpx','agt')
         mh = 0.70d0
         moh = 0d0
-        kinn_ref = 10d0**(-11.97d0)*sec2yr
+        kinn_ref = 10d0**(-13.97d0)*sec2yr
         kinh_ref = 10d0**(-6.82d0)*sec2yr
         kinoh_ref = 0d0
         ean = 78.0d0

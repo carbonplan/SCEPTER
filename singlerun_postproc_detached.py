@@ -13,7 +13,7 @@ import os
 import re
 import sys
 
-sys.path.append(os.path.abspath('/home/tykukla/aglime-swap-cdr/scepter/setup'))
+sys.path.append(os.path.abspath('/home/tykukla/ew-workflows/run_scepter'))
 # import module
 import scepter_helperFxns as shf
 import cflx_proc as cflx
