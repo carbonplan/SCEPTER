@@ -437,6 +437,12 @@ dst = outdir + runname_field  + filename
 
 with open(src, 'r') as file:
     data = file.readlines()
+if kwargs.get('ztot_field') is not None and not np.isnan(kwargs.get('ztot_field')):
+    print(f"z_field: -------------------- {kwargs.get('ztot_field')}")
+    data[1] = '{:.8f}\ttotal depth of weathering profile [m]'.format(ztot_field)
+if kwargs.get('nz') is not None and not np.isnan(kwargs.get('nz')):
+    print(f"nz: -------------------- {kwargs.get('nz')}")
+    data[2] = '{:.8f}\ttotal depth of weathering profile [m]'.format(nz)
 data[3]     = '{:.8f}\ttotal duration of simulation [yr]\n'.format(tau)
 if kwargs.get('mat') is not None and not np.isnan(kwargs.get('mat')):
     print(f"MAT: -------------------- {kwargs.get('mat')}")

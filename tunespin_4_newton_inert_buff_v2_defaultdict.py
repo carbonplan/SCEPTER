@@ -59,7 +59,7 @@ display = 'true' if kwargs.get('display') is None else kwargs.get('display')
 disp_lim = 'true' if kwargs.get('disp_lim') is None else kwargs.get('disp_lim')
 close_aq_field = 'false' if kwargs.get('close_aq_field') is None else kwargs.get('close_aq_field')
 season = 'false' if kwargs.get('season') is None else kwargs.get('season') 
-nz = 30 if kwargs.get('nz') is None else kwargs.get('nz')
+nz = 30 if kwargs.get('nz') is None else int(kwargs.get('nz'))
 
 water_frac = water_frac_tunespin
 
@@ -88,7 +88,7 @@ else:
 
 if make_initial_guess:
     outdir_guess = outdir
-    
+    print("my initial guess ----")
     try:
         filename = 'iteration.res'  # [tk] deleted leading "/" because it doesn't play nicely with "os.path.join()"
         try:
@@ -168,6 +168,8 @@ if make_initial_guess:
         if stop_unsuccessful: exit()
     
     # exit()
+import time
+time.sleep(10)
 
 if liming: ca = 10
 

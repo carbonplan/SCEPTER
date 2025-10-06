@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import time
+import fsspec
 import numpy as np
 import shutil
 import get_int_prof
@@ -452,8 +453,14 @@ for index, row in df_dust.iterrows():
 
     with open(src, 'r') as file:
         data = file.readlines()
+    if kwargs.get('ztot_field') is not None and not np.isnan(kwargs.get('ztot_field')):
+        print(f"z_field: -------------------- {kwargs.get('ztot_field')}")
+        data[1] = '{:.8f}\ttotal depth of weathering profile [m]'.format(ztot_field)
+    if kwargs.get('nz') is not None and not np.isnan(kwargs.get('nz')):
+        print(f"nz: -------------------- {kwargs.get('nz')}")
+        data[2] = '{:.8f}\ttotal depth of weathering profile [m]'.format(nz)
     data[3]     = '{:.8f}\ttotal duration of simulation [yr]\n'.format(tau)
-    if kwargs.get('mat') is not None:
+    if kwargs.get('mat') is not None and not np.isnan(kwargs.get('mat')):
         data[4] = '{:.8f}\ttemperature [oC]\n'.format(mat) 
     data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust) 
     data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(fdust2)

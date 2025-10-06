@@ -132,6 +132,7 @@ spinup_default = {
     # defaults are stored in the function and used if the value is None
     'ttot_field': None,            # [yr; default=10000] duration of the spinup field run 
     'ztot_field': None,            # [m; default=0.5] depth of soil column for field run
+    'nz': None,                    # [n; default=30] grid cells across ztot_field depth
     'zom': None,                   # [m; default=0.25] mixed layer depth for organic matter mixing
     'omrain_field': None,          # [g C/m2/yr; default=900] organic matter rain rate; initial guess for tunespin_*_newton scripts
     'zwater': None,                # [m; default=10000] depth of water table
