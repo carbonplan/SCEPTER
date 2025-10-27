@@ -11,12 +11,9 @@ import random
 import defaults.dict_singlerun
 import subprocess
 
-# --- read in helper functions from aglime-swap-cdr
-# add aglime-swap-cdr dir to path # [UPDATE FOR YOUR MACHINE]
-sys.path.append(os.path.abspath('/home/tykukla/ew-workflows/run_scepter'))
-# import module
-import scepter_helperFxns as shf
-import cflx_proc as cflx
+# --- read in helper functions from ew-workflows
+from ew_workflows import scepter_helperFxns as shf
+from ew_workflows import cflx_proc as cflx
 # ---
 # %% 
 

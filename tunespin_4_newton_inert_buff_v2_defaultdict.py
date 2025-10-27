@@ -14,11 +14,9 @@ import defaults.dict_singlerun
 
 datestr = datetime.today().strftime('%Y-%m-%d')
 
-# --- read in helper functions from aglime-swap-cdr
-# add aglime-swap-cdr dir to path # [UPDATE FOR YOUR MACHINE]
-sys.path.append(os.path.abspath('/home/tykukla/ew-workflows/run_scepter'))
+# --- read in helper functions from ew_workflows
 # import module
-import scepter_helperFxns as shf
+from ew_workflows import scepter_helperFxns as shf
 # ---
 
 

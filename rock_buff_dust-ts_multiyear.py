@@ -24,11 +24,9 @@ import pandas as pd
 
 # --- read in helper functions from aglime-swap-cdr
 # add aglime-swap-cdr dir to path # [UPDATE FOR YOUR MACHINE]
-sys.path.append(os.path.abspath('/home/tykukla/ew-workflows/run_scepter'))
-# import module
-import scepter_helperFxns as shf
-import build_composite_multiyear as cfxns
-import cflx_proc as cflx
+from ew_workflows import scepter_helperFxns as shf
+from ew_workflows import build_composite_multiyear as cfxns
+from ew_workflows import cflx_proc as cflx
 # ---
 
 
