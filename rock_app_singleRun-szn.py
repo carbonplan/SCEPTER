@@ -62,8 +62,8 @@ files_to_delete = ["check_logs.res", "check_results.res", "completed.res"]
 # duplicate directories from spinups
 for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
 
-    src = outdir + spinup
-    dst = outdir + runname
+    src = os.path.join(spindir, spinup)
+    dst = os.path.join(outdir, runname)
 
     if not os.path.exists(dst): 
         shutil.copytree(src, dst)
@@ -119,8 +119,8 @@ if cec_update_from_spinup:
 # -----------------------------------
 
 filename = '/switches.in'
-src = outdir + spinup_field + filename
-dst = outdir + runname_field  + filename
+src = os.path.join(spindir, spinup_field, filename)
+dst = os.path.join(outdir, runname_field, filename)
 with open(src, 'r') as file:
     data = file.readlines()
 data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
@@ -247,8 +247,8 @@ os.system('cp ' + dustsrc2 + to + outdir + runname_field + where + dustdst2)
 # ------------------------------------------------------------------------------ # 
 
 filename = '/slds.in'
-src = outdir + spinup_field + filename
-dst = outdir + runname_field  + filename
+src = os.path.join(spindir, spinup_field, filename)
+dst = os.path.join(outdir, runname_field, filename)
 with open(src, 'r') as file:
     data = file.readlines()
 if not data[-1].endswith("\n"):
@@ -277,8 +277,8 @@ shf.remove_duplicates(dst)
 
 # ============ adding Fe(II) as tracer and its oxidation =================
 filename = '/solutes.in'
-src = outdir + spinup + filename
-dst = outdir + runname_field  + filename
+src = os.path.join(spindir, spinup, filename)
+dst = os.path.join(outdir, runname_field, filename)
 with open(src, 'r') as file:
     data = file.readlines()
 if not data[-1].endswith("\n"):
@@ -314,8 +314,8 @@ shf.remove_duplicates(dst)
     
 # ============ common input file modification wrt spinup: for lab run ============
 filename = '/slds.in'
-src = outdir + spinup_lab + filename
-dst = outdir + runname_lab  + filename
+src = os.path.join(spindir, spinup_lab, filename)
+dst = os.path.join(outdir, runname_lab, filename)
 with open(src, 'r') as file:
     data = file.readlines()
 if not data[-1].endswith("\n"):
@@ -343,8 +343,8 @@ with open(dst, 'w') as file:
 shf.remove_duplicates(dst)
 
 filename = '/solutes.in'
-src = outdir + spinup_lab + filename
-dst = outdir + runname_lab  + filename
+src = os.path.join(spindir, spinup_lab, filename)
+dst = os.path.join(outdir, runname_lab, filename)
 with open(src, 'r') as file:
     data = file.readlines()
 if not data[-1].endswith("\n"):
@@ -358,8 +358,8 @@ with open(dst, 'w') as file:
 shf.remove_duplicates(dst)
 
 filename = '/kinspc.in'
-src = outdir + spinup_lab + filename
-dst = outdir + runname_lab  + filename
+src = os.path.join(spindir, spinup_lab, filename)       
+dst = os.path.join(outdir, runname_lab, filename)
 with open(src, 'r') as file:
     data = file.readlines()
 if not data[-1].endswith("\n"):
@@ -417,8 +417,8 @@ res_list = []
 cnt = 0
 
 # get ph of spin-up
-phint = get_int_prof.get_ph_int_site(outdir,spinup_lab,dep_sample)
-phint_field = get_int_prof.get_ph_int_site(outdir,spinup_field,dep_sample)
+phint = get_int_prof.get_ph_int_site(spindir,spinup_lab,dep_sample)
+phint_field = get_int_prof.get_ph_int_site(spindir,spinup_field,dep_sample)
 
 cnt += 1
 
@@ -429,8 +429,8 @@ cnt += 1
 ## --- setup for field run --- ##
 
 filename = '/frame.in'
-src = outdir + spinup_field + filename
-dst = outdir + runname_field  + filename
+src = os.path.join(spindir, spinup_field, filename)
+dst = os.path.join(outdir, runname_field, filename)
 
 with open(src, 'r') as file:
     data = file.readlines()
@@ -548,8 +548,8 @@ if include_DIC:                                     # (added 3.23.2023)
 fdust_list = [fdust_tmp/fdust_lab  for fdust_tmp in fdust_list  ]  
 
 filename = '/frame.in'
-src = outdir + spinup_lab + filename
-dst = outdir + runname_lab  + filename
+src = os.path.join(spindir, spinup_lab, filename)
+dst = os.path.join(outdir, runname_lab, filename)
 
 with open(src, 'r') as file:
     data = file.readlines()

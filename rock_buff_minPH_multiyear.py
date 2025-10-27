@@ -76,6 +76,7 @@ for tstep in mytsteps:
         spinup_field = runname_field_old
         spinup_lab = runname_lab_old
         fdust = next_dustrate  # set fdust to some ideally smaller value for the successive iterations
+        spindir = outdir  # set the spinup dir to the outdir for successive iterations
     
     # set runnames
     runname_field   = f"{expid}_startyear-{str(tstep).replace('.','p')}_iter-{int(counter)}_field"
@@ -84,7 +85,7 @@ for tstep in mytsteps:
     # duplicate directories from spinups
     for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
         
-        src = os.path.join(outdir, spinup)
+        src = os.path.join(spindir, spinup)
         dst = os.path.join(outdir, runname)
     
         if not os.path.exists(dst): 
@@ -125,8 +126,8 @@ for tstep in mytsteps:
     
     # ============ common input file modification wrt spinup: for field run
     filename = '/switches.in'
-    src = outdir + spinup_field + filename
-    dst = outdir + runname_field  + filename
+    src = os.path.join(spindir, spinup_field, filename)
+    dst = os.path.join(outdir, runname_field, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(imix)
@@ -194,8 +195,8 @@ for tstep in mytsteps:
     # --- 
     
     filename = '/slds.in'
-    src = outdir + spinup_field + filename
-    dst = outdir + runname_field  + filename
+    src = os.path.join(spindir, spinup_field, filename)
+    dst = os.path.join(outdir, runname_field, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     if not data[-1].endswith("\n"):
@@ -225,8 +226,8 @@ for tstep in mytsteps:
         
     # ============ adding Fe(II) as tracer and its oxidation =================
     filename = '/solutes.in'
-    src = outdir + spinup + filename
-    dst = outdir + runname_field  + filename
+    src = os.path.join(spindir, spinup, filename)
+    dst = os.path.join(outdir, runname_field, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     if not data[-1].endswith("\n"):
@@ -263,8 +264,8 @@ for tstep in mytsteps:
     # ============ common input file modification wrt spinup: for lab run ============
     
     filename = '/slds.in'
-    src = outdir + spinup_lab + filename
-    dst = outdir + runname_lab  + filename
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     if not data[-1].endswith("\n"):
@@ -293,8 +294,8 @@ for tstep in mytsteps:
 
         
     filename = '/solutes.in'
-    src = outdir + spinup_lab + filename
-    dst = outdir + runname_lab  + filename
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     if not data[-1].endswith("\n"):
@@ -309,8 +310,8 @@ for tstep in mytsteps:
     shf.remove_duplicates(dst)
         
     filename = '/kinspc.in'
-    src = outdir + spinup_lab + filename
-    dst = outdir + runname_lab  + filename
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     if not data[-1].endswith("\n"):
@@ -366,8 +367,8 @@ for tstep in mytsteps:
     res_list = []
     
     # get ph of spin-up
-    phint = get_int_prof.get_ph_int_site(outdir,spinup_lab,dep_sample)
-    phint_field = get_int_prof.get_ph_int_site(outdir,spinup_field,dep_sample)
+    phint = get_int_prof.get_ph_int_site(spindir,spinup_lab,dep_sample)
+    phint_field = get_int_prof.get_ph_int_site(spindir,spinup_field,dep_sample)
     ymx = phint - targetpH
     if phnorm_pw: ymx = phint_field - targetpH
     res_list.append([0, phint_field,phint, targetpH, 0, abs( ymx/targetpH ) ])
@@ -378,8 +379,8 @@ for tstep in mytsteps:
     ## --- setup for field run --- ##
     
     filename = '/frame.in'
-    src = outdir + spinup_field + filename
-    dst = outdir + runname_field  + filename
+    src = os.path.join(spindir, spinup_field, filename)
+    dst = os.path.join(outdir, runname_field, filename)
 
     with open(src, 'r') as file:
         data = file.readlines()
@@ -495,8 +496,8 @@ for tstep in mytsteps:
     fdust_list = [fdust_tmp/fdust_lab  for fdust_tmp in fdust_list  ]  
     
     filename = '/frame.in'
-    src = outdir + spinup_lab + filename
-    dst = outdir + runname_lab  + filename
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
 
     with open(src, 'r') as file:
         data = file.readlines()

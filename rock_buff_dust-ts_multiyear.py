@@ -139,6 +139,7 @@ for index, row in df_dust.iterrows():
     else:
         spinup_field = runname_field_old
         spinup_lab = runname_lab_old
+        spindir = outdir # set the spinup dir to outdir for later iterations
         # fdust = next_dustrate  # set fdust to some ideally smaller value for the successive iterations
     
     # set runnames
@@ -148,7 +149,7 @@ for index, row in df_dust.iterrows():
     # duplicate directories from spinups
     for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
         
-        src = os.path.join(outdir, spinup)
+        src = os.path.join(spindir, spinup)
         dst = os.path.join(outdir, runname)
     
         if not os.path.exists(dst): 
@@ -196,8 +197,8 @@ for index, row in df_dust.iterrows():
     
     # ============ common input file modification wrt spinup: for field run
     filename = '/switches.in'
-    src = outdir + spinup_field + filename
-    dst = outdir + runname_field  + filename
+    src = os.path.join(spindir, spinup_field, filename)
+    dst = os.path.join(outdir, runname_field, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
@@ -273,8 +274,8 @@ for index, row in df_dust.iterrows():
     # --- 
     
     filename = '/slds.in'
-    src = outdir + spinup_field + filename
-    dst = outdir + runname_field  + filename
+    src = os.path.join(spindir, spinup_field, filename)
+    dst = os.path.join(outdir, runname_field, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     if not data[-1].endswith("\n"):
@@ -303,8 +304,8 @@ for index, row in df_dust.iterrows():
         
     # ============ adding Fe(II) as tracer and its oxidation =================
     filename = '/solutes.in'
-    src = outdir + spinup + filename
-    dst = outdir + runname_field  + filename
+    src = os.path.join(spindir, spinup, filename)
+    dst = os.path.join(outdir, runname_field, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     if not data[-1].endswith("\n"):
@@ -341,8 +342,8 @@ for index, row in df_dust.iterrows():
     # ============ common input file modification wrt spinup: for lab run ============
     
     filename = '/slds.in'
-    src = outdir + spinup_lab + filename
-    dst = outdir + runname_lab  + filename
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     if not data[-1].endswith("\n"):
@@ -370,8 +371,8 @@ for index, row in df_dust.iterrows():
 
         
     filename = '/solutes.in'
-    src = outdir + spinup_lab + filename
-    dst = outdir + runname_lab  + filename
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     if not data[-1].endswith("\n"):
@@ -386,8 +387,8 @@ for index, row in df_dust.iterrows():
     shf.remove_duplicates(dst)
         
     filename = '/kinspc.in'
-    src = outdir + spinup_lab + filename
-    dst = outdir + runname_lab  + filename
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
     with open(src, 'r') as file:
         data = file.readlines()
     if not data[-1].endswith("\n"):
@@ -446,8 +447,8 @@ for index, row in df_dust.iterrows():
     ## --- setup for field run --- ##
     
     filename = '/frame.in'
-    src = outdir + spinup_field + filename
-    dst = outdir + runname_field  + filename
+    src = os.path.join(spindir, spinup_field, filename)
+    dst = os.path.join(outdir, runname_field, filename)
 
     with open(src, 'r') as file:
         data = file.readlines()
@@ -561,8 +562,8 @@ for index, row in df_dust.iterrows():
     fdust_list = [fdust_tmp/fdust_lab  for fdust_tmp in fdust_list  ]  
     
     filename = '/frame.in'
-    src = outdir + spinup_lab + filename
-    dst = outdir + runname_lab  + filename
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
 
     with open(src, 'r') as file:
         data = file.readlines()
