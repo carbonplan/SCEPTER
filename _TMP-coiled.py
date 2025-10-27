@@ -11,10 +11,11 @@ import json
 
 import s3fs
 
-try:
-    from ew_workflows import scepter_helperFxns as shf
-except Exception:
-    shf = None
+# try:
+from ew_workflows import scepter_helperFxns as shf
+# except Exception:
+#     print("Warning: could not import scepter_helperFxns")
+#     shf = None
 
 
 # --- 
