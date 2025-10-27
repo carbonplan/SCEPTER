@@ -6,12 +6,14 @@
 # 
 # ------------------------------------
 import os
-import sys
 import json
+from pathlib import Path
+import sys
 
 import s3fs
 
 # try:
+sys.path.append(str(Path(__file__).resolve().parent / "src"))
 from ew_workflows import scepter_helperFxns as shf
 # except Exception:
 #     print("Warning: could not import scepter_helperFxns")
