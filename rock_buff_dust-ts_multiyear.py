@@ -146,6 +146,16 @@ for index, row in df_dust.iterrows():
     runname_field   = f"{expid}_startyear-{str(tstep).replace('.','p')}_iter-{int(counter)}_field"
     runname_lab     = f"{expid}_startyear-{str(tstep).replace('.','p')}_iter-{int(counter)}_lab"
 
+    # --- move spinup files to local if on s3
+    if spindir.startswith("s3://"):
+        spindir = shf.copy_spinup_if_on_s3( # update spindir to local
+                spindir=spindir, 
+                spinup_field=spinup_field, 
+                spinup_lab=spinup_lab,
+                localdir=outdir,
+        )
+    # ---
+
     # duplicate directories from spinups
     for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
         
