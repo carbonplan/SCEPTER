@@ -59,6 +59,16 @@ datadir = os.path.join(modeldir, 'data/')
 # (diagnostic files from the spinup run)
 files_to_delete = ["check_logs.res", "check_results.res", "completed.res"]
 
+# --- move files to local if on s3
+if spindir.startswith("s3://"):
+    spindir = shf.copy_spinup_if_on_s3( # update spindir to local
+            spindir=spindir, 
+            spinup_field=spinup_field, 
+            spinup_lab=spinup_lab,
+            localdir=outdir,
+    )
+# ---
+
 # duplicate directories from spinups
 for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
 
