@@ -24,6 +24,7 @@ singlerun_default = {
     'newrun_id': 'testname',        # name of new run
     'modeldir': '/home/tykukla/SCEPTER/', # directory of model scripts
     'outdir': '/home/tykukla/SCEPTER/scepter_output/', # directory of output files
+    'spindir': 's3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/', # location of spinup run
     'climatedir': '/home/tykukla/aglime-swap-cdr/scepter/clim-inputs/',   # climate input main directory
     'climatefiles': 'default',     # climate input subdirectory (contains the climate `.in` files)
     'dustrate': 100,              # [g m-2 yr-1] dust application flux ; divide by 100 to get ton / ha / yr; not used for spintuneups and an initial guess for target ph runs
@@ -185,6 +186,7 @@ specifydust_default = {
     'newrun_id': 'testnameMeanAnn_gbas_fert',        # name of new run
     'modeldir': '/home/tykukla/SCEPTER/', # directory of model scripts
     'outdir': '/home/tykukla/SCEPTER/scepter_output/', # directory of output files
+    'spindir': 's3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/', # location of spinup run
     'climatedir': '/home/tykukla/aglime-swap-cdr/scepter/clim-inputs/',   # climate input main directory
     'climatefiles': 'default',     # climate input subdirectory (contains the climate `.in` files)
     'taudust': 0.05,               # [yr] duration of dust application in year
