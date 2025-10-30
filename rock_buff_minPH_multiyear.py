@@ -135,7 +135,7 @@ for tstep in mytsteps:
     where = '/'
     
     # ============ common input file modification wrt spinup: for field run
-    filename = '/switches.in'
+    filename = 'switches.in'
     src = os.path.join(spindir, spinup_field, filename)
     dst = os.path.join(outdir, runname_field, filename)
     with open(src, 'r') as file:
@@ -204,7 +204,7 @@ for tstep in mytsteps:
     os.system('cp ' + dustsrc2 + to + outdir + runname_field + where + dustdst2) 
     # --- 
     
-    filename = '/slds.in'
+    filename = 'slds.in'
     src = os.path.join(spindir, spinup_field, filename)
     dst = os.path.join(outdir, runname_field, filename)
     with open(src, 'r') as file:
@@ -235,7 +235,7 @@ for tstep in mytsteps:
 
         
     # ============ adding Fe(II) as tracer and its oxidation =================
-    filename = '/solutes.in'
+    filename = 'solutes.in'
     src = os.path.join(spindir, spinup, filename)
     dst = os.path.join(outdir, runname_field, filename)
     with open(src, 'r') as file:
@@ -251,7 +251,7 @@ for tstep in mytsteps:
     # remove duplicate minerals
     shf.remove_duplicates(dst)
         
-    # filename = '/gases.in'
+    # filename = 'gases.in'
     # src = outdir + spinup + filename
     # dst = outdir + runname  + filename
     # with open(src, 'r') as file:
@@ -261,7 +261,7 @@ for tstep in mytsteps:
     # with open(dst, 'w') as file:
         # file.writelines(data)
         
-    # filename = '/extrxns.in'
+    # filename = 'extrxns.in'
     # src = outdir + spinup + filename
     # dst = outdir + runname  + filename
     # with open(src, 'r') as file:
@@ -273,7 +273,7 @@ for tstep in mytsteps:
         
     # ============ common input file modification wrt spinup: for lab run ============
     
-    filename = '/slds.in'
+    filename = 'slds.in'
     src = os.path.join(spindir, spinup_lab, filename)
     dst = os.path.join(outdir, runname_lab, filename)
     with open(src, 'r') as file:
@@ -303,7 +303,7 @@ for tstep in mytsteps:
     shf.remove_duplicates(dst)
 
         
-    filename = '/solutes.in'
+    filename = 'solutes.in'
     src = os.path.join(spindir, spinup_lab, filename)
     dst = os.path.join(outdir, runname_lab, filename)
     with open(src, 'r') as file:
@@ -319,7 +319,7 @@ for tstep in mytsteps:
     # remove duplicate minerals
     shf.remove_duplicates(dst)
         
-    filename = '/kinspc.in'
+    filename = 'kinspc.in'
     src = os.path.join(spindir, spinup_lab, filename)
     dst = os.path.join(outdir, runname_lab, filename)
     with open(src, 'r') as file:
@@ -388,7 +388,7 @@ for tstep in mytsteps:
     
     ## --- setup for field run --- ##
     
-    filename = '/frame.in'
+    filename = 'frame.in'
     src = os.path.join(spindir, spinup_field, filename)
     dst = os.path.join(outdir, runname_field, filename)
 
@@ -505,7 +505,7 @@ for tstep in mytsteps:
 
     fdust_list = [fdust_tmp/fdust_lab  for fdust_tmp in fdust_list  ]  
     
-    filename = '/frame.in'
+    filename = 'frame.in'
     src = os.path.join(spindir, spinup_lab, filename)
     dst = os.path.join(outdir, runname_lab, filename)
 
