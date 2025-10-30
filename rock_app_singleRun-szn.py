@@ -129,7 +129,14 @@ if cec_update_from_spinup:
 # -----------------------------------
 
 filename = '/switches.in'
+# ************************************************* 
+# --- TROUBLESHOOT 
+print("**************** TROUBLESHOOT *****************")
+print(f"{spindir} ||| {spinup_field} ||| {filename}")
 src = os.path.join(spindir, spinup_field, filename)
+print(src)
+print("***********************************************")
+# ************************************************* 
 dst = os.path.join(outdir, runname_field, filename)
 with open(src, 'r') as file:
     data = file.readlines()
