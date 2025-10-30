@@ -665,6 +665,16 @@ for runname in [runname_field,runname_lab]:
             
     print(res_list)
 
+# -----------------------------------------------------------------------
+# TROUBLESHOOT 
+import s3fs
+fs = s3fs.S3FileSystem()
+path = "s3://carbonplan-carbon-removal/ew-workflows-data/post-scepter-proof-of-life.txt"
+with fs.open(path, "w") as f:
+    pass  # nothing written, just creates the file
+print(f"✅ Proof-of-life file created at {path}")
+# -----------------------------------------------------------------------
+
 
 # ... run postprocessing checks
 shf.run_complete_check(runname_field, 
