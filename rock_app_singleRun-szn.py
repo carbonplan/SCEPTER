@@ -129,17 +129,18 @@ if cec_update_from_spinup:
 # -----------------------------------
 
 filename = 'switches.in'
+src = os.path.join(spindir, spinup_field, filename)
 # ************************************************* 
 # --- TROUBLESHOOT 
-print("**************** TROUBLESHOOT *****************")
-print(f"{spindir} ||| {spinup_field} ||| {filename}")
-src = os.path.join(spindir, spinup_field, filename)
-print(src)
-print("***********************************************")
+# print("**************** TROUBLESHOOT *****************")
+# print(f"{spindir} ||| {spinup_field} ||| {filename}")
+# print(src)
+# print("***********************************************")
 # ************************************************* 
 dst = os.path.join(outdir, runname_field, filename)
 with open(src, 'r') as file:
     data = file.readlines()
+
 data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
 data[7] = 'true\trestart from a previous run\n'
 if include_psd_bulk == True:
@@ -181,7 +182,12 @@ if cec_adsorption_on == True:
     data[11] = "true\tenabling adsorption for cation exchange\n"
 elif cec_adsorption_on == False:
     data[11] = "false\tenabling adsorption for cation exchange\n"
-    
+
+# === modifications required for v1.0.2 ----------------------
+if exename == "scepter_richards":
+    data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken'.format(int(1))
+    data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series'.format(int(1))
+
 with open(dst, 'w') as file:
     file.writelines(data)
 
@@ -578,6 +584,63 @@ data[10]     = '{:.8f}\tinitial porosity\n'.format(poro_lab)
 with open(dst, 'w') as file:
     file.writelines(data)
     
+filename = 'switches.in'
+src = os.path.join(spindir, spinup_lab, filename)
+dst = os.path.join(outdir, runname_lab, filename)
+
+with open(src, 'r') as file:
+    data = file.readlines()
+data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
+data[7] = 'true\trestart from a previous run\n'
+if include_psd_bulk == True:
+    data[-3] = 'true\tenabling PSD tracking\n'
+elif include_psd_bulk == False:
+    data[-3] = 'false\tenabling PSD tracking\n'
+if include_psd_full == True:
+    data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
+elif include_psd_full == False:
+    data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
+
+if poro_iter_field == True:
+    data[3] = 'true\tporosity  iteration\n'
+elif poro_iter_field == False:
+    data[3] = 'false\tporosity  iteration\n'
+if poro_evol == True:
+    data[-6] = 'true\tenabling porosity evolution\n'
+elif poro_evol == False:
+    data[-6] = 'false\tenabling porosity evolution\n'
+
+if include_roughness_sa == True:
+    data[8] = 'true\tinclude roughness in mineral surface area\n'
+elif include_roughness_sa == False:
+    data[8] = 'false\tinclude roughness in mineral surface area\n'
+if sa_rule2 == True:
+    data[-4] = 'true\tenabling SA evolution 2 (SA increases with porosity)\n'
+elif sa_rule2 == False:
+    data[-4] = 'false\tenabling SA evolution 2 (SA increases with porosity)\n'
+if sa_rule1 == True:
+    data[-5] = 'true\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
+elif sa_rule1 == False:
+    data[-5] = 'false\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
+
+if singlerun_seasonality==True:
+    data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
+elif singlerun_seasonality == False:
+    data[-1] = 'false\tenabling full seasonality\n'
+if cec_adsorption_on == True:
+    data[11] = "true\tenabling adsorption for cation exchange\n"
+elif cec_adsorption_on == False:
+    data[11] = "false\tenabling adsorption for cation exchange\n"
+
+# === modifications required for v1.0.2 ----------------------
+if exename == "scepter_richards":
+    data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken'.format(int(1))
+    data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series'.format(int(1))
+
+with open(dst, 'w') as file:
+    file.writelines(data)
+
+
     
 filename = 'dust.in'
 sld_varlist = [ ( fdust_nm_list[i], fdust_list[i]) for i in range(len(fdust_nm_list)) ] 

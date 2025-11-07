@@ -233,6 +233,12 @@ for index, row in df_dust.iterrows():
         data[11] = "true\tenabling adsorption for cation exchange\n"
     else:
         data[11] = "false\tenabling adsorption for cation exchange\n"
+    
+    # === modifications required for v1.0.2 ----------------------
+    if exename == "scepter_richards":
+        data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken'.format(int(1))
+        data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series'.format(int(1))
+
 
     with open(dst, 'w') as file:
         file.writelines(data)
@@ -606,6 +612,44 @@ for index, row in df_dust.iterrows():
         ,atm_list=atm_list_lab
         )
     
+
+    filename = 'switches.in'
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
+
+    with open(src, 'r') as file:
+        data = file.readlines()
+    data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
+    data[7] = 'true\trestart from a previous run\n'
+    if include_psd_bulk:
+        data[-3] = 'true\tenabling PSD tracking\n'
+    else:
+        data[-3] = 'false\tenabling PSD tracking\n'
+    if include_psd_full:
+        data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
+    else:
+        data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
+    if include_roughness_sa == True:
+        data[8] = 'true\tinclude roughness in mineral surface area\n'
+    else:
+        data[8] = 'false\tinclude roughness in mineral surface area\n'
+    if singlerun_seasonality==True:
+        data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
+    else:
+        data[-1] = 'false\tenabling seasonality\n'
+    if cec_adsorption_on == True:
+        data[11] = "true\tenabling adsorption for cation exchange\n"
+    else:
+        data[11] = "false\tenabling adsorption for cation exchange\n"
+    
+    # === modifications required for v1.0.2 ----------------------
+    if exename == "scepter_richards":
+        data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken'.format(int(1))
+        data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series'.format(int(1))
+
+
+    with open(dst, 'w') as file:
+        file.writelines(data)
     # break
     
     ## --- run lab run --- ##
