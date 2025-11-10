@@ -184,7 +184,7 @@ elif cec_adsorption_on == False:
     data[11] = "false\tenabling adsorption for cation exchange\n"
 
 # === modifications required for v1.0.2 ----------------------
-if exename == "scepter_richards":
+if exename in v102_exelist:
     data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken'.format(int(1))
     data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series'.format(int(1))
 
@@ -633,7 +633,7 @@ elif cec_adsorption_on == False:
     data[11] = "false\tenabling adsorption for cation exchange\n"
 
 # === modifications required for v1.0.2 ----------------------
-if exename == "scepter_richards":
+if exename in v102_exelist:
     data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken'.format(int(1))
     data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series'.format(int(1))
 

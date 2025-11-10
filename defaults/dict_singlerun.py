@@ -64,6 +64,9 @@ singlerun_default = {
     "dust_mixdep": None,           # [m] depth of dust mixing into soil column
     "soilmoisture_surf": None,     # [] soil moisture saturation at the surface of the profile
 
+    # --- identify scepter version from executable name
+    "v102_exelist": ["scepter_richards"],   # list of executables for v1.0.1
+
     # --- spinup check
     'spinup_on': False,            # [bool] if it's a "spinup" initiated from another spinup, then our file naming convention will be different
 
@@ -151,6 +154,9 @@ spinup_default = {
     'close_aq_field': None,        # [default='false'] force closed system conditions for aqueous phases
     'season': None,                # [default='false'] allow seasonal clim variability
 
+    # --- identify scepter version from executable name
+    "v102_exelist": ["scepter_richards"],   # list of executables for v1.0.1
+
     # --- compute specific
     'aws_save': "copy",              # ["move", "copy", None] whether to "move" file to aws, just copy it, or nothing at all
     'aws_bucket': "s3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/",  # where to save at AWS (only used if 'aws_save'=True)
@@ -223,6 +229,9 @@ specifydust_default = {
                                     #                                                         "aqueous", "bulksoil", "exchange_total", "gas", "rate", "soil_ph", "solid_sp_saturation", 
                                     #                                                         "solid_volumePercent", "solid_weightPercent", "solid", "specific_surface_area", "surface_area"]
 
+    # --- identify scepter version from executable name
+    "v102_exelist": ["scepter_richards"],   # list of executables for v1.0.1
+    
     # --- OPTIONAL (accepts spinup value if None)
     "qrun": None,                  # [m yr-1] water infiltration flux, use this to override spinup only
     "mat": None,                   # [degC] mean annual temperature, use this to override spinup only
