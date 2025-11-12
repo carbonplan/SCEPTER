@@ -191,6 +191,20 @@ if exename in v102_exelist:
 with open(dst, 'w') as file:
     file.writelines(data)
 
+
+# --- write Dust_temp.in (for v1.0.2 seasonal runs)
+if exename in v102_exelist and singlerun_seasonality:
+    shf.create_dust_input(
+        outdir = outdir,
+        runname = runname_field,
+        dustname1 = added_sp,
+        dustname2 = added_sp2,
+        t_add = duststart,
+        output_filename  = "Dust_temp.in",
+        dryrun = False
+    )
+# --------------------------------------------------
+
 # %% 
 
 # tx = "test"
@@ -406,6 +420,19 @@ make_inputs.get_input_sld_properties(
     ,filename = filename
     ,srcfile = srcfile
     )
+
+# --- write Dust_temp.in (for v1.0.2 seasonal runs)
+if exename in v102_exelist and singlerun_seasonality:
+    shf.create_dust_input(
+        outdir = outdir,
+        runname = runname_lab,
+        dustname1 = added_sp,
+        dustname2 = added_sp2,
+        t_add = duststart,
+        output_filename  = "Dust_temp.in",
+        dryrun = False
+    )
+# --------------------------------------------------
 
 # --- particle size distribution setup
 if include_psd_bulk or include_psd_full:

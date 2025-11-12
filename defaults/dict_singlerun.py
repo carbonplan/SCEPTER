@@ -30,6 +30,7 @@ singlerun_default = {
     'dustrate': 100,              # [g m-2 yr-1] dust application flux ; divide by 100 to get ton / ha / yr; not used for spintuneups and an initial guess for target ph runs
     'dustrate_2nd': 0,            # [g m-2 yr-1] dust application flux ; multiply by ~11 to get lbs / acre / yr; divide by 100 to get ton / ha / yr (only used for reApp scripts)
     'taudust': 0.05,               # [yr] duration of dust application in year
+    'duststart': 0.25,             # [yr] (only used in seasonal runs with v1.0.2 or greater) time of year when dust application starts
     'dustrad': 150,                # [micron] radius of dust particles (gets converted to meters in python script that runs scepter)
     'singlerun_seasonality': True, # [True, False, "spinvalue"] whether to impose seasonality in the singlerun script
     'include_roughness_sa': True,  # [True, False, "spinvalue"] whether to include roughness in the mineral surface area calculation (for switches.in)
@@ -196,6 +197,7 @@ specifydust_default = {
     'climatedir': '/home/tykukla/aglime-swap-cdr/scepter/clim-inputs/',   # climate input main directory
     'climatefiles': 'default',     # climate input subdirectory (contains the climate `.in` files)
     'taudust': 0.05,               # [yr] duration of dust application in year
+    'duststart': 0.25,             # [yr] (only used in seasonal runs with v1.0.2 or greater) time of year when dust application starts
     'dustrad': 150,                # [micron] radius of dust particles (gets converted to meters in python script that runs scepter)
     # 'add_secondary': False,         # [True, False] whether to add secondary precipitates to list of solids to track (defined in array below)
     # 'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
