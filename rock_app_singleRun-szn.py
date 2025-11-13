@@ -185,8 +185,8 @@ elif cec_adsorption_on == False:
 
 # === modifications required for v1.0.2 ----------------------
 if exename in v102_exelist:
-    data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken'.format(int(1))
-    data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series'.format(int(1))
+    data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken\n'.format(int(1))
+    data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series\n'.format(int(1))
 
 with open(dst, 'w') as file:
     file.writelines(data)
@@ -661,8 +661,8 @@ elif cec_adsorption_on == False:
 
 # === modifications required for v1.0.2 ----------------------
 if exename in v102_exelist:
-    data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken'.format(int(1))
-    data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series'.format(int(1))
+    data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken\n'.format(int(1))
+    data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series\n'.format(int(1))
 
 with open(dst, 'w') as file:
     file.writelines(data)
