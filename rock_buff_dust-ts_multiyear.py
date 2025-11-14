@@ -503,6 +503,12 @@ for index, row in df_dust.iterrows():
     data[16]    = '{:.8f}\tradius of particles [m]\n'.format(dustrad)   # [tykukla added]
     data[18]    = '{}\n'.format(spinup_field)
     data[20]    = '{}\n'.format(runname_field)
+
+    # --- if v102 then use full path instead of just spinname
+    if exename in v102_exelist:
+        data[18]    = '{}\n'.format(os.path.join(outdir, spinup_field))
+    # ---
+
     with open(dst, 'w') as file:
         file.writelines(data)
         
