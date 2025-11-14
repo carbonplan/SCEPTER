@@ -516,7 +516,10 @@ def get_DIC_save_get_site_OLD(outdir,runname,dep_sample):
     btmconcs = []
     
     co2sp_list = [
-        'hco3','co3','mg(co3)','mg(hco3)','na(co3)','na(hco3)','ca(co3)','ca(hco3)','fe2(co3)','fe2(hco3)'
+        # v1.0.1
+        'hco3','co3','mg(co3)','mg(hco3)','na(co3)','na(hco3)','ca(co3)','ca(hco3)','fe2(co3)','fe2(hco3)',
+        # v1.0.2 ('hco3','co3' ... )
+        'mgco3','mghco3','naco3','nahco3','caco3','cahco3','fe2co3','fe2hco3'
         ]
     
     hco3 = data[:,sp_list.index('hco3')]
@@ -546,8 +549,11 @@ def get_DIC_save_get_site_OLD(outdir,runname,dep_sample):
     DIC = co2
     
     for co2sp in co2sp_list:
-        isp     = sp_list.index(co2sp)
-        DIC += data[:,isp]
+        try: # (will fail when looking for co2sp of the wrong version, so we pass that to the next iteration)
+            isp     = sp_list.index(co2sp)
+            DIC += data[:,isp]
+        except:
+            continue
         
     DIC_btm = DIC[idep]
     
@@ -588,8 +594,12 @@ def get_DIC_save_get_site_NEW(outdir,runname,dep_sample,i_save):
     btmconcs = []
     
     co2sp_list = [
-        'hco3','co3','mg(co3)','mg(hco3)','na(co3)','na(hco3)','ca(co3)','ca(hco3)','fe2(co3)','fe2(hco3)'
+        # v1.0.1
+        'hco3','co3','mg(co3)','mg(hco3)','na(co3)','na(hco3)','ca(co3)','ca(hco3)','fe2(co3)','fe2(hco3)',
+        # v1.0.2 ('hco3','co3' ... )
+        'mgco3','mghco3','naco3','nahco3','caco3','cahco3','fe2co3','fe2hco3'
         ]
+
     
     hco3 = data[:,sp_list.index('hco3')]
     co3 = data[:,sp_list.index('co3')]
@@ -618,8 +628,11 @@ def get_DIC_save_get_site_NEW(outdir,runname,dep_sample,i_save):
     DIC = co2
     
     for co2sp in co2sp_list:
-        isp     = sp_list.index(co2sp)
-        DIC += data[:,isp]
+        try: # (will fail when looking for co2sp of the wrong version, so we pass that to the next iteration)
+            isp     = sp_list.index(co2sp)
+            DIC += data[:,isp]
+        except:
+            continue
         
     DIC_btm = DIC[idep]
     
@@ -671,7 +684,10 @@ def get_ave_DIC_save(outdir,runname,dep_sample):
     btmconcs = []
     
     co2sp_list = [
-        'hco3','co3','mg(co3)','mg(hco3)','na(co3)','na(hco3)','ca(co3)','ca(hco3)','fe2(co3)','fe2(hco3)'
+        # v1.0.1
+        'hco3','co3','mg(co3)','mg(hco3)','na(co3)','na(hco3)','ca(co3)','ca(hco3)','fe2(co3)','fe2(hco3)',
+        # v1.0.2 ('hco3','co3' ... )
+        'mgco3','mghco3','naco3','nahco3','caco3','cahco3','fe2co3','fe2hco3'
         ]
     
     hco3 = data[:,sp_list.index('hco3')]
@@ -701,8 +717,11 @@ def get_ave_DIC_save(outdir,runname,dep_sample):
     DIC = co2
     
     for co2sp in co2sp_list:
-        isp     = sp_list.index(co2sp)
-        DIC += data[:,isp]
+        try: # (will fail when looking for co2sp of the wrong version, so we pass that to the next iteration)
+            isp     = sp_list.index(co2sp)
+            DIC += data[:,isp]
+        except:
+            continue
         
     DIC_btm = (
         np.average( DIC[:idep+1]*poro[:idep+1]*sat[:idep+1]*1e3 )  # mol/ soil m3
@@ -751,7 +770,10 @@ def get_ave_DIC_save_v2(outdir,runname,dep_sample):
     btmconcs = []
     
     co2sp_list = [
-        'hco3','co3','mg(co3)','mg(hco3)','na(co3)','na(hco3)','ca(co3)','ca(hco3)','fe2(co3)','fe2(hco3)'
+        # v1.0.1
+        'hco3','co3','mg(co3)','mg(hco3)','na(co3)','na(hco3)','ca(co3)','ca(hco3)','fe2(co3)','fe2(hco3)',
+        # v1.0.2 ('hco3','co3' ... )
+        'mgco3','mghco3','naco3','nahco3','caco3','cahco3','fe2co3','fe2hco3'
         ]
     
     hco3 = data[:,sp_list.index('hco3')]
@@ -781,8 +803,11 @@ def get_ave_DIC_save_v2(outdir,runname,dep_sample):
     DIC = co2
     
     for co2sp in co2sp_list:
-        isp     = sp_list.index(co2sp)
-        DIC += data[:,isp]
+        try: # (will fail when looking for co2sp of the wrong version, so we pass that to the next iteration)
+            isp     = sp_list.index(co2sp)
+            DIC += data[:,isp]
+        except:
+            continue
         
     DIC_ave = (
         linave(dep, DIC*poro*sat*1e3, dep_sample )  # mol/ soil m3

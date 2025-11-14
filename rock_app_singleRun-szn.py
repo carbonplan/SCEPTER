@@ -130,13 +130,6 @@ if cec_update_from_spinup:
 
 filename = 'switches.in'
 src = os.path.join(spindir, spinup_field, filename)
-# ************************************************* 
-# --- TROUBLESHOOT 
-# print("**************** TROUBLESHOOT *****************")
-# print(f"{spindir} ||| {spinup_field} ||| {filename}")
-# print(src)
-# print("***********************************************")
-# ************************************************* 
 dst = os.path.join(outdir, runname_field, filename)
 with open(src, 'r') as file:
     data = file.readlines()
@@ -215,10 +208,6 @@ if exename in v102_exelist and singlerun_seasonality:
 
 # %% 
 
-# --- TROUBLESHOOT ------------ # 
-print(src + "--------" + dst)
-print(data)
-time.sleep(5)
 
 
 # --- PRIMARY DUST FILE
@@ -517,10 +506,10 @@ with open(dst, 'w') as file:
     
     
 ## --- run field run --- ##
-
-print(outdir+runname_field+'/' + exename)
+run_field_cmd = os.path.join(outdir,runname_field,exename)
+print(run_field_cmd)
 os.system("chmod +x " + os.path.join(outdir,runname_field,exename))  # grant permissions
-os.system(os.path.join(outdir,runname_field,exename))
+os.system(run_field_cmd)
 
 ## --- getting data from field run --- ##
 
@@ -614,6 +603,10 @@ data[3]     = '{:.8f}\ttotal duration of simulation [yr]\n'.format(ttot_lab)
 data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust_lab)
 data[16]    = '{:.8f}\tradius of particles [m]\n'.format(dustrad)   # [tykukla added]
 data[10]     = '{:.8f}\tinitial porosity\n'.format(poro_lab)
+# --- if v102 then use full path instead of just spinname
+if exename in v102_exelist:
+    data[18]    = '{}\n'.format(os.path.join(outdir, spinup_lab))
+# ---
 with open(dst, 'w') as file:
     file.writelines(data)
     
@@ -761,15 +754,15 @@ for runname in [runname_field,runname_lab]:
             
     print(res_list)
 
-# -----------------------------------------------------------------------
-# TROUBLESHOOT 
-import s3fs
-fs = s3fs.S3FileSystem()
-path = "s3://carbonplan-carbon-removal/ew-workflows-data/post-scepter-proof-of-life.txt"
-with fs.open(path, "w") as f:
-    pass  # nothing written, just creates the file
-print(f"✅ Proof-of-life file created at {path}")
-# -----------------------------------------------------------------------
+# # -----------------------------------------------------------------------
+# # TROUBLESHOOT 
+# import s3fs
+# fs = s3fs.S3FileSystem()
+# path = "s3://carbonplan-carbon-removal/ew-workflows-data/post-scepter-proof-of-life.txt"
+# with fs.open(path, "w") as f:
+#     pass  # nothing written, just creates the file
+# print(f"✅ Proof-of-life file created at {path}")
+# # -----------------------------------------------------------------------
 
 
 # ... run postprocessing checks

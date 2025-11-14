@@ -608,6 +608,10 @@ for index, row in df_dust.iterrows():
     data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust_lab)
     data[10]     = '{:.8f}\tinitial porosity\n'.format(poro_lab)
     data[16]    = '{:.8f}\tradius of particles [m]\n'.format(dustrad)   # [tykukla added]
+    # --- if v102 then use full path instead of just spinname
+    if exename in v102_exelist:
+        data[18]    = '{}\n'.format(os.path.join(outdir, spinup_lab))
+    # ---
     with open(dst, 'w') as file:
         file.writelines(data)
         
