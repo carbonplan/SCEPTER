@@ -12,6 +12,7 @@ CPFLAGS       += -Dno_intr_findloc # need to use in cluster
 # CPFLAGS       += -Dnpar_in=1 # number of threads for parallelization 
 CPFLAGS       += -Dparpsd_chk # checking parallelization results
 # CPFLAGS       += -Dksld_chk # checking rate consts for sld species
+# CPFLAGS       += -Dredox_eq # assume equilibrium for redox reactions
 CPFLAGS       += -DolddustPSD # using old PSD for dust (not user input but prescribed one)
 # CPFLAGS       += -Derrmtx_printout # 
 CPFLAGS       += -Dmod_basalt_cmp # using basalt composition defined in <basalt_define.h>
@@ -47,7 +48,7 @@ LIBS          = -lopenblas
 
 ifneq (,$(findstring -Dmod_basalt_cmp,$(CPFLAGS)))
   # Found -Dmod_basalt_cmp
-  INC          = -I/home/tykukla/SCEPTER/data 
+  INC          = -I/home/jovyan/SCEPTER/data 
 else
   # Not found
   INC          = 
@@ -116,6 +117,19 @@ $(PROGRAM_D): $(OBJS_D)
 
 $(OBJS_D):   $(SRC_D)
 	$(FC) $(SRC_D) -c -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
+
+# ---
+OBJS_RICHARDS      = scepter_richards.o
+SRC_RICHARDS       = scepter_richards.f90
+PROGRAM_RICHARDS   = scepter_richards
+
+richards:           $(PROGRAM_RICHARDS)
+
+$(PROGRAM_RICHARDS): $(OBJS_RICHARDS)
+	$(FC) $(OBJS_RICHARDS) -o $(PROGRAM_RICHARDS) -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
+
+$(OBJS_RICHARDS):   $(SRC_RICHARDS)
+	$(FC) $(SRC_RICHARDS) -c -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
 # --------------------------------------------------------------------------
 
 all:            $(PROGRAM)
@@ -126,6 +140,6 @@ $(PROGRAM):     $(OBJS)
 $(OBJS):        $(SRC) 
 	$(FC) $(SRC) -c -cpp $(CPFLAGS) $(CFLAGS) $(LIBS) $(LDFLAGS) $(INC)
 
-clean:;         rm -f *.o  *~ $(PROGRAM) $(PROGRAM_A) $(PROGRAM_B) $(PROGRAM_C) $(PROGRAM_D)
+clean:;         rm -f *.o  *~ $(PROGRAM) $(PROGRAM_A) $(PROGRAM_B) $(PROGRAM_C) $(PROGRAM_D) $(PROGRAM_RICHARDS)
 blank:;         truncate -s 0 *.out
-cleanall:;         rm -f *.o *.out *~ $(PROGRAM) $(PROGRAM_A) $(PROGRAM_B) $(PROGRAM_C) $(PROGRAM_D)
+cleanall:;         rm -f *.o *.out *~ $(PROGRAM) $(PROGRAM_A) $(PROGRAM_B) $(PROGRAM_C) $(PROGRAM_D) $(PROGRAM_RICHARDS)
