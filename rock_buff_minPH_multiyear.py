@@ -575,14 +575,13 @@ for tstep in mytsteps:
         data = file.readlines()
     data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(imix)
     data[7] = 'true\trestart from a previous run\n'
-    if include_psd_bulk:
-        data[-3] = 'true\tenabling PSD tracking\n'
-    else:
-        data[-3] = 'false\tenabling PSD tracking\n'
-    if include_psd_full:
-        data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
-    else:
-        data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
+    # turn of PSD tracking in lab
+    data[-3] = 'false\tenabling PSD tracking\n'
+    data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
+    # turn off porosity iteration in lab
+    data[3] = 'false\tporosity  iteration\n'
+    data[-6] = 'false\tenabling porosity evolution\n'
+
     if include_roughness_sa == True:
         data[8] = 'true\tinclude roughness in mineral surface area\n'
     else:

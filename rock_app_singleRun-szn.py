@@ -618,23 +618,12 @@ with open(src, 'r') as file:
     data = file.readlines()
 data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
 data[7] = 'true\trestart from a previous run\n'
-if include_psd_bulk == True:
-    data[-3] = 'true\tenabling PSD tracking\n'
-elif include_psd_bulk == False:
-    data[-3] = 'false\tenabling PSD tracking\n'
-if include_psd_full == True:
-    data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
-elif include_psd_full == False:
-    data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
-
-if poro_iter_field == True:
-    data[3] = 'true\tporosity  iteration\n'
-elif poro_iter_field == False:
-    data[3] = 'false\tporosity  iteration\n'
-if poro_evol == True:
-    data[-6] = 'true\tenabling porosity evolution\n'
-elif poro_evol == False:
-    data[-6] = 'false\tenabling porosity evolution\n'
+# turn of PSD tracking in lab
+data[-3] = 'false\tenabling PSD tracking\n'
+data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
+# turn off porosity iteration in lab
+data[3] = 'false\tporosity  iteration\n'
+data[-6] = 'false\tenabling porosity evolution\n'
 
 if include_roughness_sa == True:
     data[8] = 'true\tinclude roughness in mineral surface area\n'
