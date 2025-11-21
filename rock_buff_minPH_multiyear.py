@@ -452,10 +452,15 @@ for tstep in mytsteps:
         
         
     ## --- run field run --- ##
-    
-    print(outdir+runname_field+'/' + exename)
-    os.system("chmod +x " + os.path.join(outdir,runname_field,exename))  # grant permissions
-    os.system(os.path.join(outdir,runname_field,exename))
+    rundir = os.path.join(outdir, runname_field)
+    os.chdir(rundir)
+    print(f"Attempting {exename} from {rundir}")
+    os.system("chmod +x " + exename)  # grant permissions
+    os.system(f"./{exename}")
+
+    # print(outdir+runname_field+'/' + exename)
+    # os.system("chmod +x " + os.path.join(outdir,runname_field,exename))  # grant permissions
+    # os.system(os.path.join(outdir,runname_field,exename))
 
     ## --- getting data from field run --- ##
     
@@ -627,10 +632,14 @@ for tstep in mytsteps:
 
         
         ## --- run lab run --- ##
-
-        print(outdir+runname_lab+'/' + exename)
-        os.system("chmod +x " + os.path.join(outdir,runname_lab,exename))  # grant permissions
-        os.system(os.path.join(outdir,runname_lab,exename))
+        rundir = os.path.join(outdir, runname_lab)
+        os.chdir(rundir)
+        print(f"Attempting {exename} from {rundir}")
+        os.system("chmod +x " + exename)  # grant permissions
+        os.system(f"./{exename}")
+        # print(outdir+runname_lab+'/' + exename)
+        # os.system("chmod +x " + os.path.join(outdir,runname_lab,exename))  # grant permissions
+        # os.system(os.path.join(outdir,runname_lab,exename))
         
         ## --- getting data from lab run --- ##
         

@@ -508,10 +508,16 @@ with open(dst, 'w') as file:
     
     
 ## --- run field run --- ##
-run_field_cmd = os.path.join(outdir,runname_field,exename)
-print(run_field_cmd)
-os.system("chmod +x " + os.path.join(outdir,runname_field,exename))  # grant permissions
-os.system(run_field_cmd)
+rundir = os.path.join(outdir, runname_field)
+os.chdir(rundir)
+print(f"Attempting {exename} from {rundir}")
+os.system("chmod +x " + exename)  # grant permissions
+os.system(f"./{exename}")
+
+# run_field_cmd = os.path.join(outdir,runname_field,exename)
+# print(run_field_cmd)
+# os.system("chmod +x " + os.path.join(outdir,runname_field,exename))  # grant permissions
+# os.system(run_field_cmd)
 
 ## --- getting data from field run --- ##
 
@@ -682,10 +688,14 @@ if not skip_lab_run:
     # break
 
     ## --- run lab run --- ##
-
-    print(outdir+runname_lab+'/' +exename)
-    os.system("chmod +x " + os.path.join(outdir,runname_lab,exename))  # grant permissions
-    os.system(os.path.join(outdir,runname_lab,exename))
+    rundir = os.path.join(outdir, runname_lab)
+    os.chdir(rundir)
+    print(f"Attempting {exename} from {rundir}")
+    os.system("chmod +x " + exename)  # grant permissions
+    os.system(f"./{exename}")
+    # print(outdir+runname_lab+'/' +exename)
+    # os.system("chmod +x " + os.path.join(outdir,runname_lab,exename))  # grant permissions
+    # os.system(os.path.join(outdir,runname_lab,exename))
 
     ## --- getting data from lab run --- ##
 
