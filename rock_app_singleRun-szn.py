@@ -339,89 +339,90 @@ shf.remove_duplicates(dst)
     # file.writelines(data)
     
 # ============ common input file modification wrt spinup: for lab run ============
-filename = 'slds.in'
-src = os.path.join(spindir, spinup_lab, filename)
-dst = os.path.join(outdir, runname_lab, filename)
-with open(src, 'r') as file:
-    data = file.readlines()
-if not data[-1].endswith("\n"):
-    data[-1] += "\n"   # add to avoid a messy append
-# add dust species if name is mineral
-if not multi_sp_feedstock:
-    data.insert(1, added_sp+'\n')
-else: # otherwise get dustsp from the dust.in file
-    data = shf.add_dustsp_to_sld(data, dustdst, outdir, runname_lab)
-    
-# add second species if needed
-if not multi_sp_feedstock_2nd: # then add this as well
-        data.insert(1, added_sp2+'\n')
-else: # otherwise get dustsp from the dust.in file
-    data = shf.add_dustsp_to_sld(data, dustdst2, outdir, runname_lab)
-    
-if include_N and added_sp2 != "amnt":
-    data.append('amnt'+'\n')
-if include_Al: 
-    data.append(alphase+'\n')
+if not skip_lab_run:
+    filename = 'slds.in'
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
+    with open(src, 'r') as file:
+        data = file.readlines()
+    if not data[-1].endswith("\n"):
+        data[-1] += "\n"   # add to avoid a messy append
+    # add dust species if name is mineral
+    if not multi_sp_feedstock:
+        data.insert(1, added_sp+'\n')
+    else: # otherwise get dustsp from the dust.in file
+        data = shf.add_dustsp_to_sld(data, dustdst, outdir, runname_lab)
+        
+    # add second species if needed
+    if not multi_sp_feedstock_2nd: # then add this as well
+            data.insert(1, added_sp2+'\n')
+    else: # otherwise get dustsp from the dust.in file
+        data = shf.add_dustsp_to_sld(data, dustdst2, outdir, runname_lab)
+        
+    if include_N and added_sp2 != "amnt":
+        data.append('amnt'+'\n')
+    if include_Al: 
+        data.append(alphase+'\n')
 
-with open(dst, 'w') as file:
-    file.writelines(data)
-# remove duplicate minerals
-shf.remove_duplicates(dst)
+    with open(dst, 'w') as file:
+        file.writelines(data)
+    # remove duplicate minerals
+    shf.remove_duplicates(dst)
 
-filename = 'solutes.in'
-src = os.path.join(spindir, spinup_lab, filename)
-dst = os.path.join(outdir, runname_lab, filename)
-with open(src, 'r') as file:
-    data = file.readlines()
-if not data[-1].endswith("\n"):
-    data[-1] += "\n"   # add to avoid a messy append
-if include_N or added_sp2 == "amnt":
-    data.append('no3'+'\t\n')
-# data.insert(1, 'k\t\nna\t\nmg\t\n')
-with open(dst, 'w') as file:
-    file.writelines(data)
-# remove duplicate minerals
-shf.remove_duplicates(dst)
+    filename = 'solutes.in'
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
+    with open(src, 'r') as file:
+        data = file.readlines()
+    if not data[-1].endswith("\n"):
+        data[-1] += "\n"   # add to avoid a messy append
+    if include_N or added_sp2 == "amnt":
+        data.append('no3'+'\t\n')
+    # data.insert(1, 'k\t\nna\t\nmg\t\n')
+    with open(dst, 'w') as file:
+        file.writelines(data)
+    # remove duplicate minerals
+    shf.remove_duplicates(dst)
 
-filename = 'kinspc.in'
-src = os.path.join(spindir, spinup_lab, filename)       
-dst = os.path.join(outdir, runname_lab, filename)
-with open(src, 'r') as file:
-    data = file.readlines()
-if not data[-1].endswith("\n"):
-    data[-1] += "\n"   # add to avoid a messy append
-data.insert(1, added_sp+'\t0\n')
-with open(dst, 'w') as file:
-    file.writelines(data)
+    filename = 'kinspc.in'
+    src = os.path.join(spindir, spinup_lab, filename)       
+    dst = os.path.join(outdir, runname_lab, filename)
+    with open(src, 'r') as file:
+        data = file.readlines()
+    if not data[-1].endswith("\n"):
+        data[-1] += "\n"   # add to avoid a messy append
+    data.insert(1, added_sp+'\t0\n')
+    with open(dst, 'w') as file:
+        file.writelines(data)
 
 
-filename = '2ndslds.in'
-srcfile = os.path.join(modeldir, 'data', '2ndslds_def.in')
-make_inputs.get_input_sld_properties(
-    outdir=outdir
-    ,runname=runname_field
-    ,filename = filename
-    ,srcfile = srcfile
-    )
-make_inputs.get_input_sld_properties(
-    outdir=outdir
-    ,runname=runname_lab
-    ,filename = filename
-    ,srcfile = srcfile
-    )
+    filename = '2ndslds.in'
+    srcfile = os.path.join(modeldir, 'data', '2ndslds_def.in')
+    make_inputs.get_input_sld_properties(
+        outdir=outdir
+        ,runname=runname_field
+        ,filename = filename
+        ,srcfile = srcfile
+        )
+    make_inputs.get_input_sld_properties(
+        outdir=outdir
+        ,runname=runname_lab
+        ,filename = filename
+        ,srcfile = srcfile
+        )
 
-# --- write Dust_temp.in (for v1.0.2 seasonal runs)
-if exename in v102_exelist and singlerun_seasonality:
-    shf.create_dust_input(
-        outdir = outdir,
-        runname = runname_lab,
-        dustname1 = added_sp,
-        dustname2 = added_sp2,
-        t_add = duststart,
-        output_filename  = "Dust_temp.in",
-        dryrun = False
-    )
-# --------------------------------------------------
+    # --- write Dust_temp.in (for v1.0.2 seasonal runs)
+    if exename in v102_exelist and singlerun_seasonality:
+        shf.create_dust_input(
+            outdir = outdir,
+            runname = runname_lab,
+            dustname1 = added_sp,
+            dustname2 = added_sp2,
+            t_add = duststart,
+            output_filename  = "Dust_temp.in",
+            dryrun = False
+        )
+    # --------------------------------------------------
 
 # --- particle size distribution setup
 if include_psd_bulk or include_psd_full:
@@ -456,7 +457,8 @@ res_list = []
 cnt = 0
 
 # get ph of spin-up
-phint = get_int_prof.get_ph_int_site(spindir,spinup_lab,dep_sample)
+if not skip_lab_run:
+    phint = get_int_prof.get_ph_int_site(spindir,spinup_lab,dep_sample)
 phint_field = get_int_prof.get_ph_int_site(spindir,spinup_field,dep_sample)
 
 cnt += 1
@@ -540,155 +542,155 @@ dic,dep = get_int_prof.get_ave_DIC_save(outdir,runname_field,dep_sample) # retur
 ## /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ## --- setup for lab run --- ##
+if not skip_lab_run:
+    poro_lab = water_frac/(1./dense_lab+water_frac)
 
-poro_lab = water_frac/(1./dense_lab+water_frac)
+    oxide_ctnm_list = ['ca','mg','na','k'] 
+    oxide_oxnm_list = ['cao','mgo','na2o','k2o'] 
+    oxide_stch_list = [1,1,2,2] 
+    oxide_mass_list = [56.1 ,40.3, 62, 94.2]
 
-oxide_ctnm_list = ['ca','mg','na','k'] 
-oxide_oxnm_list = ['cao','mgo','na2o','k2o'] 
-oxide_stch_list = [1,1,2,2] 
-oxide_mass_list = [56.1 ,40.3, 62, 94.2]
+    if include_N:
+        oxide_ctnm_list.append( 'no3' )
+        oxide_oxnm_list.append( 'amnt' )
+        oxide_stch_list.append( 2 )
+        oxide_mass_list.append( 80 )
+    if include_Al:
+        oxide_ctnm_list.append( 'al' )
+        oxide_oxnm_list.append( 'al2o3' )
+        oxide_stch_list.append( 2 )
+        oxide_mass_list.append( 1.02E+02 )
 
-if include_N:
-    oxide_ctnm_list.append( 'no3' )
-    oxide_oxnm_list.append( 'amnt' )
-    oxide_stch_list.append( 2 )
-    oxide_mass_list.append( 80 )
-if include_Al:
-    oxide_ctnm_list.append( 'al' )
-    oxide_oxnm_list.append( 'al2o3' )
-    oxide_stch_list.append( 2 )
-    oxide_mass_list.append( 1.02E+02 )
+    fdust_list = []
+    fdust_nm_list = []
 
-fdust_list = []
-fdust_nm_list = []
-
-for sp in aqsps:
-    if sp not in oxide_ctnm_list:
-            continue
-    isp = aqsps.index(sp)
-    iox = oxide_ctnm_list.index(sp)
-    conc = btmconcs[isp]
-    fdust_tmp = ztot_lab*(1-poro_lab)*conc* oxide_mass_list[iox]/oxide_stch_list[iox]
-    fdust_list.append(fdust_tmp)
-    fdust_nm_list.append(oxide_oxnm_list[iox])
-    
-    
-fdust_lab = fdust_list[aqsps.index('ca')]
-
-if use_CaCl2:
-    cacl2_conc = 0.01
-    cacl2_wt2  = 110.98
-    fdust_cacl2 = ztot_lab*poro_lab*cacl2_conc*1e3*cacl2_wt2
-
-    if fdust_cacl2 > 0:
-        fdust_list.append(fdust_cacl2)
-        fdust_nm_list.append('cacl2')
+    for sp in aqsps:
+        if sp not in oxide_ctnm_list:
+                continue
+        isp = aqsps.index(sp)
+        iox = oxide_ctnm_list.index(sp)
+        conc = btmconcs[isp]
+        fdust_tmp = ztot_lab*(1-poro_lab)*conc* oxide_mass_list[iox]/oxide_stch_list[iox]
+        fdust_list.append(fdust_tmp)
+        fdust_nm_list.append(oxide_oxnm_list[iox])
         
         
-if include_DIC:                                     # (added 3.23.2023)
-    fdust_dic = ztot_lab*(1-poro_lab)*dic* 30.      # (added 3.22.2023)
-    fdust_list.append(fdust_dic)                    # (added 3.22.2023)
-    fdust_nm_list.append('g1')                      # (added 3.22.2023)
+    fdust_lab = fdust_list[aqsps.index('ca')]
 
-fdust_list = [fdust_tmp/fdust_lab  for fdust_tmp in fdust_list  ]  
+    if use_CaCl2:
+        cacl2_conc = 0.01
+        cacl2_wt2  = 110.98
+        fdust_cacl2 = ztot_lab*poro_lab*cacl2_conc*1e3*cacl2_wt2
 
-filename = 'frame.in'
-src = os.path.join(spindir, spinup_lab, filename)
-dst = os.path.join(outdir, runname_lab, filename)
+        if fdust_cacl2 > 0:
+            fdust_list.append(fdust_cacl2)
+            fdust_nm_list.append('cacl2')
+            
+            
+    if include_DIC:                                     # (added 3.23.2023)
+        fdust_dic = ztot_lab*(1-poro_lab)*dic* 30.      # (added 3.22.2023)
+        fdust_list.append(fdust_dic)                    # (added 3.22.2023)
+        fdust_nm_list.append('g1')                      # (added 3.22.2023)
 
-with open(src, 'r') as file:
-    data = file.readlines()
-data[1]     = '{:.8f}\ttotal depth of weathering profile [m]\n'.format(ztot_lab)
-data[3]     = '{:.8f}\ttotal duration of simulation [yr]\n'.format(ttot_lab)
-data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust_lab)
-data[16]    = '{:.8f}\tradius of particles [m]\n'.format(dustrad)   # [tykukla added]
-data[10]     = '{:.8f}\tinitial porosity\n'.format(poro_lab)
-# --- if v102 then use full path instead of just spinname
-if exename in v102_exelist:
-    data[18]    = '{}\n'.format(os.path.join(outdir, spinup_lab))
-# ---
-with open(dst, 'w') as file:
-    file.writelines(data)
-    
-filename = 'switches.in'
-src = os.path.join(spindir, spinup_lab, filename)
-dst = os.path.join(outdir, runname_lab, filename)
+    fdust_list = [fdust_tmp/fdust_lab  for fdust_tmp in fdust_list  ]  
 
-with open(src, 'r') as file:
-    data = file.readlines()
-data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
-data[7] = 'true\trestart from a previous run\n'
-# turn of PSD tracking in lab
-data[-3] = 'false\tenabling PSD tracking\n'
-data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
-# turn off porosity iteration in lab
-data[3] = 'false\tporosity  iteration\n'
-data[-6] = 'false\tenabling porosity evolution\n'
+    filename = 'frame.in'
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
 
-if include_roughness_sa == True:
-    data[8] = 'true\tinclude roughness in mineral surface area\n'
-elif include_roughness_sa == False:
-    data[8] = 'false\tinclude roughness in mineral surface area\n'
-if sa_rule2 == True:
-    data[-4] = 'true\tenabling SA evolution 2 (SA increases with porosity)\n'
-elif sa_rule2 == False:
-    data[-4] = 'false\tenabling SA evolution 2 (SA increases with porosity)\n'
-if sa_rule1 == True:
-    data[-5] = 'true\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
-elif sa_rule1 == False:
-    data[-5] = 'false\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
+    with open(src, 'r') as file:
+        data = file.readlines()
+    data[1]     = '{:.8f}\ttotal depth of weathering profile [m]\n'.format(ztot_lab)
+    data[3]     = '{:.8f}\ttotal duration of simulation [yr]\n'.format(ttot_lab)
+    data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust_lab)
+    data[16]    = '{:.8f}\tradius of particles [m]\n'.format(dustrad)   # [tykukla added]
+    data[10]     = '{:.8f}\tinitial porosity\n'.format(poro_lab)
+    # --- if v102 then use full path instead of just spinname
+    if exename in v102_exelist:
+        data[18]    = '{}\n'.format(os.path.join(outdir, spinup_lab))
+    # ---
+    with open(dst, 'w') as file:
+        file.writelines(data)
+        
+    filename = 'switches.in'
+    src = os.path.join(spindir, spinup_lab, filename)
+    dst = os.path.join(outdir, runname_lab, filename)
 
-if singlerun_seasonality==True:
-    data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
-elif singlerun_seasonality == False:
-    data[-1] = 'false\tenabling full seasonality\n'
-if cec_adsorption_on == True:
-    data[11] = "true\tenabling adsorption for cation exchange\n"
-elif cec_adsorption_on == False:
-    data[11] = "false\tenabling adsorption for cation exchange\n"
+    with open(src, 'r') as file:
+        data = file.readlines()
+    data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
+    data[7] = 'true\trestart from a previous run\n'
+    # turn of PSD tracking in lab
+    data[-3] = 'false\tenabling PSD tracking\n'
+    data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
+    # turn off porosity iteration in lab
+    data[3] = 'false\tporosity  iteration\n'
+    data[-6] = 'false\tenabling porosity evolution\n'
 
-# === modifications required for v1.0.2 ----------------------
-if exename in v102_exelist:
-    data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken\n'.format(int(1))
-    data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series\n'.format(int(1))
+    if include_roughness_sa == True:
+        data[8] = 'true\tinclude roughness in mineral surface area\n'
+    elif include_roughness_sa == False:
+        data[8] = 'false\tinclude roughness in mineral surface area\n'
+    if sa_rule2 == True:
+        data[-4] = 'true\tenabling SA evolution 2 (SA increases with porosity)\n'
+    elif sa_rule2 == False:
+        data[-4] = 'false\tenabling SA evolution 2 (SA increases with porosity)\n'
+    if sa_rule1 == True:
+        data[-5] = 'true\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
+    elif sa_rule1 == False:
+        data[-5] = 'false\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
 
-with open(dst, 'w') as file:
-    file.writelines(data)
+    if singlerun_seasonality==True:
+        data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
+    elif singlerun_seasonality == False:
+        data[-1] = 'false\tenabling full seasonality\n'
+    if cec_adsorption_on == True:
+        data[11] = "true\tenabling adsorption for cation exchange\n"
+    elif cec_adsorption_on == False:
+        data[11] = "false\tenabling adsorption for cation exchange\n"
+
+    # === modifications required for v1.0.2 ----------------------
+    if exename in v102_exelist:
+        data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken\n'.format(int(1))
+        data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series\n'.format(int(1))
+
+    with open(dst, 'w') as file:
+        file.writelines(data)
 
 
-    
-filename = 'dust.in'
-sld_varlist = [ ( fdust_nm_list[i], fdust_list[i]) for i in range(len(fdust_nm_list)) ] 
-make_inputs.get_input_sld_properties(
-    outdir=outdir
-    ,runname=runname_lab
-    ,filename = filename
-    ,sld_varlist=sld_varlist
-    )
-    
-pr_list_lab = [(sp,sldwt_list[sps.index(sp)]/100.) for sp in sps]
-atm_list_lab = [('pco2',3.16e-4),('po2',0.21),('pnh3',1e-50),('pn2o',1e-50)]
-if include_DIC: atm_list_lab = [('pco2',1e-20),('po2',0.21),('pnh3',1e-50),('pn2o',1e-50)] # (added 3.22.2023)
-make_inputs.get_input_tracer_bounds(
-    outdir=outdir
-    ,runname=runname_lab
-    ,pr_list = pr_list_lab
-    # ,rain_list=rain_list
-    ,atm_list=atm_list_lab
-    )
+        
+    filename = 'dust.in'
+    sld_varlist = [ ( fdust_nm_list[i], fdust_list[i]) for i in range(len(fdust_nm_list)) ] 
+    make_inputs.get_input_sld_properties(
+        outdir=outdir
+        ,runname=runname_lab
+        ,filename = filename
+        ,sld_varlist=sld_varlist
+        )
+        
+    pr_list_lab = [(sp,sldwt_list[sps.index(sp)]/100.) for sp in sps]
+    atm_list_lab = [('pco2',3.16e-4),('po2',0.21),('pnh3',1e-50),('pn2o',1e-50)]
+    if include_DIC: atm_list_lab = [('pco2',1e-20),('po2',0.21),('pnh3',1e-50),('pn2o',1e-50)] # (added 3.22.2023)
+    make_inputs.get_input_tracer_bounds(
+        outdir=outdir
+        ,runname=runname_lab
+        ,pr_list = pr_list_lab
+        # ,rain_list=rain_list
+        ,atm_list=atm_list_lab
+        )
 
-# break
+    # break
 
-## --- run lab run --- ##
+    ## --- run lab run --- ##
 
-print(outdir+runname_lab+'/' +exename)
-os.system("chmod +x " + os.path.join(outdir,runname_lab,exename))  # grant permissions
-os.system(os.path.join(outdir,runname_lab,exename))
+    print(outdir+runname_lab+'/' +exename)
+    os.system("chmod +x " + os.path.join(outdir,runname_lab,exename))  # grant permissions
+    os.system(os.path.join(outdir,runname_lab,exename))
 
-## --- getting data from lab run --- ##
+    ## --- getting data from lab run --- ##
 
-phint = get_int_prof.get_ph_int_site(outdir,runname_lab,dep_sample)
-print(phint_field,phint)
+    phint = get_int_prof.get_ph_int_site(outdir,runname_lab,dep_sample)
+    print(phint_field,phint)
 
 ## /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -702,6 +704,7 @@ print(' ')
 print(' ')
 print(' ')
 
+phint = np.nan if skip_lab_run else phint
 res_list.append([cnt, phint_field, phint, fdust ])
 
 cnt += 1
@@ -710,6 +713,8 @@ cnt += 1
 time.sleep(5)
 
 for runname in [runname_field,runname_lab]:
+    if skip_lab_run and (runname == runname_lab):
+        continue
     np.savetxt(outdir + runname + where + 'iteration_tmp.res',np.array(res_list))
 
 
@@ -722,6 +727,9 @@ name_list = [
     ]
 
 for runname in [runname_field,runname_lab]:
+    if skip_lab_run and (runname == runname_lab):
+        continue
+
     dst = outdir + runname + where + 'iteration.res'
 
     with open(dst, 'w') as file:
@@ -753,6 +761,7 @@ for runname in [runname_field,runname_lab]:
 # print(f"✅ Proof-of-life file created at {path}")
 # # -----------------------------------------------------------------------
 
+runname_lab = None if skip_lab_run else runname_lab  # helper functions will ignore lab if name is none (for field-only)
 
 # ... run postprocessing checks
 shf.run_complete_check(runname_field, 

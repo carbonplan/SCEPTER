@@ -13,6 +13,7 @@ singlerun_default = {
     'alphase': 'amal',   # 'gb'    # set aluminum phase
     'use_CaCl2': False,            # relevant for lab run
     'include_DIC': True,           
+    'skip_lab_run': False,         # whether to only run the field or field + lab
     'duration': 2,                 # [yr] duration of simulation (or single targetpH or minPH iteration for multi-year)
     'dustsp': 'gbas',              # added dust species 
     'dustsp_2nd': 'amnt',          # added dust species for secondary dust
@@ -91,6 +92,7 @@ spinup_default = {
     'alphase': 'amal',   # 'gb'    # set aluminum phase
     'use_CaCl2': False,            # relevant for lab run
     'include_DIC': True,           
+    'skip_lab_run': False,         # whether to only run the field or field + lab
     'use_local_storage': False,    # only relevant for georgia tech hpc
     'cec': 21.1,                   # [cmol kg-1] cation exchange capacity
     'modeldir': '/home/tykukla/SCEPTER/', # directory of model scripts
@@ -180,6 +182,7 @@ specifydust_default = {
     'alphase': 'amal',   # 'gb'    # set aluminum phase
     'use_CaCl2': False,            # relevant for lab run
     'include_DIC': True,           
+    'skip_lab_run': False,         # whether to only run the field or field + lab
     'use_local_storage': False,    # only relevant for georgia tech hpc
     # 'cec': 21.1,                 # [cmol kg-1] cation exchange capacity
     'duration': 1,                 # [yr] duration of simulation (or iteration for multiyear; gets over-written by the dust timeseries file)
