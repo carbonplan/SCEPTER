@@ -303,7 +303,7 @@ shf.remove_duplicates(dst)
 
 # ============ adding Fe(II) as tracer and its oxidation =================
 filename = 'solutes.in'
-src = os.path.join(spindir, spinup, filename)
+src = os.path.join(spindir, spinup_field, filename)
 dst = os.path.join(outdir, runname_field, filename)
 with open(src, 'r') as file:
     data = file.readlines()
