@@ -1,7 +1,7 @@
 program weathering
 
 implicit none 
-integer :: i
+
 integer nsp_sld,nsp_aq,nsp_gas,nrxn_ext,nz,nsld_kinspc
 character(5),dimension(:),allocatable::chraq,chrsld,chrgas,chrrxn_ext,chrsld_kinspc 
 real(kind=8),dimension(:),allocatable::kin_sld_spc
@@ -19,20 +19,8 @@ WRITE(*,*) TRIM(path)
 ! call get_command_argument(0, cmd)
 ! WRITE(*,*) TRIM(cmd)
 ! path2 = path(:index(path,'weathering')-2)
-! 
-! NOTE: This tries to create the rundir path from the `/path/to/rundir/scepterEXEname`
 ! but it assumes the executable is named "scepter" by subtracting the last len('scepter') 
-! characters... we comment this out in favor of a version that works for 
-! any executable that starts with "scepter"
-!
-! path2 = path(:len(trim(path))-len('scepter')-1)
-! 
-i = len_trim(path)
-do while (i > 0 .and. path(i:i) /= '/')
-    i = i - 1
-end do
-! keep everything up to it
-path2 = path(:i)
+path2 = path(:len(trim(path))-len('scepter')-1)
 WRITE(*,*) TRIM(path2)
 
 CALL chdir(TRIM(path2))
@@ -7835,6 +7823,9 @@ character(256),intent(in):: workdir,runname_save
 character(500) file_name
 
 file_name = trim(adjustl(runname_save))//'/slds.save'
+! --- TMP TMP 
+print *, 'DEBUG: opening file: ', trim(file_name)
+! --- TMP TMP 
 call Console4(file_name,nsp_sld)
 file_name = trim(adjustl(runname_save))//'/solutes.save'
 call Console4(file_name,nsp_aq)
@@ -12557,9 +12548,9 @@ ph_iter = iter
 
 ph_error = .false.
 
-if (any(isnan(prox)) .or. any(prox<=0d0)) then     
+if (any(isnan(prox)) .or. any(prox<=1d-20) .or. any(prox>=100d0)) then     
     print *, (-log10(prox(iz)),iz=1,nz,nz/5)
-    print*,'ph is nan or <= zero'
+    print*,'ph is nan or >= 20 or <-2'
     ! prox = prox_init
     ph_error = .true.
 	
