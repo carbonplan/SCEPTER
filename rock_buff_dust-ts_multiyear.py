@@ -346,6 +346,20 @@ for index, row in df_dust.iterrows():
     if include_Al: 
         data.append(alphase+'\n')
 
+    # handle secondary mineral addition/removal
+    data = shf.setup_solids_custom(
+        data,
+        spindir,
+        outdir,
+        spinname=spinup_field,
+        runname=runname_field,
+        secondary_min_rule=secondary_min_rule,
+        sld_track=sld_track,
+        rockdata_dir=datadir,
+        secondslds_fn = "2ndslds.in",
+        secondslds_list_name = "2ndslds_def.in",
+    )
+
     with open(dst, 'w') as file:
         file.writelines(data)
     # remove duplicate minerals
@@ -414,6 +428,20 @@ for index, row in df_dust.iterrows():
         if include_Al: 
             data.append(alphase+'\n')
 
+        # handle secondary mineral addition/removal
+        data = shf.setup_solids_custom(
+            data,
+            spindir,
+            outdir,
+            spinname=spinup_lab,
+            runname=runname_lab,
+            secondary_min_rule=secondary_min_rule,
+            sld_track=sld_track,
+            rockdata_dir=datadir,
+            secondslds_fn = "2ndslds.in",
+            secondslds_list_name = "2ndslds_def.in",
+        )
+
         with open(dst, 'w') as file:
             file.writelines(data)
         # remove duplicate minerals
@@ -448,19 +476,20 @@ for index, row in df_dust.iterrows():
             file.writelines(data)
             
         filename = '2ndslds.in'
-        srcfile = os.path.join(datadir, '2ndslds_def.in')
-        make_inputs.get_input_sld_properties(
-            outdir=outdir
-            ,runname=runname_field
-            ,filename = filename
-            ,srcfile = srcfile
-            )
-        make_inputs.get_input_sld_properties(
-            outdir=outdir
-            ,runname=runname_lab
-            ,filename = filename
-            ,srcfile = srcfile
-            )
+        if secondary_min_rule != "remove": # then add secondary mineral(s) (otherwise the file was made blank at the slds.in step)
+            srcfile = os.path.join(datadir, '2ndslds_def.in')
+            make_inputs.get_input_sld_properties(
+                outdir=outdir
+                ,runname=runname_field
+                ,filename = filename
+                ,srcfile = srcfile
+                )
+            make_inputs.get_input_sld_properties(
+                outdir=outdir
+                ,runname=runname_lab
+                ,filename = filename
+                ,srcfile = srcfile
+                )
 
     # --- particle size distribution setup
     if include_psd_bulk or include_psd_full:

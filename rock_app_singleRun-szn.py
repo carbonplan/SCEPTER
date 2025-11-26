@@ -298,6 +298,20 @@ if include_N and added_sp2 != "amnt":
 if include_Al: 
     data.append(alphase+'\n')
 
+# handle secondary mineral addition/removal
+data = shf.setup_solids_custom(
+    data,
+    spindir,
+    outdir,
+    spinname=spinup_field,
+    runname=runname_field,
+    secondary_min_rule=secondary_min_rule,
+    sld_track=sld_track,
+    rockdata_dir=datadir,
+    secondslds_fn = "2ndslds.in",
+    secondslds_list_name = "2ndslds_def.in",
+)
+
 with open(dst, 'w') as file:
     file.writelines(data)
 # remove duplicate minerals
@@ -366,6 +380,20 @@ if not skip_lab_run:
     if include_Al: 
         data.append(alphase+'\n')
 
+    # handle secondary mineral addition/removal
+    data = shf.setup_solids_custom(
+        data,
+        spindir,
+        outdir,
+        spinname=spinup_lab,
+        runname=runname_lab,
+        secondary_min_rule=secondary_min_rule,
+        sld_track=sld_track,
+        rockdata_dir=datadir,
+        secondslds_fn = "2ndslds.in",
+        secondslds_list_name = "2ndslds_def.in",
+    )
+
     with open(dst, 'w') as file:
         file.writelines(data)
     # remove duplicate minerals
@@ -399,19 +427,20 @@ if not skip_lab_run:
 
 
     filename = '2ndslds.in'
-    srcfile = os.path.join(modeldir, 'data', '2ndslds_def.in')
-    make_inputs.get_input_sld_properties(
-        outdir=outdir
-        ,runname=runname_field
-        ,filename = filename
-        ,srcfile = srcfile
-        )
-    make_inputs.get_input_sld_properties(
-        outdir=outdir
-        ,runname=runname_lab
-        ,filename = filename
-        ,srcfile = srcfile
-        )
+    if secondary_min_rule != "remove": # then add secondary mineral(s) (otherwise the file was made blank at the slds.in step)
+        srcfile = os.path.join(datadir, '2ndslds_def.in')
+        make_inputs.get_input_sld_properties(
+            outdir=outdir
+            ,runname=runname_field
+            ,filename = filename
+            ,srcfile = srcfile
+            )
+        make_inputs.get_input_sld_properties(
+            outdir=outdir
+            ,runname=runname_lab
+            ,filename = filename
+            ,srcfile = srcfile
+            )
 
     # --- write Dust_temp.in (for v1.0.2 seasonal runs)
     if exename in v102_exelist and singlerun_seasonality:
@@ -430,7 +459,7 @@ if not skip_lab_run:
 if include_psd_bulk or include_psd_full:
     # define the source file 
     if use_psdrain_datfile:
-        srcfile = os.path.join(modeldir, 'data', psdrain_datfile)
+        srcfile = os.path.join(datadir, psdrain_datfile)
     else: 
         srcfile = None  # this means we make one from scratch using sld_varlist
     
