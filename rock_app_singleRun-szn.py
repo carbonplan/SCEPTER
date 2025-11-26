@@ -519,6 +519,9 @@ if kwargs.get('mat') is not None and not np.isnan(kwargs.get('mat')):
 data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust) 
 data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(fdust2)
 data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(taudust)
+if kwargs.get('poro_updated') is not None:
+    if kwargs.get('poro_updated') > 0 and kwargs.get('poro_updated') < 1:
+        data[10] = '{:.8f}\tinitial porosity\n'.format(kwargs.get('poro_updated'))
 if kwargs.get('soilmoisture_surf') is not None:
     data[11] = '{:.8f}\twater saturation at the surface of profile\n'.format(soilmoisture_surf)
 if kwargs.get('dust_mixdep') is not None:

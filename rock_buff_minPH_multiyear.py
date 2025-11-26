@@ -170,26 +170,46 @@ for tstep in mytsteps:
         data = file.readlines()
     data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
     data[7] = 'true\trestart from a previous run\n'
-    if include_psd_bulk:
+    if include_psd_bulk == True:
         data[-3] = 'true\tenabling PSD tracking\n'
-    else:
+    elif include_psd_bulk == False:
         data[-3] = 'false\tenabling PSD tracking\n'
-    if include_psd_full:
+    if include_psd_full == True:
         data[-2] = 'true\tenabling PSD tracking for individual solid species\n'
-    else:
+    elif include_psd_full == False:
         data[-2] = 'false\tenabling PSD tracking for individual solid species\n'
+
+    if poro_iter_field == True:
+        data[3] = 'true\tporosity  iteration\n'
+    elif poro_iter_field == False:
+        data[3] = 'false\tporosity  iteration\n'
+    if poro_evol == True:
+        data[-6] = 'true\tenabling porosity evolution\n'
+    elif poro_evol == False:
+        data[-6] = 'false\tenabling porosity evolution\n'
+
     if include_roughness_sa == True:
         data[8] = 'true\tinclude roughness in mineral surface area\n'
-    else:
+    elif include_roughness_sa == False:
         data[8] = 'false\tinclude roughness in mineral surface area\n'
+    if sa_rule2 == True:
+        data[-4] = 'true\tenabling SA evolution 2 (SA increases with porosity)\n'
+    elif sa_rule2 == False:
+        data[-4] = 'false\tenabling SA evolution 2 (SA increases with porosity)\n'
+    if sa_rule1 == True:
+        data[-5] = 'true\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
+    elif sa_rule1 == False:
+        data[-5] = 'false\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
+
     if singlerun_seasonality==True:
         data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
-    else:
-        data[-1] = 'false\tenabling seasonality\n'
+    elif singlerun_seasonality == False:
+        data[-1] = 'false\tenabling full seasonality\n'
     if cec_adsorption_on == True:
         data[11] = "true\tenabling adsorption for cation exchange\n"
-    else:
+    elif cec_adsorption_on == False:
         data[11] = "false\tenabling adsorption for cation exchange\n"
+
 
     # === modifications required for v1.0.2 ----------------------
     if exename in v102_exelist:
@@ -491,6 +511,9 @@ for tstep in mytsteps:
     data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust)
     data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(fdust2)
     data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(taudust)
+    if kwargs.get('poro_updated') is not None:
+        if kwargs.get('poro_updated') > 0 and kwargs.get('poro_updated') < 1:
+            data[10] = '{:.8f}\tinitial porosity\n'.format(kwargs.get('poro_updated'))
     if kwargs.get('soilmoisture_surf') is not None:
         data[11] = '{:.8f}\twater saturation at the surface of profile\n'.format(soilmoisture_surf)
     if kwargs.get('dust_mixdep') is not None:
@@ -657,15 +680,24 @@ for tstep in mytsteps:
 
         if include_roughness_sa == True:
             data[8] = 'true\tinclude roughness in mineral surface area\n'
-        else:
+        elif include_roughness_sa == False:
             data[8] = 'false\tinclude roughness in mineral surface area\n'
+        if sa_rule2 == True:
+            data[-4] = 'true\tenabling SA evolution 2 (SA increases with porosity)\n'
+        elif sa_rule2 == False:
+            data[-4] = 'false\tenabling SA evolution 2 (SA increases with porosity)\n'
+        if sa_rule1 == True:
+            data[-5] = 'true\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
+        elif sa_rule1 == False:
+            data[-5] = 'false\tenabling SA evolution 1 (SA decreases as porosity increases)\n'
+
         if singlerun_seasonality==True:
             data[-1] = 'true\tenabling seasonality\n'   # added per yoshi suggestion
-        else:
-            data[-1] = 'false\tenabling seasonality\n'
+        elif singlerun_seasonality == False:
+            data[-1] = 'false\tenabling full seasonality\n'
         if cec_adsorption_on == True:
             data[11] = "true\tenabling adsorption for cation exchange\n"
-        else:
+        elif cec_adsorption_on == False:
             data[11] = "false\tenabling adsorption for cation exchange\n"
 
         # === modifications required for v1.0.2 ----------------------

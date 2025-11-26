@@ -45,6 +45,7 @@ singlerun_default = {
     'include_psd_full': True,      # [True, False, "spinvalue"] whether to compute full particle size diameters (for switches.in)
     'poro_iter_field': False,      # [True, False "spinvalue"] porosity iteration
     'poro_evol': False,            # [True, False "spinvalue"] porosity evolves with solid phase dissolution
+    'poro_updated': None,          # [float, None] if a float is provided, it overrides the porosity at the start of the run (for both field and lab)
     'cec_adsorption_on': False,    # [True, False "spinvalue"] whether to enable cec adsorption
     'dep_sample': 0.15,            # [cm] depth of sample for comparing pH to target -- not relevant for single run or initial tuneup, but relevant for tuning rock application
     # --- particle size distribution
@@ -214,6 +215,9 @@ specifydust_default = {
     'include_roughness_sa': False,  # [True, False] whether to include roughness in the mineral surface area calculation (for switches.in)
     'include_psd_bulk': False,      # [True, False] whether to compute bulk particle size diameters (for switches.in)
     'include_psd_full': False,      # [True, False] whether to compute full particle size diameters (for switches.in)
+    'poro_iter_field': False,      # [True, False "spinvalue"] porosity iteration
+    'poro_evol': False,            # [True, False "spinvalue"] porosity evolves with solid phase dissolution
+    'poro_updated': None,          # [float, None] if a float is provided, it overrides the porosity at the start of the run (for both field and lab)
     'cec_adsorption_on': False,    # [True, False] whether to enable cec adsorption
     'dep_sample': 0.15,            # [cm] depth of sample for comparing pH to target -- not relevant for single run or initial tuneup, but relevant for tuning rock application
     # --- particle size distribution
@@ -290,6 +294,9 @@ ph_react_default = {
     'include_roughness_sa': False,  # [True, False] whether to include roughness in the mineral surface area calculation (for switches.in)
     'include_psd_bulk': False,      # [True, False] whether to compute bulk particle size diameters (for switches.in)
     'include_psd_full': False,      # [True, False] whether to compute full particle size diameters (for switches.in)
+    'poro_iter_field': False,      # [True, False "spinvalue"] porosity iteration
+    'poro_evol': False,            # [True, False "spinvalue"] porosity evolves with solid phase dissolution
+    'poro_updated': None,          # [float, None] if a float is provided, it overrides the porosity at the start of the run (for both field and lab)
     'cec_adsorption_on': False,    # [True, False] whether to enable cec adsorption
     'dep_sample': 0.15,            # [cm] depth of sample for comparing pH to target -- not relevant for single run or initial tuneup, but relevant for tuning rock application
     # --- particle size distribution
