@@ -787,6 +787,9 @@ runname_field_list.append(compDir_field)
 runname_lab_list.append(compDir_lab)
 # ---------------------------------------
 
+if skip_lab_run:
+    compDir_lab = None
+
 # ... run postprocessing checks
 shf.run_complete_check(compDir_field, 
                       compDir_lab, 
