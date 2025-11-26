@@ -249,3 +249,82 @@ specifydust_default = {
     'scepter_exec_name': 'scepter'  # ['scepter', 'scepter_rateA', ...]
 }
 
+
+# Multi-year type 1 -- specifiy the dust timeseries
+ph_react_default = { 
+    'include_N': True,             # include nitrogen dynamics in solution
+    'include_Al': False,           # include aluminum dynamics
+    'alphase': 'amal',   # 'gb'    # set aluminum phase
+    'use_CaCl2': False,            # relevant for lab run
+    'include_DIC': True,           
+    'skip_lab_run': False,         # whether to only run the field or field + lab
+    'use_local_storage': False,    # only relevant for georgia tech hpc
+    # 'cec': 21.1,                 # [cmol kg-1] cation exchange capacity
+    'duration': 1,                 # [yr] duration of simulation (or iteration for multiyear; gets over-written by the dust timeseries file)
+    'dustsp': 'gbas',              # added dust species (will get overwritten by dust timeseries file if defined there) 
+    'dustsp_2nd': 'amnt',          # added dust species for secondary dust (will get overwritten by dust timeseries file if defined there) 
+    'dustrate': 1000,              # [g m-2 yr-1] dust application flux ; divide by 100 to get ton / ha / yr; (will get overwritten by dust timeseries file if defined there) 
+    'dustrate_2nd': 80,            # [g m-2 yr-1] dust application flux ; multiply by ~11 to get lbs / acre / yr; divide by 100 to get ton / ha / yr (will get overwritten by dust timeseries file if defined there) 
+    'imix': 3,                     # mixing style (1=fickian; 2=homogeneous; 3=tilling)
+    # 'catlist': ['ca','mg','k','na'], # list of tracked cations
+    'spinrun': 'spinup_1_spintuneupManual',         # name of spinup run
+    'newrun_id': 'testnameMeanAnn_gbas_fert',        # name of new run
+    'modeldir': '/home/tykukla/SCEPTER/', # directory of model scripts
+    'outdir': '/home/tykukla/SCEPTER/scepter_output/', # directory of output files
+    'spindir': 's3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/', # location of spinup run
+    'climatedir': '/home/tykukla/aglime-swap-cdr/scepter/clim-inputs/',   # climate input main directory
+    'climatefiles': 'default',     # climate input subdirectory (contains the climate `.in` files)
+    'taudust': 0.05,               # [yr] duration of dust application in year
+    'duststart': 0.25,             # [yr] (only used in seasonal runs with v1.0.2 or greater) time of year when dust application starts
+    'dustrad': 150,                # [micron] radius of dust particles (gets converted to meters in python script that runs scepter)
+    # 'add_secondary': False,         # [True, False] whether to add secondary precipitates to list of solids to track (defined in array below)
+    # 'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
+    #               "gb", "ct", "cabd", "ill", "gps", "mgbd"],
+    'singlerun_seasonality': False, # [True, False] whether to impose seasonality in the singlerun script
+    'include_roughness_sa': False,  # [True, False] whether to include roughness in the mineral surface area calculation (for switches.in)
+    'include_psd_bulk': False,      # [True, False] whether to compute bulk particle size diameters (for switches.in)
+    'include_psd_full': False,      # [True, False] whether to compute full particle size diameters (for switches.in)
+    'cec_adsorption_on': False,    # [True, False] whether to enable cec adsorption
+    'dep_sample': 0.15,            # [cm] depth of sample for comparing pH to target -- not relevant for single run or initial tuneup, but relevant for tuning rock application
+    # --- particle size distribution
+    'psdrain_datfile': "psdrain_100um.in",  # [] name of psdrain.in file in SCEPTER/data/ to use for the given run
+    'use_psdrain_datfile': False,  # [True, False] If true, the psdrain_datfile is copied over and used, otherwise a single peak distribution is constructed from the gaussian parameters below
+    'psdrain_meanRad': 5e-6,       # [m] mean radius of the particle size distribution (only used if `include_psd_*` is True)
+    'psdrain_log10_sd': 0.2,       # [m] standard deviation of the particle size distribution in log10 (only used if `include_psd_*` is True)
+    'psdrain_wt': 1.,              # [ ] weight for the PSD distribution
+
+    # --- ph-react specific
+    "max_time": 5,                 # [yr] total amount of time to simulate (must be > `duration`, which refers to individual targetpH run)
+    "tph": 7.3,                   # [] target pH for each iteration
+    "phnorm_pw": False,            # metric for target pH (true = porewater pH; false = soil pH)
+    
+    # --- multi-year specific
+    "dust_ts_dir": "/home/tykukla/ew-workflows/inputs/scepter/dust",
+    "dust_ts_fn": "gbas_15yr_1app_no2nd_001.csv",
+    'max_time': 6,                 # [yr] total amount of time to simulate (must be > `duration`, which refers to individual targetpH run)
+    'clim_files': ["T_temp.in", "q_temp.in", "Wet_temp.in"],  # names of climate files (only used in multi-year because we have to update each)
+
+    # --- lab vars
+    'ztot_lab': 0.05,
+    'ttot_lab': 100, 
+    'water_frac': 1.,              # water fraction for lab simulation
+
+    # --- postprocess
+    "postproc_prof_list": ["all"],  # list of postproc files to convert to .nc. Options are: ["adsorbed_percCEC", "adsorbed_ppm", "adsorbed", "aqueous_total", 
+                                    #                                                         "aqueous", "bulksoil", "exchange_total", "gas", "rate", "soil_ph", "solid_sp_saturation", 
+                                    #                                                         "solid_volumePercent", "solid_weightPercent", "solid", "specific_surface_area", "surface_area"]
+
+    # --- identify scepter version from executable name
+    "v102_exelist": ["scepter_richards"],   # list of executables for v1.0.1
+    
+    # --- OPTIONAL (accepts spinup value if None)
+    "qrun": None,                  # [m yr-1] water infiltration flux, use this to override spinup only
+    "mat": None,                   # [degC] mean annual temperature, use this to override spinup only
+    
+    # --- compute specific
+    'aws_save': None,              # ["move", "copy", None] whether to "move" file to aws, just copy it, or nothing at all
+    'aws_bucket': "s3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/",  # where to save at AWS (only used if 'aws_save'=True)
+
+    # --- which scepter executable to use
+    'scepter_exec_name': 'scepter'  # ['scepter', 'scepter_rateA', ...]
+}

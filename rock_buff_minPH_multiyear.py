@@ -1,8 +1,15 @@
 # %%
+# ---------------------------------------------------------
+# 
+# multiyear run with reactive dust application based on 
+# ph of previous timestep
+# 
+# ---------------------------------------------------------
 import os
 import re
 import sys
 import time
+import fsspec
 import numpy as np
 import shutil
 import get_int_prof
@@ -10,6 +17,7 @@ import make_inputs
 import random
 import subprocess
 import defaults.dict_singlerun
+import pandas as pd
 # import build_composite_multiyear as cfxns
 
 
@@ -17,20 +25,28 @@ import defaults.dict_singlerun
 # import module
 from ew_workflows import scepter_helperFxns as shf
 from ew_workflows import build_composite_multiyear as cfxns
+from ew_workflows import cflx_proc as cflx
 # ---
 
 
 # %%
+# ============================================================================================================
+# [ DEBUG: use synthetic sys.args ] 
+# sys.argv = "python3 /home/jovyan/SCEPTER/rock_buff_dust-ts_multiyear.py --modeldir /home/jovyan/SCEPTER/ --outdir /home/jovyan/SCEPTER/scepter_output/ --default_dict singlerun_default --row_number 7 --psdrain_meanRad 7.5e-05 --add_secondary True --poro 0.25 --dustrate_2nd 35 --dustrate 75 --site 264_cornbelt --spinrun 264_cornbelt --climatefiles 264_cornbelt_monthly_ltm_3yearly --dust_ts_dir s3://carbonplan-carbon-removal/ew-workflows-data/scepter/dust/ --dust_ts_fn gbas_100yr_3-yearly_001.csv --duration 100 --dustsp gbas --dustsp_2nd amnt --imix 3 --cec_adsorption_on True --include_psd_full True --include_psd_bulk False --psdrain_log10_sd 0.05 --psdrain_wt 1 --use_psdrain_datfile False --poro_iter_field False --poro_evol True --sa_rule1 False --sa_rule2 True --include_roughness_sa True --singlerun_seasonality True --climatedir s3://carbonplan-carbon-removal/ew-workflows-data/scepter/clim/era5_2006-01-01_2020-12-31/ --skip_lab_run True --aws_save move --aws_bucket s3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/ --scepter_exec_name scepter_richards --newrun_id longrun_monthly_ltm_3yearly_v0_264_cornbelt_monthly_ltm_3yearly_app_75p0_233 --task_started_at 2025-11-25T22:29:02.931497+00:00 --model_dir_exists".split()
+# ============================================================================================================
+
+
 # -------------------------------------------------------------
 # --- set default and system args
 sys_args = shf.parse_arguments(sys.argv)   # parse system args
-import_dict = "reApp_dictionary" # set the dictionary to use from system args
-# import_dict = "default_dictionary" # set the dictionary to use from system args
-# import_dict = sys_args['default_dict'] # set the dictionary to use from system args
+import_dict = sys_args['default_dict'] # set the dictionary to use from system args
 def_args = getattr(defaults.dict_singlerun, import_dict)  # get dict attribute
 
 # set global variables
 combined_dict = shf.set_vars(def_args, sys_args)  # default unless defined in sys_args
+# (set as kwargs CHANGE WHEN THIS BECOMES A FUNCTION)
+kwargs = combined_dict.copy()
+# add to globals (CHANGE/REMOVE WHEN THIS BECOMES A FUNCTION)
 for key, value in combined_dict.items():
     globals()[key] = value
     
@@ -65,6 +81,8 @@ mytsteps = shf.generate_timesteps(max_time, timestep_dur)
 counter = 0  # for tracking and file naming (MUST START AT ZERO)
 runname_field_old, runname_lab_old = "placeholder1", "placeholder2"   # placeholders for update later
 
+# empty lists for moving output to aws
+runname_lab_list, runname_field_list = [], []
 # %% 
 for tstep in mytsteps:
     
@@ -125,11 +143,16 @@ for tstep in mytsteps:
         for runname in [runname_field,runname_lab]:
             if (runname == runname_lab) and skip_lab_run:
                 continue
+            # set source and destination
+            src_clim = os.path.join(climatedir, climatefiles)
+            dst_clim = os.path.join(outdir, runname)
+            # copy over
+            shf.copy_files(src_clim, dst_clim)
+            
             for thisfile in clim_files:  # loop through all three climate inputs
-                src_clim = os.path.join(climatedir, climatefiles, thisfile)
-                dst_clim = os.path.join(outdir, runname, thisfile)
-                # read from source, update, save to dst
-                shf.update_clim(src_clim, dst_clim, tstep)
+                dst_clim_file = os.path.join(dst_clim, thisfile)
+                # read from dst, update, and save there
+                shf.update_clim(dst_clim_file, dst_clim_file, tstep)
 
 
     
@@ -200,6 +223,9 @@ for tstep in mytsteps:
     if added_sp == 'baek23': 
         dustsrc = os.path.join(modeldir, 'data', 'dust_def.in')
         multi_sp_feedstock = True
+    if added_sp == 'baek23nodp': 
+        dustsrc = os.path.join(modeldir, 'data', 'dust_def_noDP.in')
+        multi_sp_feedstock = True
     if added_sp == 'bridge': # blue ridge basalt
         dustsrc = os.path.join(modeldir, 'data', 'dust_BlueRidge.in')
         multi_sp_feedstock = True
@@ -214,9 +240,13 @@ for tstep in mytsteps:
     if added_sp2 == 'cc': dustsrc2 = os.path.join(modeldir, 'data', 'dust_lime.in')
     if added_sp2 == 'cao': dustsrc2 = os.path.join(modeldir, 'data', 'dust_cao.in')
     if added_sp2 == 'dlm': dustsrc2 = os.path.join(modeldir, 'data', 'dust_dlm.in')  
-    if added_sp2 == 'wls': dustsrc2 = os.path.join(modeldir, 'data', 'dust_wls.in')
+    if added_sp2 == 'wls': dustsrc = os.path.join(modeldir, 'data', 'dust_wls.in')
+    if added_sp2 == 'fo': dustsrc2 = os.path.join(modeldir, 'data', 'dust_fo.in')
     if added_sp2 == 'baek23': 
         dustsrc2 = os.path.join(modeldir, 'data', 'dust_def.in')
+        multi_sp_feedstock_2nd = True
+    if added_sp2 == 'baek23nodp': 
+        dustsrc2 = os.path.join(modeldir, 'data', 'dust_def_noDP.in')
         multi_sp_feedstock_2nd = True
     if added_sp2 == 'bridge': # blue ridge basalt
         dustsrc2 = os.path.join(modeldir, 'data', 'dust_BlueRidge.in')
@@ -401,10 +431,10 @@ for tstep in mytsteps:
     # get ph of spin-up
     if not skip_lab_run:
         phint = get_int_prof.get_ph_int_site(spindir,spinup_lab,dep_sample)
+        ymx = phint - targetpH
     else:
         phint = np.nan
     phint_field = get_int_prof.get_ph_int_site(spindir,spinup_field,dep_sample)
-    ymx = phint - targetpH
     if phnorm_pw: ymx = phint_field - targetpH
     res_list.append([0, phint_field,phint, targetpH, 0, abs( ymx/targetpH ) ])
         
@@ -584,6 +614,7 @@ for tstep in mytsteps:
         filename = 'switches.in'
         src = os.path.join(spindir, spinup_lab, filename)
         dst = os.path.join(outdir, runname_lab, filename)
+
         with open(src, 'r') as file:
             data = file.readlines()
         data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(imix)
@@ -644,9 +675,11 @@ for tstep in mytsteps:
         ## --- getting data from lab run --- ##
         
         phint, ph_trend_lab = get_int_prof.get_ph_int_site_trend(outdir,runname_lab,dep_sample)
+        phint, ph_trend_field = get_int_prof.get_ph_int_site_trend(outdir,runname_field,dep_sample)
         print(phint_field,phint)
     
     if skip_lab_run:
+        phint, ph_trend_field = get_int_prof.get_ph_int_site_trend(outdir,runname_field,dep_sample)
         ph_trend_lab = np.nan
     
     ## /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -680,7 +713,7 @@ for tstep in mytsteps:
         next_dustrate = dustrate
     # [4] it's too basic
     if (timestep_ph > targetpH):
-        next_dustrate = 0.1  # negligible
+        next_dustrate = 0.01  # negligible
     
     
     
@@ -764,21 +797,14 @@ for tstep in mytsteps:
     # ... update the dust flux file so it's usable without needing input from frame.in
     shf.dustflx_calc(outdir, runname_field, fdust, fdust2, dustsp, dustsp_2nd)
     
-    # ... move to aws if this option is turned on
-    # [nothing happens if aws_save != 'move' or 'copy']
-    shf.to_aws(aws_save, 
-               aws_bucket, 
-               outdir, 
-               runname_lab, 
-               runname_field)
-
-    
     
     # UPDATE THE RUNNAME FOR NEXT ITERATION
     counter += 1
     runname_field_old = runname_field
     runname_lab_old = runname_lab
-
+    # add to lists that are used for aws moving
+    runname_field_list.append(runname_field)
+    runname_lab_list.append(runname_lab)
     
 
 # %%
@@ -789,6 +815,20 @@ compDir_field, compDir_lab = cfxns.build_composite(expid, outdir)
 runname_field_list.append(compDir_field)
 runname_lab_list.append(compDir_lab)
 # ---------------------------------------
+
+if skip_lab_run:
+    compDir_lab = None
+
+# ... run postprocessing checks
+shf.run_complete_check(compDir_field, 
+                      compDir_lab, 
+                      outdir, 
+                      target_duration=tau, 
+                      include_duration_check=False, 
+                      omit_saveSuff=True, 
+                      omit_ipynb=True,
+                     )
+
 # %% 
 # ... compute cdr-relevant fluxes
 multi_sp_dict = {dustsp: multi_sp_feedstock, dustsp_2nd: multi_sp_feedstock_2nd}
