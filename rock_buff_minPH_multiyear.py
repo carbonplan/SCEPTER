@@ -168,7 +168,7 @@ for tstep in mytsteps:
     dst = os.path.join(outdir, runname_field, filename)
     with open(src, 'r') as file:
         data = file.readlines()
-    data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(imix)
+    data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
     data[7] = 'true\trestart from a previous run\n'
     if include_psd_bulk:
         data[-3] = 'true\tenabling PSD tracking\n'
@@ -617,7 +617,7 @@ for tstep in mytsteps:
 
         with open(src, 'r') as file:
             data = file.readlines()
-        data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(imix)
+        data[2] = '{:d}\tbio-mixing style: 0-- no mixing, 1-- fickian mixing, 2-- homogeneous mixng, 3--- tilling, 4--- LABS mixing, if not defined 0 is taken\n'.format(int(imix))
         data[7] = 'true\trestart from a previous run\n'
         # turn of PSD tracking in lab
         data[-3] = 'false\tenabling PSD tracking\n'
