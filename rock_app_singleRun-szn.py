@@ -93,6 +93,8 @@ for (runname,spinup) in [(runname_field,spinup_field),(runname_lab,spinup_lab)]:
 # duplicate the climate files
 if singlerun_seasonality==True:
     for runname in [runname_field,runname_lab]:
+        if skip_lab_run and (runname == runname_lab):
+            continue
         # set source and destination
         src_clim = os.path.join(climatedir, climatefiles)
         dst_clim = os.path.join(outdir, runname)

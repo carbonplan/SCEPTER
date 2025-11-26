@@ -32,6 +32,12 @@ from ew_workflows import cflx_proc as cflx
 
 
 # %%
+# ============================================================================================================
+# [ DEBUG: use synthetic sys.args ] 
+# sys.argv = "python3 /home/jovyan/SCEPTER/rock_buff_dust-ts_multiyear.py --modeldir /home/jovyan/SCEPTER/ --outdir /home/jovyan/SCEPTER/scepter_output/ --default_dict singlerun_default --row_number 7 --psdrain_meanRad 7.5e-05 --add_secondary True --poro 0.25 --dustrate_2nd 35 --dustrate 75 --site 264_cornbelt --spinrun 264_cornbelt --climatefiles 264_cornbelt_monthly_ltm_3yearly --dust_ts_dir s3://carbonplan-carbon-removal/ew-workflows-data/scepter/dust/ --dust_ts_fn gbas_100yr_3-yearly_001.csv --duration 100 --dustsp gbas --dustsp_2nd amnt --imix 3 --cec_adsorption_on True --include_psd_full True --include_psd_bulk False --psdrain_log10_sd 0.05 --psdrain_wt 1 --use_psdrain_datfile False --poro_iter_field False --poro_evol True --sa_rule1 False --sa_rule2 True --include_roughness_sa True --singlerun_seasonality True --climatedir s3://carbonplan-carbon-removal/ew-workflows-data/scepter/clim/era5_2006-01-01_2020-12-31/ --skip_lab_run True --aws_save move --aws_bucket s3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/ --scepter_exec_name scepter_richards --newrun_id longrun_monthly_ltm_3yearly_v0_264_cornbelt_monthly_ltm_3yearly_app_75p0_233 --task_started_at 2025-11-25T22:29:02.931497+00:00 --model_dir_exists".split()
+# ============================================================================================================
+
+
 # -------------------------------------------------------------
 # --- set default and system args
 sys_args = shf.parse_arguments(sys.argv)   # parse system args
@@ -55,6 +61,8 @@ datadir = os.path.join(modeldir, 'data/')
 # %% 
 # --- Read in the dust flux file
 # [2] read in file
+if "dust_ts_dir" not in locals():
+    raise ValueError(f"Did not find `dust_ts_dir` in inputs. Did you set it? If so, you might be using the wrong default dict (make sure it's also defined there)")
 src_dust = os.path.join(dust_ts_dir, dust_ts_fn)
 df_dust = pd.read_csv(src_dust)
 # except:
@@ -189,11 +197,16 @@ for index, row in df_dust.iterrows():
         for runname in [runname_field,runname_lab]:
             if skip_lab_run and (runname == runname_lab):
                 continue
+            # set source and destination
+            src_clim = os.path.join(climatedir, climatefiles)
+            dst_clim = os.path.join(outdir, runname)
+            # copy over
+            shf.copy_files(src_clim, dst_clim)
+            
             for thisfile in clim_files:  # loop through all three climate inputs
-                src_clim = os.path.join(climatedir, climatefiles, thisfile)
-                dst_clim = os.path.join(outdir, runname, thisfile)
-                # read from source, update, save to dst
-                shf.update_clim(src_clim, dst_clim, tstep)
+                dst_clim_file = os.path.join(dst_clim, thisfile)
+                # read from dst, update, and save there
+                shf.update_clim(dst_clim_file, dst_clim_file, tstep)
     
     # save the dust file
     for runname in [runname_field,runname_lab]:
