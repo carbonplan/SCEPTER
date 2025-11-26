@@ -212,6 +212,8 @@ specifydust_default = {
     'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
                   "gb", "ct", "cabd", "ill", "gps", "mgbd"],
     'singlerun_seasonality': False, # [True, False] whether to impose seasonality in the singlerun script
+    'sa_rule1': "spinvalue",       # [True, False, "spinvalue"] SA decreases as porosity increases
+    'sa_rule2': "spinvalue",       # [True, False, "spinvalue"] SA increases as porosity increases
     'include_roughness_sa': False,  # [True, False] whether to include roughness in the mineral surface area calculation (for switches.in)
     'include_psd_bulk': False,      # [True, False] whether to compute bulk particle size diameters (for switches.in)
     'include_psd_full': False,      # [True, False] whether to compute full particle size diameters (for switches.in)
@@ -249,6 +251,9 @@ specifydust_default = {
     # --- OPTIONAL (accepts spinup value if None)
     "qrun": None,                  # [m yr-1] water infiltration flux, use this to override spinup only
     "mat": None,                   # [degC] mean annual temperature, use this to override spinup only
+    "dust_mixdep": None,           # [m] depth of dust mixing into soil column
+    "soilmoisture_surf": None,     # [] soil moisture saturation at the surface of the profile
+
     
     # --- compute specific
     'aws_save': None,              # ["move", "copy", None] whether to "move" file to aws, just copy it, or nothing at all
@@ -291,6 +296,8 @@ ph_react_default = {
     'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
                   "gb", "ct", "cabd", "ill", "gps", "mgbd"],
     'singlerun_seasonality': False, # [True, False] whether to impose seasonality in the singlerun script
+    'sa_rule1': "spinvalue",       # [True, False, "spinvalue"] SA decreases as porosity increases
+    'sa_rule2': "spinvalue",       # [True, False, "spinvalue"] SA increases as porosity increases
     'include_roughness_sa': False,  # [True, False] whether to include roughness in the mineral surface area calculation (for switches.in)
     'include_psd_bulk': False,      # [True, False] whether to compute bulk particle size diameters (for switches.in)
     'include_psd_full': False,      # [True, False] whether to compute full particle size diameters (for switches.in)
@@ -333,6 +340,8 @@ ph_react_default = {
     # --- OPTIONAL (accepts spinup value if None)
     "qrun": None,                  # [m yr-1] water infiltration flux, use this to override spinup only
     "mat": None,                   # [degC] mean annual temperature, use this to override spinup only
+    "dust_mixdep": None,           # [m] depth of dust mixing into soil column
+    "soilmoisture_surf": None,     # [] soil moisture saturation at the surface of the profile
     
     # --- compute specific
     'aws_save': None,              # ["move", "copy", None] whether to "move" file to aws, just copy it, or nothing at all
