@@ -35,10 +35,10 @@ singlerun_default = {
     'dustrad': 150,                # [micron] radius of dust particles (gets converted to meters in python script that runs scepter)
     'singlerun_seasonality': True, # [True, False, "spinvalue"] whether to impose seasonality in the singlerun script
     'include_roughness_sa': True,  # [True, False, "spinvalue"] whether to include roughness in the mineral surface area calculation (for switches.in)
-    'secondary_min_rule': None,    # ["add", "remove", "add+sld_track", None] "add": add anything in 2ndslds.in to slds.in; "remove": remove everything from 2ndslds.in and secondary minerals from slds.in
+    'secondary_min_rule': None,    # ["add", "remove", "sld_track", "add+sld_track", None] "add": add anything in 2ndslds.in to slds.in; "remove": remove everything from 2ndslds.in and secondary minerals from slds.in; "sld_track": only add whatever's in "sld_track" (below) to slds.in
                                    #                                          "add+sld_track": add 2ndslds.in to slds.in and whatever's in "sld_track" (below); None: no special modifications to slds.in or 2ndslds.in (beyond what already happens in the .py file)  
     'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
-                  "gb", "ct", "cabd", "ill", "gps", "mgbd"],                               
+                  "gb", "ct", "cabd", "amsi", "ill", "gps", "mgbd", "nabd", "kbd"],                               
     'sa_rule1': "spinvalue",       # [True, False, "spinvalue"] SA decreases as porosity increases
     'sa_rule2': "spinvalue",       # [True, False, "spinvalue"] SA increases as porosity increases
     'include_psd_bulk': True,      # [True, False, "spinvalue"] whether to compute bulk particle size diameters (for switches.in)
@@ -113,7 +113,7 @@ spinup_default = {
     'stop_unsuccessful': True,     # [True, False] whether to stop looking after run timeout threshold is passed
     'add_secondary': False,         # [True, False] whether to add secondary precipitates to list of solids to track (defined in array below)
     'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
-                  "gb", "ct", "cabd", "ill", "gps", "mgbd"],
+                  "gb", "ct", "cabd", "amsi", "ill", "gps", "mgbd", "nabd", "kbd"],                               
     'liming': False,               # [True, False] if liming, 10 units of ca added (over-writes initial ca value below) 
     'limesp': 'cc',                # [] lime species to apply (CaCO3 or CaO)
     'water_frac_tunespin': 2.5,    # [] water frac for the tunespin (set separately because default files had 2.5 for tuneup, 1 for basalt)
@@ -207,10 +207,10 @@ specifydust_default = {
     'taudust': 0.05,               # [yr] duration of dust application in year
     'duststart': 0.25,             # [yr] (only used in seasonal runs with v1.0.2 or greater) time of year when dust application starts
     'dustrad': 150,                # [micron] radius of dust particles (gets converted to meters in python script that runs scepter)
-    'secondary_min_rule': None,    # ["add", "remove", "add+sld_track", None] "add": add anything in 2ndslds.in to slds.in; "remove": remove everything from 2ndslds.in and secondary minerals from slds.in
+    'secondary_min_rule': None,    # ["add", "remove", "sld_track", "add+sld_track", None] "add": add anything in 2ndslds.in to slds.in; "remove": remove everything from 2ndslds.in and secondary minerals from slds.in; "sld_track": only add whatever's in "sld_track" (below) to slds.in
                                    #                                          "add+sld_track": add 2ndslds.in to slds.in and whatever's in "sld_track" (below); None: no special modifications to slds.in or 2ndslds.in (beyond what already happens in the .py file)  
     'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
-                  "gb", "ct", "cabd", "ill", "gps", "mgbd"],
+                  "gb", "ct", "cabd", "amsi", "ill", "gps", "mgbd", "nabd", "kbd"],                               
     'singlerun_seasonality': False, # [True, False] whether to impose seasonality in the singlerun script
     'sa_rule1': "spinvalue",       # [True, False, "spinvalue"] SA decreases as porosity increases
     'sa_rule2': "spinvalue",       # [True, False, "spinvalue"] SA increases as porosity increases
@@ -291,10 +291,10 @@ ph_react_default = {
     'taudust': 0.05,               # [yr] duration of dust application in year
     'duststart': 0.25,             # [yr] (only used in seasonal runs with v1.0.2 or greater) time of year when dust application starts
     'dustrad': 150,                # [micron] radius of dust particles (gets converted to meters in python script that runs scepter)
-    'secondary_min_rule': None,    # ["add", "remove", "add+sld_track", None] "add": add anything in 2ndslds.in to slds.in; "remove": remove everything from 2ndslds.in and secondary minerals from slds.in
+    'secondary_min_rule': None,    # ["add", "remove", "sld_track", "add+sld_track", None] "add": add anything in 2ndslds.in to slds.in; "remove": remove everything from 2ndslds.in and secondary minerals from slds.in; "sld_track": only add whatever's in "sld_track" (below) to slds.in
                                    #                                          "add+sld_track": add 2ndslds.in to slds.in and whatever's in "sld_track" (below); None: no special modifications to slds.in or 2ndslds.in (beyond what already happens in the .py file)  
     'sld_track': ["cc", "ka",      # list of minerals whose secondary precipitation to track and output (appended to the sld_list in python script)
-                  "gb", "ct", "cabd", "ill", "gps", "mgbd"],
+                  "gb", "ct", "cabd", "amsi", "ill", "gps", "mgbd", "nabd", "kbd"],                               
     'singlerun_seasonality': False, # [True, False] whether to impose seasonality in the singlerun script
     'sa_rule1': "spinvalue",       # [True, False, "spinvalue"] SA decreases as porosity increases
     'sa_rule2': "spinvalue",       # [True, False, "spinvalue"] SA increases as porosity increases
