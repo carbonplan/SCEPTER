@@ -19,7 +19,6 @@ WRITE(*,*) TRIM(path)
 ! call get_command_argument(0, cmd)
 ! WRITE(*,*) TRIM(cmd)
 ! path2 = path(:index(path,'weathering')-2)
-! but it assumes the executable is named "scepter" by subtracting the last len('scepter') 
 path2 = path(:len(trim(path))-len('scepter')-1)
 WRITE(*,*) TRIM(path2)
 

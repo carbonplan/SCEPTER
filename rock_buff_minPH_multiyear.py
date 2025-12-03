@@ -219,18 +219,6 @@ for tstep in mytsteps:
     with open(dst, 'w') as file:
         file.writelines(data)
     
-    # --- write Dust_temp.in (for v1.0.2 seasonal runs)
-    if exename in v102_exelist and singlerun_seasonality:
-        shf.create_dust_input(
-            outdir = outdir,
-            runname = runname_field,
-            dustname1 = added_sp,
-            dustname2 = added_sp2,
-            t_add = duststart,
-            output_filename  = "Dust_temp.in",
-            dryrun = False
-        )
-    # --------------------------------------------------
 
     # --- PRIMARY DUST FILE
     multi_sp_feedstock = False
@@ -533,6 +521,20 @@ for tstep in mytsteps:
         file.writelines(data)
         
         
+    # --- write Dust_temp.in (for v1.0.2 seasonal runs)
+    if exename in v102_exelist and singlerun_seasonality:
+        shf.create_dust_input(
+            outdir = outdir,
+            runname = runname_field,
+            dustname1 = added_sp,
+            dustname2 = added_sp2,
+            t_add = duststart,
+            output_filename  = "Dust_temp.in",
+            dryrun = False
+        )
+    # --------------------------------------------------
+
+
     ## --- run field run --- ##
     rundir = os.path.join(outdir, runname_field)
     os.chdir(rundir)
