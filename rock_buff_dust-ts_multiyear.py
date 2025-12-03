@@ -300,6 +300,11 @@ for index, row in df_dust.iterrows():
     if exename in v102_exelist:
         data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken\n'.format(int(1))
         data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series\n'.format(int(1))
+    # === make v1.0.2 spinups backward-compatible -----------------
+    if (exename == "scepter") and (data[5].lstrip()[0].isdigit()): # convert
+        data[5] = 'true\tdisplay results at runtime\n'
+    if (exename == "scepter") and (data[6].lstrip()[0].isdigit()): # convert
+        data[6] = 'true\treport files\n'
 
 
     with open(dst, 'w') as file:
@@ -779,6 +784,11 @@ for index, row in df_dust.iterrows():
         if exename in v102_exelist:
             data[5] = '{:d}\tdisplay results at runtime: 0-- none, 1-- only reporting time, 2-- every time iteration, if not defined 1 is taken\n'.format(int(1))
             data[6] = '{:d}\treport files: 0-- basics, 1-- +saturation time series\n'.format(int(1))
+        # === make v1.0.2 spinups backward-compatible -----------------
+        if (exename == "scepter") and (data[5].lstrip()[0].isdigit()): # convert
+            data[5] = 'true\tdisplay results at runtime\n'
+        if (exename == "scepter") and (data[6].lstrip()[0].isdigit()): # convert
+            data[6] = 'true\treport files\n'
 
         with open(dst, 'w') as file:
             file.writelines(data)
