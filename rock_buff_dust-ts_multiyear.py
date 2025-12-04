@@ -331,7 +331,16 @@ for index, row in df_dust.iterrows():
         multi_sp_feedstock = True
     dustdst = 'dust.in'
     
-    os.system('cp ' + dustsrc + to + outdir + runname_field + where + dustdst) 
+    if exename in v102_exelist and singlerun_seasonality: # then we need all dustsp in the same file
+        src = dustsrc
+        dstpath = os.path.join(outdir, runname_field)
+        shf.update_dust_input(
+                src, dstpath, added_sp2, fdust2, fdust,
+                multi_sp_feedstock, save_fn = dustdst,
+        )
+    else:    
+        os.system('cp ' + dustsrc + to + outdir + runname_field + where + dustdst) 
+
 
     # --- SECONDARY DUST FILE
     multi_sp_feedstock_2nd = False
@@ -610,6 +619,9 @@ for index, row in df_dust.iterrows():
             output_filename  = "Dust_temp.in",
             dryrun = False
         )
+        data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(0.) 
+        data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(0.)
+        data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(0.)
     # --------------------------------------------------
 
         

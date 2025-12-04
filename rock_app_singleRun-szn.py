@@ -223,7 +223,15 @@ if added_sp == 'bridge': # blue ridge basalt
     multi_sp_feedstock = True
 dustdst = 'dust.in'
 
-os.system('cp ' + dustsrc + to + outdir + runname_field + where + dustdst) 
+if exename in v102_exelist and singlerun_seasonality: # then we need all dustsp in the same file
+    src = dustsrc
+    dstpath = os.path.join(outdir, runname_field)
+    shf.update_dust_input(
+            src, dstpath, added_sp2, fdust2, fdust,
+            multi_sp_feedstock, save_fn = dustdst,
+    )
+else:    
+    os.system('cp ' + dustsrc + to + outdir + runname_field + where + dustdst) 
 
 
 # --- SECONDARY DUST FILE
@@ -520,6 +528,7 @@ with open(dst, 'w') as file:
     
 
 # --- write Dust_temp.in (for v1.0.2 seasonal runs)
+#     and set frame.in dust specifications to zero (it's handled by `Dust_temp.in`)
 if exename in v102_exelist and singlerun_seasonality:
     shf.create_dust_input(
         outdir = outdir,
@@ -531,6 +540,9 @@ if exename in v102_exelist and singlerun_seasonality:
         output_filename  = "Dust_temp.in",
         dryrun = False
     )
+    data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(0.) 
+    data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(0.)
+    data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(0.)
 # --------------------------------------------------
 
 
@@ -696,7 +708,7 @@ if not skip_lab_run:
         file.writelines(data)
 
 
-        # --- write Dust_temp.in (for v1.0.2 seasonal runs)
+    # --- write Dust_temp.in (for v1.0.2 seasonal runs)
     if exename in v102_exelist and singlerun_seasonality:
         shf.create_dust_input(
             outdir = outdir,
