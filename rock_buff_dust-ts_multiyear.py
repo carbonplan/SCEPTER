@@ -872,7 +872,16 @@ for index, row in df_dust.iterrows():
                          )
 
     # ... update the dust flux file so it's usable without needing input from frame.in
-    shf.dustflx_calc(outdir, runname_field, fdust, fdust2, dustsp, dustsp_2nd)
+    if exename in v102_exelist and singlerun_seasonality:
+        shf.dustflx_calc_v102(       # [ updated for v1.0.2 ]
+                outdir, runname_field, dustsp, dustsp_2nd, fdust,
+                fdust2, multi_sp_feedstock,
+                dustsubdir = "flx",        # [ DEFAULT ]
+                dustname = "dust.txt",     # [ DEFAULT ]
+                dustname_in = "dust.in",   # [ DEFAULT ]
+        )
+    else:
+        shf.dustflx_calc(outdir, runname_field, fdust, fdust2, dustsp, dustsp_2nd)
     
     # UPDATE THE RUNNAME FOR NEXT ITERATION
     counter += 1
