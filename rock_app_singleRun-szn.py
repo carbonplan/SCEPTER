@@ -521,11 +521,7 @@ data[20]    = '{}\n'.format(runname_field)
 # --- if v102 then use full path instead of just spinname
 if exename in v102_exelist:
     data[18]    = '{}\n'.format(os.path.join(outdir, spinup_field))
-# ---
-
-with open(dst, 'w') as file:
-    file.writelines(data)
-    
+# ---    
 
 # --- write Dust_temp.in (for v1.0.2 seasonal runs)
 #     and set frame.in dust specifications to zero (it's handled by `Dust_temp.in`)
@@ -544,6 +540,9 @@ if exename in v102_exelist and singlerun_seasonality:
     data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(0.)
     data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(0.)
 # --------------------------------------------------
+
+with open(dst, 'w') as file:
+    file.writelines(data)
 
 
 ## --- run field run --- ##

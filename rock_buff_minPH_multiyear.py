@@ -530,10 +530,6 @@ for tstep in mytsteps:
     if exename in v102_exelist:
         data[18]    = '{}\n'.format(os.path.join(outdir, spinup_field))
     # ---
-
-    with open(dst, 'w') as file:
-        file.writelines(data)
-        
         
     # --- write Dust_temp.in (for v1.0.2 seasonal runs)
     if exename in v102_exelist and singlerun_seasonality:
@@ -552,6 +548,10 @@ for tstep in mytsteps:
         data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(0.)
     # --------------------------------------------------
 
+    with open(dst, 'w') as file:
+        file.writelines(data)
+
+        
 
     ## --- run field run --- ##
     rundir = os.path.join(outdir, runname_field)

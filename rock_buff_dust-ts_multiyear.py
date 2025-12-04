@@ -603,10 +603,6 @@ for index, row in df_dust.iterrows():
         data[18]    = '{}\n'.format(os.path.join(outdir, spinup_field))
     # ---
 
-    with open(dst, 'w') as file:
-        file.writelines(data)
-        
-
     # --- write Dust_temp.in (for v1.0.2 seasonal runs)
     if exename in v102_exelist and singlerun_seasonality:
         shf.create_dust_input(
@@ -623,6 +619,9 @@ for index, row in df_dust.iterrows():
         data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(0.)
         data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(0.)
     # --------------------------------------------------
+
+    with open(dst, 'w') as file:
+        file.writelines(data)
 
         
     ## --- run field run --- ##
