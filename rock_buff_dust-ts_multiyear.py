@@ -603,9 +603,10 @@ for index, row in df_dust.iterrows():
         shf.create_dust_input(
             outdir = outdir,
             runname = runname_field,
-            dustname1 = added_sp,
-            dustname2 = added_sp2,
+            dust1_dict = {added_sp: fdust},
+            dust2_dict = {added_sp2: fdust2},
             t_add = duststart,
+            taudust = taudust,
             output_filename  = "Dust_temp.in",
             dryrun = False
         )
@@ -799,9 +800,10 @@ for index, row in df_dust.iterrows():
             shf.create_dust_input(
                 outdir = outdir,
                 runname = runname_field,
-                dustname1 = added_sp,
-                dustname2 = added_sp2,
+                dust1_dict = {added_sp: fdust},
+                dust2_dict = {added_sp2: fdust2},
                 t_add = duststart,
+                taudust = taudust,
                 output_filename  = "Dust_temp.in",
                 dryrun = False
             )
