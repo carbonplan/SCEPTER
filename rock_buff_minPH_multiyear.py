@@ -296,6 +296,9 @@ for tstep in mytsteps:
             data.insert(1, added_sp2+'\n')
     else: # otherwise get dustsp from the dust.in file
         data = shf.add_dustsp_to_sld(data, dustdst2, outdir, runname_field)
+    # add parentrock if asked to 
+    if add_parentrock_to_sld:
+        data = shf.add_dustsp_to_sld(data, 'parentrock.in', outdir, runname_field)
         
     if include_N and added_sp2 != "amnt":
         data.append('amnt'+'\n')
