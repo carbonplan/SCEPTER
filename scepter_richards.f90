@@ -3213,7 +3213,7 @@ if (do_psd) then
         
         open(ipsdv,file = trim(adjustl(profdir))//'/'//'intpsd_pr.txt',status = 'replace')
         write(ipsdv,*) ' sldsp\diameter(um) ', (10d0**ps(ips)*1d6*2d0,ips=1,nps), 'p80(um)'
-        write(ipsdv,*) chrsld(isps),(intpsd(ips),ips=1,nps), p80_tmp
+        write(ipsdv,*) 'bulk',(intpsd(ips),ips=1,nps), p80_tmp
         close(ipsdv)
 
         ! initially particle is distributed as in parent rock 
