@@ -516,7 +516,7 @@ for tstep in mytsteps:
     data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(fdust)
     data[6]     = '{:.8f}\tamounts of 2nd dusts [g/m2/yr]\n'.format(fdust2)
     data[7]     = '{:.8f}\tduration of dust application [yr]\n'.format(taudust)
-    if kwargs.get('poro_updated') is not None:
+    if (kwargs.get('poro_updated') is not None) and (not isinstance(kwargs.get('poro_updated'), str)):
         if kwargs.get('poro_updated') > 0 and kwargs.get('poro_updated') < 1:
             data[10] = '{:.8f}\tinitial porosity\n'.format(kwargs.get('poro_updated'))
     if kwargs.get('soilmoisture_surf') is not None:
