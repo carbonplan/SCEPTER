@@ -229,6 +229,9 @@ for tstep in mytsteps:
     multi_sp_feedstock = False
     if added_sp == "amnt": dustsrc = os.path.join(modeldir, 'data', 'dust_fert.in')
     if added_sp == 'gbas': dustsrc = os.path.join(modeldir, 'data', 'dust_gbasalt.in')
+    if added_sp == 'cbas': dustsrc = os.path.join(modeldir, 'data', 'dust_cbasalt.in')
+    if added_sp == 'gac': dustsrc = os.path.join(modeldir, 'data', 'dust_gac.in') # (i think for lab runs only)
+    if added_sp == 'ims': dustsrc = os.path.join(modeldir, 'data', 'dust_ims.in') # (i think for lab runs only)
     if added_sp == 'cc': dustsrc = os.path.join(modeldir, 'data', 'dust_lime.in')
     if added_sp == 'cao': dustsrc = os.path.join(modeldir, 'data', 'dust_cao.in')
     if added_sp == 'dlm': dustsrc = os.path.join(modeldir, 'data', 'dust_dlm.in')
@@ -259,6 +262,9 @@ for tstep in mytsteps:
     multi_sp_feedstock_2nd = False
     if added_sp2 == "amnt": dustsrc2 = os.path.join(modeldir, 'data', 'dust_fert.in')
     if added_sp2 == 'gbas': dustsrc2 = os.path.join(modeldir, 'data', 'dust_gbasalt.in')
+    if added_sp == 'cbas': dustsrc = os.path.join(modeldir, 'data', 'dust_cbasalt.in')
+    if added_sp == 'gac': dustsrc = os.path.join(modeldir, 'data', 'dust_gac.in') # (i think for lab runs only)
+    if added_sp == 'ims': dustsrc = os.path.join(modeldir, 'data', 'dust_ims.in') # (i think for lab runs only)
     if added_sp2 == 'cc': dustsrc2 = os.path.join(modeldir, 'data', 'dust_lime.in')
     if added_sp2 == 'cao': dustsrc2 = os.path.join(modeldir, 'data', 'dust_cao.in')
     if added_sp2 == 'dlm': dustsrc2 = os.path.join(modeldir, 'data', 'dust_dlm.in')  
