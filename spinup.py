@@ -6,6 +6,9 @@ def run_a_scepter_run(
     runname,outdir_src,
     **kwargs
     ):
+    # ---- executable ----
+    exename_src         = kwargs.get('exename_src',         'scepter_richards')
+    
     # ---- frame.in ----
     ztot                = kwargs.get('ztot',                0.5)
     nz                  = kwargs.get('nz',                  30)
@@ -77,8 +80,8 @@ def run_a_scepter_run(
     if use_local_storage:  outdir = os.environ['TMPDIR'] + '/scepter_output/'
     
     # compile 
-    exename = 'scepter'
-    exename_src = 'scepter'
+    # exename = 'scepter'
+    # exename_src = 'scepter'
     # exename_src = 'scepter_test'
     to = ' '
     where = '/'
