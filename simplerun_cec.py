@@ -34,8 +34,8 @@ def simplerun(rundict_path):
     
     # --- populate inputs
     # 
-    outdir_src = rundict.get('outdir', '/home/jovyan/SCEPTER/scepter_output')
-    use_local_storage = False # (True for GT cluster)
+    # outdir_src = rundict.get('outdir', '/home/jovyan/SCEPTER/scepter_output')
+    # use_local_storage = False # (True for GT cluster)
     rstrt = rundict.get('rstrt', 'self')
 
     # (keeping from Yoshi's original script)
@@ -94,6 +94,7 @@ def simplerun(rundict_path):
     
     if rstrt != 'self':
         print("TKTK write code to check if restart is on s3 and move it to local !!")
+        return "Need to set up code to handle restart from spinup for `simplerun_cec.py` (just move it from s3 to local)"
     
     
     spinup.run_a_scepter_run(**rundict)

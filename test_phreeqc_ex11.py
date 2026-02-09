@@ -173,7 +173,7 @@ def spin_inert(outdir_src,runname,rstrt,ttot,
         
         
 def ex_11_series():
-    outdir_src = '/storage/coda1/p-creinhard3/0/ykanzaki3/scepter_output/'
+    outdir_src = '/home/jovyan/SCEPTER/scepter_output/'
     
     
     use_local_storage   = True

@@ -79,13 +79,14 @@ def run_a_scepter_run(
     outdir = outdir_src
     if use_local_storage:  outdir = os.environ['TMPDIR'] + '/scepter_output/'
     
-    # compile 
-    # exename = 'scepter'
-    # exename_src = 'scepter'
+    # compile
+    exename = exename_src
+    # exename = 'scepter_richards'
+    # exename_src = 'scepter_richards'
     # exename_src = 'scepter_test'
     to = ' '
     where = '/'
-    os.system('make')
+    # os.system('make')
     # os.system('make --file=makefile_test')
     if not os.path.exists( outdir + runname) : os.system('mkdir -p ' + outdir + runname)
     os.system('cp ' + exename_src + to + outdir + runname + where + exename)
@@ -112,6 +113,7 @@ def run_a_scepter_run(
         ,nstep=nstep
         ,rstrt=rstrt
         ,runid=runid
+        ,exename=exename
         )
         
     make_inputs.get_input_switches(
@@ -136,6 +138,7 @@ def run_a_scepter_run(
         ,psd_bulk=psd_bulk
         ,psd_full=psd_full
         ,season=season
+        ,exename=exename
         )
         
     make_inputs.get_input_tracers(
@@ -178,7 +181,10 @@ def run_a_scepter_run(
                 )
         
     # >>>> run 
-    
+
+    # switch to rundir so scepter f90 is happy
+    os.chdir(os.path.join(outdir, runname))
+             
     run_success = False
     
     if not lim_calc_time:
