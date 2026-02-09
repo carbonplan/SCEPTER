@@ -6,6 +6,10 @@ import fsspec
 import numpy as np
 import spinup,get_int_prof,get_soilpH_time
 
+# --- read in helper functions from ew-workflows
+from ew_workflows import scepter_helperFxns as shf
+from ew_workflows import cflx_proc as cflx
+
 def read_json(path):
     """
     Read a JSON file from local disk or S3.
@@ -27,11 +31,8 @@ def read_json(path):
     return data
 
         
-def simplerun(rundict_path):
+def simplerun(**rundict):
 
-    # --- read in the rundict (assume json)
-    rundict = read_json(rundict_path)
-    
     # --- populate inputs
     # 
     # outdir_src = rundict.get('outdir', '/home/jovyan/SCEPTER/scepter_output')
@@ -104,10 +105,33 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: python3 simplerun.py path/to/rundict.json")
         sys.exit(1)
+
+    # read in the run dict
+    # --- read in the rundict (assume json)
+    rundict_path = sys.argv[1]  # get the first command-line argument
+    rundict = read_json(rundict_path)
     
     # run
-    rundict_path = sys.argv[1]  # get the first command-line argument
-    simplerun(rundict_path)
+    simplerun(**rundict)
+
+    # postproc
+    outdir = rundict.get('outdir_src', "NOOUTDIR!!")
+    runname = rundict.get('runname', 'NORUNNAME!!')
+    # ... compute profile data
+    postproc_prof_list = rundict.get('postproc_prof_list', 'all')
+    cflx.prof_postproc_save(outdir, runname, 
+                            runname_lab=None, postproc_prof_list=postproc_prof_list)
+    
+    # ... move to aws if this option is turned on
+    # [nothing happens if aws_save != 'move' or 'copy']
+    aws_save = rundict.get('aws_save', None)
+    aws_bucket = rundict.get('aws_bucket', None)
+    shf.to_aws(aws_save, 
+               aws_bucket, 
+               outdir, 
+               runname_lab=None, 
+               runname_field=runname)
+
    
 if __name__ == '__main__':
     main()
