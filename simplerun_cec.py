@@ -111,6 +111,9 @@ def main():
     rundict_path = sys.argv[1]  # get the first command-line argument
     rundict = read_json(rundict_path)
     
+    # change dir for relative path integration (esp. in make_inputs..)
+    os.chdir(rundict['model-dir'])
+    
     # run
     simplerun(**rundict)
 
