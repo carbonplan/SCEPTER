@@ -535,14 +535,18 @@ if exename in v102_exelist:
 # --- write Dust_temp.in (for v1.0.2 seasonal runs)
 #     and set frame.in dust specifications to zero (it's handled by `Dust_temp.in`)
 if exename in v102_exelist and singlerun_seasonality:
+    dust_csv_path = None
+    if dustrate_from_file: 
+        dust_csv_path = os.path.join(dust_ts_dir, dust_ts_fn)
     shf.create_dust_input(
         outdir = outdir,
         runname = runname_field,
-        dust1_dict = {added_sp: fdust},
-        dust2_dict = {added_sp2: fdust2},
         t_add = duststart,
         taudust = taudust,
+        dust1_dict = {added_sp: fdust},
+        dust2_dict = {added_sp2: fdust2},
         output_filename  = "Dust_temp.in",
+        dust_csv_path = dust_csv_path,
         dryrun = False
     )
     data[5]     = '{:.8f}\tamounts of dusts [g/m2/yr]\n'.format(0.) 
@@ -718,14 +722,18 @@ if not skip_lab_run:
 
     # --- write Dust_temp.in (for v1.0.2 seasonal runs)
     if exename in v102_exelist and singlerun_seasonality:
+        dust_csv_path = None
+        if dustrate_from_file: 
+            dust_csv_path = os.path.join(dust_ts_dir, dust_ts_fn)
         shf.create_dust_input(
             outdir = outdir,
             runname = runname_lab,
-            dust1_dict = {added_sp: fdust},
-            dust2_dict = {added_sp2: fdust2},
             t_add = duststart,
             taudust = taudust,
+            dust1_dict = {added_sp: fdust},
+            dust2_dict = {added_sp2: fdust2},
             output_filename  = "Dust_temp.in",
+            dust_csv_path = dust_csv_path,
             dryrun = False
         )
     # --------------------------------------------------

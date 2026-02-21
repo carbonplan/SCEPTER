@@ -28,6 +28,9 @@ singlerun_default = {
     'spindir': 's3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/', # location of spinup run
     'climatedir': '/home/tykukla/aglime-swap-cdr/scepter/clim-inputs/',   # climate input main directory
     'climatefiles': 'default',     # climate input subdirectory (contains the climate `.in` files)
+    'dustrate_from_file': False,   # [bool] (only for >v1.0.2) if True, we use dust_ts_path and dust_ts_fn to get time-varying Dust_temp.in 
+    "dust_ts_dir": None,
+    "dust_ts_fn": None,
     'dustrate': 100,              # [g m-2 yr-1] dust application flux ; divide by 100 to get ton / ha / yr; not used for spintuneups and an initial guess for target ph runs
     'dustrate_2nd': 0,            # [g m-2 yr-1] dust application flux ; multiply by ~11 to get lbs / acre / yr; divide by 100 to get ton / ha / yr (only used for reApp scripts)
     'taudust': 0.05,               # [yr] duration of dust application in year
