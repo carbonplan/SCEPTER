@@ -183,8 +183,8 @@ runname_lab     = simid+'_spintuneup4_lab'
 
 
 # compile 
-exename = 'scepter'
-exename_src = 'scepter'
+exename = scepter_exec_name
+exename_src = scepter_exec_name
 # exename_src = 'scepter_test'
 to = ' '
 where = '/'
@@ -461,78 +461,79 @@ if liming:
     
     
 # ============= buffer exp. setup ============= 
-make_inputs.get_input_frame(
-    outdir=outdir
-    ,runname=runname_lab
-    ,ztot=ztot_lab
-    ,nz=nz
-    ,ttot=ttot_lab
-    ,temp=temp_lab
-    ,fdust=fdust_lab
-    ,fdust2=fdust2
-    ,taudust=taudust_lab
-    ,omrain=omrain_lab
-    ,zom=zom
-    ,poro=poro_lab
-    ,moistsrf=moistsrf_lab
-    ,zwater=zwater
-    ,zdust=zdust_lab
-    ,w=w_lab
-    ,q=q_lab
-    ,p=p
-    ,nstep=nstep
-    ,rstrt=rstrt
-    ,runid=runname_lab
-    )
-    
-make_inputs.get_input_switches(
-    outdir=outdir
-    ,runname=runname_lab
-    ,w_scheme=w_scheme_lab
-    ,mix_scheme=mix_scheme_lab
-    ,poro_iter=poro_iter_lab
-    ,sldmin_lim=sldmin_lim 
-    ,display=display
-    # ,report=report
-    ,disp_lim=disp_lim
-    ,restart=restart 
-    ,rough=rough_lab
-    ,act_ON=act_ON 
-    ,dt_fix=dt_fix
-    ,cec_on=cec_on
-    ,dz_fix=dz_fix
-    ,close_aq=close_aq_lab
-    ,poro_evol=poro_evol
-    ,sa_evol_1=sa_evol_1 
-    ,sa_evol_2=sa_evol_2
-    ,psd_bulk=psd_bulk_lab
-    ,psd_full=psd_full_lab
-    ,season=season
-    )
+if not skip_lab_run:
+    make_inputs.get_input_frame(
+        outdir=outdir
+        ,runname=runname_lab
+        ,ztot=ztot_lab
+        ,nz=nz
+        ,ttot=ttot_lab
+        ,temp=temp_lab
+        ,fdust=fdust_lab
+        ,fdust2=fdust2
+        ,taudust=taudust_lab
+        ,omrain=omrain_lab
+        ,zom=zom
+        ,poro=poro_lab
+        ,moistsrf=moistsrf_lab
+        ,zwater=zwater
+        ,zdust=zdust_lab
+        ,w=w_lab
+        ,q=q_lab
+        ,p=p
+        ,nstep=nstep
+        ,rstrt=rstrt
+        ,runid=runname_lab
+        )
+        
+    make_inputs.get_input_switches(
+        outdir=outdir
+        ,runname=runname_lab
+        ,w_scheme=w_scheme_lab
+        ,mix_scheme=mix_scheme_lab
+        ,poro_iter=poro_iter_lab
+        ,sldmin_lim=sldmin_lim 
+        ,display=display
+        # ,report=report
+        ,disp_lim=disp_lim
+        ,restart=restart 
+        ,rough=rough_lab
+        ,act_ON=act_ON 
+        ,dt_fix=dt_fix
+        ,cec_on=cec_on
+        ,dz_fix=dz_fix
+        ,close_aq=close_aq_lab
+        ,poro_evol=poro_evol
+        ,sa_evol_1=sa_evol_1 
+        ,sa_evol_2=sa_evol_2
+        ,psd_bulk=psd_bulk_lab
+        ,psd_full=psd_full_lab
+        ,season=season
+        )
 
-sld_list_lab = ['inrt','g2','cao','mgo','na2o','k2o']
-aq_list_lab = ['ca','mg','na','k'] 
-gas_list_lab = [] # (added 3.23.2023)
-if include_N: 
-    sld_list_lab.append('amnt')
-    aq_list_lab.append('no3')
-if include_Al: 
-    sld_list_lab.append(alphase)
-    aq_list_lab.append('al')
-if use_CaCl2:
-    sld_list_lab.append('cacl2')
-    aq_list_lab.append('cl')
-if include_DIC: # (added 3.22.2023)
-    sld_list_lab.append('g1')
-    gas_list_lab.append('pco2')
-make_inputs.get_input_tracers(
-    outdir=outdir
-    ,runname=runname_lab
-    ,sld_list = sld_list_lab
-    ,aq_list = aq_list_lab
-    ,gas_list = gas_list_lab # (added 3.23.2023)
-    # ,exrxn_list = exrxn_list
-    )
+    sld_list_lab = ['inrt','g2','cao','mgo','na2o','k2o']
+    aq_list_lab = ['ca','mg','na','k'] 
+    gas_list_lab = [] # (added 3.23.2023)
+    if include_N: 
+        sld_list_lab.append('amnt')
+        aq_list_lab.append('no3')
+    if include_Al: 
+        sld_list_lab.append(alphase)
+        aq_list_lab.append('al')
+    if use_CaCl2:
+        sld_list_lab.append('cacl2')
+        aq_list_lab.append('cl')
+    if include_DIC: # (added 3.22.2023)
+        sld_list_lab.append('g1')
+        gas_list_lab.append('pco2')
+    make_inputs.get_input_tracers(
+        outdir=outdir
+        ,runname=runname_lab
+        ,sld_list = sld_list_lab
+        ,aq_list = aq_list_lab
+        ,gas_list = gas_list_lab # (added 3.23.2023)
+        # ,exrxn_list = exrxn_list
+        )
     
 # pr_list = [('inrt',1.0)]
 # bring in parent rock file [tk added]
@@ -545,63 +546,64 @@ else:
 pr_list_lab = [('inrt',0.95),('g2',0.05)]
 atm_list_lab = [('pco2',3.16e-4),('po2',0.21),('pnh3',1e-50),('pn2o',1e-50)]
 if include_DIC: atm_list_lab = [('pco2',1e-20),('po2',0.21),('pnh3',1e-50),('pn2o',1e-50)] # (added 3.22.2023)
-make_inputs.get_input_tracer_bounds(
-    outdir=outdir
-    ,runname=runname_lab
-    ,pr_list = pr_list_lab
-    # ,rain_list=rain_list
-    ,atm_list=atm_list_lab
-    )
+if not skip_lab_run:
+    make_inputs.get_input_tracer_bounds(
+        outdir=outdir
+        ,runname=runname_lab
+        ,pr_list = pr_list_lab
+        # ,rain_list=rain_list
+        ,atm_list=atm_list_lab
+        )
     
-filename = 'dust.in'
-srcfile = os.path.join(datadir, 'dust_cao.in')
-sld_varlist =[]
-make_inputs.get_input_sld_properties(
-    outdir=outdir
-    ,runname=runname_lab
-    ,filename = filename
-    ,srcfile = srcfile
-    # ,sld_varlist=sld_varlist
-    )
-    
-filename = 'cec.in'
-# sld_varlist = [('inrt',4,4.1)  ] 
-sld_varlist = [('inrt',4,4.1,alpha) ,('g2',4,4.1,alpha) ] 
-if include_Al: sld_varlist.append( (alphase,4,4.1,alpha) )
-make_inputs.get_input_sld_properties(
-    outdir=outdir
-    ,runname=runname_lab
-    ,filename = filename
-    ,sld_varlist=sld_varlist
-    )
-    
-filename = 'OM_rain.in'
-sld_varlist = [ ('g2',1) ] 
-make_inputs.get_input_sld_properties(
-    outdir=outdir
-    ,runname=runname_lab
-    ,filename = filename
-    ,sld_varlist=sld_varlist
-    )
-    
-filename = 'kinspc.in'
-sld_varlist = [ ('g2',0) ] 
-if include_Al:  sld_varlist.append(  (alphase,0)  )
-make_inputs.get_input_sld_properties(
-    outdir=outdir
-    ,runname=runname_lab
-    ,filename = filename
-    ,sld_varlist=sld_varlist
-    )
-    
-filename = '2ndslds.in'
-srcfile = os.path.join(datadir,'2ndslds_def.in')
-make_inputs.get_input_sld_properties(
-    outdir=outdir
-    ,runname=runname_lab
-    ,filename = filename
-    ,srcfile = srcfile
-    )
+    filename = 'dust.in'
+    srcfile = os.path.join(datadir, 'dust_cao.in')
+    sld_varlist =[]
+    make_inputs.get_input_sld_properties(
+        outdir=outdir
+        ,runname=runname_lab
+        ,filename = filename
+        ,srcfile = srcfile
+        # ,sld_varlist=sld_varlist
+        )
+        
+    filename = 'cec.in'
+    # sld_varlist = [('inrt',4,4.1)  ] 
+    sld_varlist = [('inrt',4,4.1,alpha) ,('g2',4,4.1,alpha) ] 
+    if include_Al: sld_varlist.append( (alphase,4,4.1,alpha) )
+    make_inputs.get_input_sld_properties(
+        outdir=outdir
+        ,runname=runname_lab
+        ,filename = filename
+        ,sld_varlist=sld_varlist
+        )
+        
+    filename = 'OM_rain.in'
+    sld_varlist = [ ('g2',1) ] 
+    make_inputs.get_input_sld_properties(
+        outdir=outdir
+        ,runname=runname_lab
+        ,filename = filename
+        ,sld_varlist=sld_varlist
+        )
+        
+    filename = 'kinspc.in'
+    sld_varlist = [ ('g2',0) ] 
+    if include_Al:  sld_varlist.append(  (alphase,0)  )
+    make_inputs.get_input_sld_properties(
+        outdir=outdir
+        ,runname=runname_lab
+        ,filename = filename
+        ,sld_varlist=sld_varlist
+        )
+        
+    filename = '2ndslds.in'
+    srcfile = os.path.join(datadir,'2ndslds_def.in')
+    make_inputs.get_input_sld_properties(
+        outdir=outdir
+        ,runname=runname_lab
+        ,filename = filename
+        ,srcfile = srcfile
+        )
 
 
 
@@ -625,7 +627,7 @@ if prev_iter_exist:
     kh  = 10.**iter_prev[-1,-1]
     
 
-def run_a_single_set(ca,logkh,omrain_field,tau_g2):
+def run_a_single_set(ca,logkh,omrain_field,tau_g2, skip_lab_run=False):
 
     # =========== field sim =========== 
     # 4 boundary conditions 
@@ -799,165 +801,170 @@ def run_a_single_set(ca,logkh,omrain_field,tau_g2):
     # =========== lab sim =========== 
     # 2 processes before setting boundary conditions 
     # (1) getting porosity in the laboratory 
-    poro_lab = water_frac/(1./dense_lab+water_frac)
-    
-    # (2) getting material to be dissolved in the laboratory 
-    
-    oxide_ctnm_list = ['ca','mg','na','k'] 
-    oxide_oxnm_list = ['cao','mgo','na2o','k2o'] 
-    oxide_stch_list = [1,1,2,2] 
-    oxide_mass_list = [56.1 ,40.3, 62, 94.2]
-    
-    if include_N:
-        oxide_ctnm_list.append( 'no3' )
-        oxide_oxnm_list.append( 'amnt' )
-        oxide_stch_list.append( 2 )
-        oxide_mass_list.append( 80 )
-    if include_Al:
-        oxide_ctnm_list.append( 'al' )
-        oxide_oxnm_list.append( 'al2o3' )
-        oxide_stch_list.append( 2 )
-        oxide_mass_list.append( 1.02E+02 )
+    if not skip_lab_run:
+        poro_lab = water_frac/(1./dense_lab+water_frac)
         
-    fdust_list = []
-    fdust_nm_list = []
+        # (2) getting material to be dissolved in the laboratory 
+        
+        oxide_ctnm_list = ['ca','mg','na','k'] 
+        oxide_oxnm_list = ['cao','mgo','na2o','k2o'] 
+        oxide_stch_list = [1,1,2,2] 
+        oxide_mass_list = [56.1 ,40.3, 62, 94.2]
+        
+        if include_N:
+            oxide_ctnm_list.append( 'no3' )
+            oxide_oxnm_list.append( 'amnt' )
+            oxide_stch_list.append( 2 )
+            oxide_mass_list.append( 80 )
+        if include_Al:
+            oxide_ctnm_list.append( 'al' )
+            oxide_oxnm_list.append( 'al2o3' )
+            oxide_stch_list.append( 2 )
+            oxide_mass_list.append( 1.02E+02 )
+            
+        fdust_list = []
+        fdust_nm_list = []
 
-    for sp in aqsps:
-        isp = aqsps.index(sp)
-        iox = oxide_ctnm_list.index(sp)
-        conc = btmconcs[isp]
-        fdust = ztot_lab*(1-poro_lab)*conc* oxide_mass_list[iox]/oxide_stch_list[iox]
-    
-        if liming and sp == 'ca':  # (added 6.15.2023)
-            fdust += ztot_lab*(1-poro_lab)*dense_lab*1e6*sldwt_list[sps.index(limesp)]/100./limemwt * oxide_mass_list[iox]/oxide_stch_list[iox] # (added 6.15.2023)
+        for sp in aqsps:
+            isp = aqsps.index(sp)
+            iox = oxide_ctnm_list.index(sp)
+            conc = btmconcs[isp]
+            fdust = ztot_lab*(1-poro_lab)*conc* oxide_mass_list[iox]/oxide_stch_list[iox]
+        
+            if liming and sp == 'ca':  # (added 6.15.2023)
+                fdust += ztot_lab*(1-poro_lab)*dense_lab*1e6*sldwt_list[sps.index(limesp)]/100./limemwt * oxide_mass_list[iox]/oxide_stch_list[iox] # (added 6.15.2023)
+                    
+            fdust_list.append(fdust)
+            fdust_nm_list.append(oxide_oxnm_list[iox])
+            
+        fdust_lab = fdust_list[aqsps.index('ca')]
+        
+        if use_CaCl2:
+            cacl2_conc = 0.01
+            cacl2_wt2  = 110.98
+            fdust_cacl2 = ztot_lab*poro_lab*cacl2_conc*1e3*cacl2_wt2
+        
+            if fdust_cacl2 > 0:
+                fdust_list.append(fdust_cacl2)
+                fdust_nm_list.append('cacl2')
+        
+        if include_DIC:                                     # (added 3.23.2023)
+            if liming and limesp=='cc':  # (added 6.15.2023)
+                dic += dense_lab*1e6*sldwt_list[sps.index(limesp)]/100./limemwt # (added 6.15.2023)
                 
-        fdust_list.append(fdust)
-        fdust_nm_list.append(oxide_oxnm_list[iox])
+            fdust_dic = ztot_lab*(1-poro_lab)*dic* 30.      # (added 3.22.2023)
+                
+            fdust_list.append(fdust_dic)                    # (added 3.22.2023)
+            fdust_nm_list.append('g1')                      # (added 3.22.2023)
+
+        fdust_list = [fdust/fdust_lab  for fdust in fdust_list  ]
         
-    fdust_lab = fdust_list[aqsps.index('ca')]
-    
-    if use_CaCl2:
-        cacl2_conc = 0.01
-        cacl2_wt2  = 110.98
-        fdust_cacl2 = ztot_lab*poro_lab*cacl2_conc*1e3*cacl2_wt2
-    
-        if fdust_cacl2 > 0:
-            fdust_list.append(fdust_cacl2)
-            fdust_nm_list.append('cacl2')
-    
-    if include_DIC:                                     # (added 3.23.2023)
-        if liming and limesp=='cc':  # (added 6.15.2023)
-            dic += dense_lab*1e6*sldwt_list[sps.index(limesp)]/100./limemwt # (added 6.15.2023)
+        # 4 boundary conditions 
+        # (1) frame.in to reflect the reference dust flux (fdust_lab)
+        make_inputs.get_input_frame(
+            outdir=outdir
+            ,runname=runname_lab
+            ,ztot=ztot_lab
+            ,nz=nz
+            ,ttot=ttot_lab
+            ,temp=temp_lab
+            ,fdust=fdust_lab
+            ,fdust2=fdust2
+            ,taudust=taudust_lab
+            ,omrain=omrain_lab
+            ,zom=zom
+            ,poro=poro_lab
+            ,moistsrf=moistsrf_lab
+            ,zwater=zwater
+            ,zdust=zdust_lab
+            ,w=w_lab
+            ,q=q_lab
+            ,p=p
+            ,nstep=nstep
+            ,rstrt=rstrt
+            ,runid=runname_lab
+            )
+        
+        # (2) solid phase concs. 
+        pr_list_lab = [('inrt',sldwt_list[sps.index('inrt')]/100.),('g2',sldwt_list[sps.index('g2')]/100.)]
+        if include_Al:  pr_list_lab.append(  (alphase,sldwt_list[sps.index(alphase)]/100.) )
+        make_inputs.get_input_tracer_bounds(
+            outdir=outdir
+            ,runname=runname_lab
+            ,pr_list = pr_list_lab
+            # ,rain_list=rain_list
+            ,atm_list=atm_list_lab
+            )
+
+        # (3) CEC 
+        filename = 'cec.in'
+        sld_varlist = [('inrt',cec, logkhna, logkhk, logkhca, logkhmg, logkhal,alpha),('g2',cec,logkhna, logkhk, logkhca, logkhmg, logkhal,alpha)  ] 
+        if include_Al:   sld_varlist.append( (alphase,cec,logkhna, logkhk, logkhca, logkhmg, logkhal,alpha) )
+        if include_DIC:  sld_varlist.append( ('g1',0, logkhna, logkhk, logkhca, logkhmg, logkhal,alpha) )    # added 3.23.2023
+        make_inputs.get_input_sld_properties(
+            outdir=outdir
+            ,runname=runname_lab
+            ,filename = filename
+            ,sld_varlist=sld_varlist
+            )
             
-        fdust_dic = ztot_lab*(1-poro_lab)*dic* 30.      # (added 3.22.2023)
+        # (4) dust composition
+        filename = 'dust.in'
+        sld_varlist =[ ( fdust_nm_list[i], fdust_list[i]) for i in range(len(fdust_nm_list)) ]
+        make_inputs.get_input_sld_properties(
+            outdir=outdir
+            ,runname=runname_lab
+            ,filename = filename
+            ,sld_varlist=sld_varlist
+            )
             
-        fdust_list.append(fdust_dic)                    # (added 3.22.2023)
-        fdust_nm_list.append('g1')                      # (added 3.22.2023)
-
-    fdust_list = [fdust/fdust_lab  for fdust in fdust_list  ]
-    
-    # 4 boundary conditions 
-    # (1) frame.in to reflect the reference dust flux (fdust_lab)
-    make_inputs.get_input_frame(
-        outdir=outdir
-        ,runname=runname_lab
-        ,ztot=ztot_lab
-        ,nz=nz
-        ,ttot=ttot_lab
-        ,temp=temp_lab
-        ,fdust=fdust_lab
-        ,fdust2=fdust2
-        ,taudust=taudust_lab
-        ,omrain=omrain_lab
-        ,zom=zom
-        ,poro=poro_lab
-        ,moistsrf=moistsrf_lab
-        ,zwater=zwater
-        ,zdust=zdust_lab
-        ,w=w_lab
-        ,q=q_lab
-        ,p=p
-        ,nstep=nstep
-        ,rstrt=rstrt
-        ,runid=runname_lab
-        )
-    
-    # (2) solid phase concs. 
-    pr_list_lab = [('inrt',sldwt_list[sps.index('inrt')]/100.),('g2',sldwt_list[sps.index('g2')]/100.)]
-    if include_Al:  pr_list_lab.append(  (alphase,sldwt_list[sps.index(alphase)]/100.) )
-    make_inputs.get_input_tracer_bounds(
-        outdir=outdir
-        ,runname=runname_lab
-        ,pr_list = pr_list_lab
-        # ,rain_list=rain_list
-        ,atm_list=atm_list_lab
-        )
-
-    # (3) CEC 
-    filename = 'cec.in'
-    sld_varlist = [('inrt',cec, logkhna, logkhk, logkhca, logkhmg, logkhal,alpha),('g2',cec,logkhna, logkhk, logkhca, logkhmg, logkhal,alpha)  ] 
-    if include_Al:   sld_varlist.append( (alphase,cec,logkhna, logkhk, logkhca, logkhmg, logkhal,alpha) )
-    if include_DIC:  sld_varlist.append( ('g1',0, logkhna, logkhk, logkhca, logkhmg, logkhal,alpha) )    # added 3.23.2023
-    make_inputs.get_input_sld_properties(
-        outdir=outdir
-        ,runname=runname_lab
-        ,filename = filename
-        ,sld_varlist=sld_varlist
-        )
+        # before running previous results are deleted
+        if os.path.exists(outdir+runname_lab+where+'flx'): shutil.rmtree(outdir+runname_lab+where+'flx')
+        if os.path.exists(outdir+runname_lab+where+'prof'): shutil.rmtree(outdir+runname_lab+where+'prof')
         
-    # (4) dust composition
-    filename = 'dust.in'
-    sld_varlist =[ ( fdust_nm_list[i], fdust_list[i]) for i in range(len(fdust_nm_list)) ]
-    make_inputs.get_input_sld_properties(
-        outdir=outdir
-        ,runname=runname_lab
-        ,filename = filename
-        ,sld_varlist=sld_varlist
-        )
-        
-    # before running previous results are deleted
-    if os.path.exists(outdir+runname_lab+where+'flx'): shutil.rmtree(outdir+runname_lab+where+'flx')
-    if os.path.exists(outdir+runname_lab+where+'prof'): shutil.rmtree(outdir+runname_lab+where+'prof')
-    
-    # >>> run 
-    # os.system(outdir+runname_lab+where+exename)
-    os.system("chmod +x " + os.path.join(outdir,runname_lab,'scepter'))  # grant permissions
-    proc = subprocess.Popen([outdir+runname_lab+where+exename])
+        # >>> run 
+        # os.system(outdir+runname_lab+where+exename)
+        os.system("chmod +x " + os.path.join(outdir,runname_lab,'scepter'))  # grant permissions
+        proc = subprocess.Popen([outdir+runname_lab+where+exename])
 
-    my_timeout = tunespin_timeout # 60*20
-    
-    flag_error_field = False
-    flag_error_lab = False
-    
-    try:
-        proc.wait(my_timeout)
-        print('run finished within {:f} min'.format(int(my_timeout/60.)))
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        flag_error_lab = True
-        phint_field=np.nan;phint=np.nan;omint=np.nan;acint=np.nan;logpco2=np.nan
-        print('run UNfinished within {:f} min'.format(int(my_timeout/60.)))
-        if stop_unsuccessful: exit()
-        return phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab
+        my_timeout = tunespin_timeout # 60*20
+        
+        flag_error_field = False
+        flag_error_lab = False
+        
+        try:
+            proc.wait(my_timeout)
+            print('run finished within {:f} min'.format(int(my_timeout/60.)))
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            flag_error_lab = True
+            phint_field=np.nan;phint=np.nan;omint=np.nan;acint=np.nan;logpco2=np.nan
+            print('run UNfinished within {:f} min'.format(int(my_timeout/60.)))
+            if stop_unsuccessful: exit()
+            return phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab
 
     
     # 1 data retrieval 
 
     flag_error_field = False
     flag_error_lab = False
-    try:
-        # (1) lab pH
-        # phint = get_int_prof.get_ph_int_site(outdir,runname_lab,dep_sample,20)
-        phint = get_int_prof.get_ph_int_site(outdir,runname_lab,dep_sample)  # [tykukla] delete 20
-        print('!!! SUCCESSFUL data retrieval; lab run must have been SUCCESSFUL !!!')
+    if not skip_lab_run:
+        try:
+            # (1) lab pH
+            # phint = get_int_prof.get_ph_int_site(outdir,runname_lab,dep_sample,20)
+            phint = get_int_prof.get_ph_int_site(outdir,runname_lab,dep_sample)  # [tykukla] delete 20
+            print('!!! SUCCESSFUL data retrieval; lab run must have been SUCCESSFUL !!!')
+        
+        except:
+            print('*** UNSUCCESSFUL data retrieval; lab run must have been UNSUCCESSFUL ***')
+            flag_error_lab = True
+            phint_field=np.nan;phint=np.nan;omint=np.nan;acint=np.nan;logpco2=np.nan
+            if stop_unsuccessful: exit()
+            return phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab
+    else:
+        phint=np.nan
     
-    except:
-        print('*** UNSUCCESSFUL data retrieval; lab run must have been UNSUCCESSFUL ***')
-        flag_error_lab = True
-        phint_field=np.nan;phint=np.nan;omint=np.nan;acint=np.nan;logpco2=np.nan
-        if stop_unsuccessful: exit()
-        return phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab
-    
+    # --- return result
     return phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab
 
 while (error > tol):
@@ -976,7 +983,7 @@ while (error > tol):
     
     # =========== sim 1st =========== 
     
-    phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field,tau_g2)
+    phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field,tau_g2, skip_lab_run)
     
     if flag_error_field or flag_error_lab: # assume error is caused by too much OM rain
         print(flag_error_field,flag_error_lab,omrain_field)
@@ -991,7 +998,7 @@ while (error > tol):
     dca = facts[0]
     dca = ca*facts[0]
     
-    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca+dca,np.log10(kh),omrain_field,tau_g2)
+    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca+dca,np.log10(kh),omrain_field,tau_g2, skip_lab_run)
     print('after 2nd run',dphint_field,dphint,domint,dacint,dlogpco2)
     time.sleep(5)
     
@@ -1009,7 +1016,7 @@ while (error > tol):
     dkh = facts[1]
     dkh = kh*facts[1]
     
-    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh+dkh),omrain_field,tau_g2)
+    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh+dkh),omrain_field,tau_g2, skip_lab_run)
 
     # domint_dlogkh = (domint-omint)/dlogkh
     # dacint_dlogkh = (dacint-acint)/dlogkh
@@ -1031,7 +1038,7 @@ while (error > tol):
     domrain = facts[2]
     domrain = omrain_field*facts[2]
     
-    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field+domrain,tau_g2)
+    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field+domrain,tau_g2, skip_lab_run)
 
     if phnorm_pw:       dphint_domrain = (dphint_field-phint_field)/domrain * omrain_field
     if not phnorm_pw:   dphint_domrain = (dphint-phint)/domrain * omrain_field
@@ -1049,7 +1056,7 @@ while (error > tol):
     dtaug2 = facts[3]
     dtaug2 = tau_g2*facts[3]
     
-    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field,tau_g2+dtaug2)
+    dphint_field,dphint,domint,dacint,dlogpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field,tau_g2+dtaug2, skip_lab_run)
 
     if phnorm_pw:       dphint_dtaug2 = (dphint_field-phint_field)/dtaug2 * tau_g2
     if not phnorm_pw:   dphint_dtaug2 = (dphint-phint)/dtaug2 * tau_g2
@@ -1218,6 +1225,8 @@ while (error > tol):
         'tau.OM[yr]',
         ]
     for runname in [runname_field,runname_lab]:
+        if skip_lab_run and (runname==runname_lab):
+            continue
         # np.savetxt(outdir + runname + where + 'iteration_tmp.res',np.array(res_list))
         dst = os.path.join(outdir, runname, 'iteration_tmp.res')
 
@@ -1247,7 +1256,7 @@ while (error > tol):
         shutil.copyfile(dst,dst2)
 
 
-phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field,tau_g2)
+phint_field,phint,omint,acint,logpco2,flag_error_field,flag_error_lab = run_a_single_set(ca,np.log10(kh),omrain_field,tau_g2, skip_lab_run)
 print(phint_field,phint,omint,acint,logpco2)
 # name_list = [
     # 'iter.'
@@ -1275,6 +1284,9 @@ name_list = [
     ]
     
 for runname in [runname_field,runname_lab]:
+    if skip_lab_run and (runname==runname_lab):
+        continue
+
     dst = outdir + runname + where + 'iteration.res'
 
     with open(dst, 'w') as file:
@@ -1310,6 +1322,7 @@ for runname in [runname_field,runname_lab]:
 #             shutil.rmtree(dst)
 #             shutil.copytree(src, dst)
 
+runname_lab = None if skip_lab_run else runname_lab  # helper functions will ignore lab if name is none (for field-only)
 
 # ... run postprocessing checks
 shf.run_complete_check(runname_field, 
