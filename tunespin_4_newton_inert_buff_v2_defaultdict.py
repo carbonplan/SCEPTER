@@ -17,6 +17,7 @@ datestr = datetime.today().strftime('%Y-%m-%d')
 # --- read in helper functions from ew_workflows
 # import module
 from ew_workflows import scepter_helperFxns as shf
+from ew_workflows import cflx_proc as cflx
 # ---
 
 

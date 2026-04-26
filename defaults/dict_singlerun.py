@@ -106,8 +106,8 @@ spinup_default = {
     'cec': 21.1,                   # [cmol kg-1] cation exchange capacity
     'modeldir': '/home/tykukla/SCEPTER/', # directory of model scripts
     'outdir': '/home/tykukla/SCEPTER/scepter_output/', # directory of output files
-    'include_roughness_sa': True,  # [True, False] whether to include roughness in the mineral surface area calculation (for switches.in)
-    'cec_adsorption_on': False,    # [True, False] whether to enable cec adsorption
+    'include_roughness_sa': False,  # [True, False] whether to include roughness in the mineral surface area calculation (for switches.in)
+    'cec_adsorption_on': True,    # [True, False] whether to enable cec adsorption
     'dep_sample': 0.15,            # [cm] depth of sample for comparing pH to target -- not relevant for single run or initial tuneup, but relevant for tuning rock application
 
     # --- tunespin specific
@@ -135,8 +135,8 @@ spinup_default = {
     'erosion': 0.001013,           # [m/yr] erosion rate (usually defined in spinup_*.sh)
     'qrun': 0.351,                 # [m/yr] mean annual runoff rate (usually defined in spinup_*.sh)
     'nitrif': 1.005952,            # [gN/m2/yr] NO3 production rate via nitrification (usually defined in spinup_*.sh) (24.6 ~ 220 lbs/acre/year)
-    'phnorm_pw': False,            # metric for target pH (true = porewater pH; false = soil pH) -- not relevant for single run
-    'spinup_parentrock_file': 'parentlist1.json',  # [None or *.json] looks for a parent rock composition in SCEPTER/data/*.json. None assumes fully inert
+    'phnorm_pw': True,            # metric for target pH (true = porewater pH; false = soil pH) -- not relevant for single run
+    'spinup_parentrock_file': 'parentlist10.json',  # [None or *.json] looks for a parent rock composition in SCEPTER/data/*.json. None assumes fully inert
     'tunespin_timeout': 60*60*48,      # [s] time before we give up on a tunespin run (7200 is 120*60 = 2 hours)
 
     # --- postprocess
@@ -174,7 +174,7 @@ spinup_default = {
     'aws_bucket': "s3://carbonplan-carbon-removal/SCEPTER/scepter_output_scratch/",  # where to save at AWS (only used if 'aws_save'=True)
 
     # --- which scepter executable to use
-    'scepter_exec_name': 'scepter'  # ['scepter', 'scepter_rateA', ...]
+    'scepter_exec_name': 'scepter_richards'  # ['scepter', 'scepter_rateA', ...]
 }
 
 
