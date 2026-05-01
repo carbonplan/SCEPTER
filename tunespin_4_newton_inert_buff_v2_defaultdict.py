@@ -199,11 +199,11 @@ prev_iter_exist = False
 if not os.path.exists( outdir + runname_field) : 
     os.system('mkdir -p ' + outdir + runname_field)
 else:
-    if os.path.exists( outdir + runname_field + where + 'iteration_tmp.res'):
+    if os.path.exists(os.path.join(outdir, runname_field, 'iteration_tmp.res')):
         try:
-            iter_prev = np.loadtxt(outdir + runname_field + where + 'iteration_tmp.res',skiprows=1)
-            shutil.copy(outdir + runname_field + where + 'iteration_tmp.res'
-                ,outdir + runname_field + where + 'iteration_tmp_SAVE_'+datestr+'.res')
+            iter_prev = np.loadtxt(os.path.join(outdir, runname_field, 'iteration_tmp.res'), skiprows=1)
+            shutil.copy(os.path.join(outdir, runname_field, 'iteration_tmp.res')
+                ,os.path.join(outdir, runname_field, 'iteration_tmp_SAVE_'+datestr+'.res'))
         except:
             print('something went wrong while saving previous iterations')
         # prev_iter_exist = True
@@ -214,8 +214,9 @@ fn_dict_save = os.path.join(outdir, runname_field, "vars.res")
 shf.save_dict_to_text_file(combined_dict, fn_dict_save, delimiter='\t')
 # ----------------------
 
-os.system('cp ' + exename_src + to + outdir + runname_field + where + exename)
-os.system('cp ' + exename_src + to + outdir + runname_lab + where + exename)
+os.system('cp ' + exename_src + to + os.path.join(outdir, runname_field, exename))
+os.system('cp ' + exename_src + to + os.path.join(outdir, runname_lab, exename))
+
 # change back
 os.chdir(mycwd)
 
